@@ -6,7 +6,7 @@ export class History {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column('datetime')
+    @Column('timestamp')
     timestamp: Date;
 
     @Column()
@@ -15,6 +15,6 @@ export class History {
     @ManyToOne(type => User)
     savedBy: User;
 
-    @Column('blob')
-    raw: any;
+    @Column('jsonb')
+    raw: object;
 }

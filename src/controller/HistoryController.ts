@@ -14,7 +14,7 @@ const addToHistory = async (request: Request, response: Response) => {
     let history = new History();
 
     history.timestamp = new Date();
-    history.raw = '{}';
+    history.raw = {};
     history.type = 'instagram_saved';
     history.savedBy = user;
 
