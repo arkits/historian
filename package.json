@@ -1,0 +1,33 @@
+{
+   "name": "historian",
+   "author": {
+      "name": "Archit Khode"
+   },
+   "version": "0.0.1",
+   "license": "MIT",
+   "description": "#NeverForget",
+   "devDependencies": {
+      "@types/bunyan": "^1.8.6",
+      "@types/config": "^0.0.36",
+      "@types/express": "^4.17.6",
+      "@types/node": "^8.0.29",
+      "nodemon": "^2.0.3",
+      "ts-node": "3.3.0",
+      "tslint": "^6.1.2",
+      "typescript": "3.3.3333"
+   },
+   "dependencies": {
+      "bcrypt": "^4.0.1",
+      "body-parser": "^1.18.1",
+      "bunyan": "^1.8.12",
+      "config": "^3.3.1",
+      "express": "^4.17.1",
+      "reflect-metadata": "^0.1.10",
+      "sqlite3": "^4.0.3",
+      "typeorm": "0.2.24"
+   },
+   "scripts": {
+      "start": "ts-node src/index.ts",
+      "dev": "nodemon src/index.ts | bunyan"
+   }
+}

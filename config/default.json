@@ -1,0 +1,10 @@
+{
+    "version": {
+        "name": " 🕵🏻‍♂️  Historian",
+        "version": "0.0.1"
+    },
+    "runOnPort": 3000,
+    "auth": {
+        "saltRounds": 10
+    }
+}

@@ -1,2 +1,12 @@
-# historian
-🕵️ Historian never forgets
+# 🕵️  Historian
+
+## About
+
+## Instructions
+
+### Building
+
+```bash
+yarn
+yarn dev
+```
