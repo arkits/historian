@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
-import * as bunyan from 'bunyan';
 import { History } from '../entity/History';
 import { decodeAuthHeader } from '../utils';
 import { getUserByUsername } from '../dao/UserDao';
 import { saveHistory } from '../dao/HistoryDao';
+import { logger } from '../domain/Logger';
 
-const logger = bunyan.createLogger({ name: 'historian' });
-
-const addToHistory = async (request: Request, response: Response) => {
+async function addToHistory(request: Request, response: Response) {
     let [username, _] = decodeAuthHeader(request.headers.authorization);
     let user = await getUserByUsername(username);
 
@@ -37,6 +35,6 @@ const addToHistory = async (request: Request, response: Response) => {
         });
         return;
     }
-};
+}
 
 export { addToHistory };
