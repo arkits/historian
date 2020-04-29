@@ -1,12 +1,14 @@
 import { History } from '../entity/History';
-import * as bunyan from 'bunyan';
 import { getRepository } from 'typeorm';
+import { logger } from '../domain/Logger';
 
-const logger = bunyan.createLogger({ name: 'historian' });
-
-const saveHistory = async (history) => {
+async function saveHistory(history) {
     var historyRepository = getRepository(History);
     await historyRepository.save(history);
-};
+}
 
-export { saveHistory };
+async function getHistoryById(history) {}
+
+async function getHistoryByUser(history) {}
+
+export { saveHistory, getHistoryById, getHistoryByUser };
