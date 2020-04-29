@@ -3,24 +3,33 @@ import { createConnection } from 'typeorm';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { router } from './routes';
-import * as bunyan from 'bunyan';
+import { logger } from './domain/Logger';
 import * as config from 'config';
 
-var logger = bunyan.createLogger({ name: 'historian' });
+// create express app
+var app = express();
 
-createConnection()
-    .then(async (connection) => {
-        // create express app
-        const app = express();
-        app.use(bodyParser.json());
+// add those middlewares
+app.use(bodyParser.json());
 
-        app.use('/', router);
+// add them routes
+app.use('/', router);
 
-        let runOnPort: number = config.get('runOnPort');
+async function createServer() {
+    // create connection to database
+    await createConnection();
 
-        // start express server
-        app.listen(runOnPort, () => {
-            logger.info(`🕵🏻‍♂️  Historian is running on ${runOnPort} 🙏`);
-        });
-    })
-    .catch((error) => console.log(error));
+    // define which port to run on
+    let runOnPort: number = config.get('runOnPort');
+
+    // start express server
+    app.listen(runOnPort, () => {
+        logger.info(`🕵🏻‍♂️  Historian is running on ${runOnPort} 🙏`);
+    });
+}
+
+(async () => {
+    await createServer();
+})();
+
+export default app;
