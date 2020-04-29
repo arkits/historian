@@ -1,16 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import * as bcrypt from 'bcrypt';
-import * as bunyan from 'bunyan';
 import { getUserByUsername } from '../dao/UserDao';
 import { decodeAuthHeader } from '../utils';
-
-const logger = bunyan.createLogger({ name: 'historian' });
+import { logger } from '../domain/Logger';
 
 const authenticateUser = async (request: Request, response: Response, next: NextFunction) => {
     let authenticated = false;
 
-    let authHeader = request.headers.authorization;
-    let [username, password] = decodeAuthHeader(authHeader);
+    let [username, password] = decodeAuthHeader(request.headers.authorization);
 
     let user = await getUserByUsername(username);
 
