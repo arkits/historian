@@ -4,14 +4,8 @@ import { logger } from '../domain/Logger';
 import { deleteUserHistory } from './HistoryDao';
 
 async function saveUser(user: User): Promise<User> {
-    let savedUser = null;
     let userRepository = getRepository(User);
-    try {
-        savedUser = await userRepository.save(user);
-    } catch (error) {
-        logger.error(error);
-    }
-    return savedUser;
+    return userRepository.save(user);
 }
 
 async function getUserByUsername(username: string): Promise<User> {

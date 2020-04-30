@@ -26,22 +26,35 @@ async function registerUser(request: Request, response: Response) {
         user.password = hashedPassword;
     }
 
-    let savedUser = await saveUser(user);
-    logger.info('[register-user] saved user to db! - ', savedUser);
+    try {
+        let savedUser = await saveUser(user);
+        logger.info('[register-user] saved user to db! - ', savedUser);
 
-    if (savedUser !== null) {
+        // remove password
         delete savedUser.password;
+
         response.status(200);
         response.json({
             message: 'Registered User!',
             user: savedUser
         });
         return;
-    } else {
+    } catch (error) {
+        logger.error('[register-user] caught error when creating user - ', error);
+
+        if (error.message.includes('duplicate key value violates unique constraint')) {
+            response.status(400);
+            response.json({
+                error: 'Failed to create an user!',
+                error_description: 'Username already exists'
+            });
+            return;
+        }
+
         response.status(400);
         response.json({
-            error: 'Failed to Registered User!',
-            error_description: 'Failed to Registered User!'
+            error: 'Bad Request!',
+            error_description: 'Bad Request!'
         });
         return;
     }
