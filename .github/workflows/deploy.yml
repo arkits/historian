@@ -23,4 +23,4 @@ jobs:
                   privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
                   debug: false
                   command: |
-                    /home/arkits/software/historian/src/backend/deploy.sh
+                    /home/arkits/software/historian/src/backend/scripts/deploy.sh
