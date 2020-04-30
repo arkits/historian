@@ -22,4 +22,5 @@ jobs:
                   hosts: ${{ secrets.SSH_TARGET }}
                   privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
                   debug: false
-                  command: pwd
+                  command: |
+                    /home/arkits/software/historian/scripts/deploy.sh
