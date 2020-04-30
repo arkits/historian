@@ -3,7 +3,7 @@
         "name": " 🕵🏻‍♂️  Historian",
         "version": "0.0.1"
     },
-    "runOnPort": 3000,
+    "runOnPort": 4209,
     "auth": {
         "saltRounds": 10
     }
