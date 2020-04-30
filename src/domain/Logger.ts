@@ -1,7 +1,17 @@
 import * as bunyan from 'bunyan';
 
 var logger = bunyan.createLogger({
-    name: 'historian'
+    name: 'historian',
+    streams: [
+        {
+            stream: process.stdout
+        },
+        {
+            type: 'rotating-file',
+            path: 'logs/historian.log',
+            period: '1d'
+        }
+    ]
 });
 
 if (process.env.BUNYAN_OFF) {
