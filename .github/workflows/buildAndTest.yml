@@ -33,5 +33,6 @@ jobs:
             - name: Build and test backend
               working-directory: ./src/backend
               run: |
-                  ls -l
                   pwd
+                  npm install
+                  npm test

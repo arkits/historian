@@ -16,11 +16,11 @@ jobs:
             # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
             - uses: actions/checkout@v2
 
-            - name: SSH Execute Commands
+            - name: Deploy Backend to Askari
               uses: JimCronqvist/action-ssh@0.1.1
               with:
                   hosts: ${{ secrets.SSH_TARGET }}
                   privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
                   debug: false
                   command: |
-                    /home/arkits/software/historian/scripts/deploy.sh
+                    /home/arkits/software/historian/src/backend/deploy.sh
