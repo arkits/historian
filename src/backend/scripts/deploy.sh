@@ -8,6 +8,6 @@ git pull
 
 cd src/backend
 
-pm2 restart "historian"
+pm2 restart "historian-backend"
 
-# pm2 start --name "historian" npm -- start
+# pm2 start --name "historian-backend" npm -- start
