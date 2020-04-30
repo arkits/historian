@@ -17,4 +17,12 @@ async function getHistoryDao(where: object, limit: number, order: object) {
     return history;
 }
 
-export { addHistoryDao, getHistoryDao };
+async function deleteUserHistory(user) {
+    let historyRepository = getRepository(History);
+    let result = await historyRepository.delete({
+        savedBy: user
+    });
+    logger.debug('[deleteUserHistory] result - ', result);
+}
+
+export { addHistoryDao, getHistoryDao, deleteUserHistory };

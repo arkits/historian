@@ -51,6 +51,8 @@ async function deleteUser(request: Request, response: Response) {
     // extract username from request headers
     let [username, _] = decodeAuthHeader(request.headers.authorization);
 
+    logger.info('[delete-user] request from username=', username);
+
     let result = await deleteUserByUsername(username);
 
     if (result.affected === 1) {
@@ -62,8 +64,8 @@ async function deleteUser(request: Request, response: Response) {
     } else {
         response.status(400);
         response.json({
-            error: 'Failed to Update User!',
-            error_description: 'Failed to Update User!'
+            error: 'Failed to Delete User!',
+            error_description: 'Failed to Delete User!'
         });
         return;
     }
