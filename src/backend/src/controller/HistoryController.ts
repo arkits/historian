@@ -4,7 +4,7 @@ import { decodeAuthHeader } from '../utils';
 import { getUserByUsername } from '../dao/UserDao';
 import { addHistoryDao, getHistoryDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
-import e = require('express');
+import { validateInstagramHistory } from '../domain/HistoryDomain';
 import { User } from '../entity/User';
 
 async function addToHistory(request: Request, response: Response) {
@@ -15,12 +15,13 @@ async function addToHistory(request: Request, response: Response) {
     try {
         if (Array.isArray(request.body)) {
             // handle a multiple History array
-            request.body.map((singleHistory) => {
-                incomingHistory.push(validateIncomingHistory(singleHistory, user));
-            });
+            for (let singleHistory of request.body) {
+                incomingHistory.push(await validateIncomingHistory(singleHistory, user));
+            }
         } else {
             // handle a single History
-            incomingHistory.push(validateIncomingHistory(request.body, user));
+            logger.info('Single');
+            incomingHistory.push(await validateIncomingHistory(request.body, user));
         }
     } catch (error) {
         logger.error('[add-history] caught error in request validation - ', error);
@@ -62,7 +63,7 @@ async function addToHistory(request: Request, response: Response) {
     }
 }
 
-function validateIncomingHistory(body, user: User) {
+async function validateIncomingHistory(body, user: User) {
     let history = new History();
 
     if (body.timestamp) {
@@ -71,10 +72,10 @@ function validateIncomingHistory(body, user: User) {
         history.timestamp = new Date();
     }
 
-    if (body.raw) {
-        history.raw = body.raw;
+    if (body.metadata) {
+        history.metadata = body.metadata;
     } else {
-        throw new Error('Required field raw not provided');
+        throw new Error('Required field metadata not provided');
     }
 
     if (body.type) {
@@ -85,6 +86,10 @@ function validateIncomingHistory(body, user: User) {
         }
     } else {
         throw new Error('Required field type not provided');
+    }
+
+    if (history.type == 'instagram_saved') {
+        await validateInstagramHistory(history);
     }
 
     history.savedBy = user;

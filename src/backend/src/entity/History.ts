@@ -12,9 +12,9 @@ export class History {
     @Column()
     type: string;
 
-    @ManyToOne(type => User)
+    @ManyToOne((type) => User)
     savedBy: User;
 
     @Column('jsonb')
-    raw: object;
+    metadata: object;
 }

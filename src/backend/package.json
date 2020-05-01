@@ -24,6 +24,7 @@
       "typescript": "3.3.3333"
    },
    "dependencies": {
+      "axios": "^0.19.2",
       "bcrypt": "^4.0.1",
       "body-parser": "^1.18.1",
       "bunyan": "^1.8.12",

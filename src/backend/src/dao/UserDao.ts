@@ -1,7 +1,7 @@
 import { User } from '../entity/User';
 import { getRepository, DeleteResult, UpdateResult } from 'typeorm';
 import { logger } from '../domain/Logger';
-import { deleteUserHistory } from './HistoryDao';
+import { deleteUserHistoryDao } from './HistoryDao';
 
 async function saveUser(user: User): Promise<User> {
     let userRepository = getRepository(User);
@@ -23,7 +23,7 @@ async function deleteUserByUsername(username: string): Promise<DeleteResult> {
         let user = await getUserByUsername(username);
 
         // delete user's history
-        await deleteUserHistory(user);
+        await deleteUserHistoryDao(user);
 
         result = await userRepository.delete({
             username: username

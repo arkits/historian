@@ -17,7 +17,7 @@ async function getHistoryDao(where: object, limit: number, order: object) {
     return history;
 }
 
-async function deleteUserHistory(user) {
+async function deleteUserHistoryDao(user) {
     let historyRepository = getRepository(History);
     let result = await historyRepository.delete({
         savedBy: user
@@ -25,4 +25,10 @@ async function deleteUserHistory(user) {
     logger.debug('[delete-user-history] result - ', result);
 }
 
-export { addHistoryDao, getHistoryDao, deleteUserHistory };
+async function getHistoryWithInstagramPkDao(instagramPk) {
+    let historyRepository = getRepository(History);
+    let query = historyRepository.createQueryBuilder('history').where(`metadata ->> 'pk' = '${instagramPk}'`);
+    return query;
+}
+
+export { addHistoryDao, getHistoryDao, deleteUserHistoryDao, getHistoryWithInstagramPkDao };
