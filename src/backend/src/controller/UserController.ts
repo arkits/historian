@@ -13,17 +13,33 @@ async function registerUser(request: Request, response: Response) {
 
     let user = new User();
 
-    if (body.username) {
-        user.username = body.username;
-    }
+    try {
+        if (body.username) {
+            user.username = body.username;
+        } else {
+            throw new Error('Required field: username supplied');
+        }
 
-    if (body.name) {
-        user.name = body.name;
-    }
+        if (body.name) {
+            user.name = body.name;
+        } else {
+            throw new Error('Required field: name supplied');
+        }
 
-    if (body.password) {
-        let hashedPassword = await bcrypt.hash(body.password, config.get('auth.saltRounds'));
-        user.password = hashedPassword;
+        if (body.password) {
+            let hashedPassword = await bcrypt.hash(body.password, config.get('auth.saltRounds'));
+            user.password = hashedPassword;
+        } else {
+            throw new Error('Required field: password supplied');
+        }
+    } catch (error) {
+        logger.error('[register-user] caught error in request validation - ', error);
+        response.status(400);
+        response.json({
+            error: 'Bad Request!',
+            error_description: 'Validation Error - ' + error.message
+        });
+        return;
     }
 
     try {
