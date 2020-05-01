@@ -8,7 +8,7 @@ var logger = bunyan.createLogger({
         },
         {
             type: 'rotating-file',
-            path: 'logs/historian.log',
+            path: 'logs/historian-backend.log',
             period: '1d'
         }
     ]
