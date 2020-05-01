@@ -5,7 +5,7 @@ import { logger } from '../domain/Logger';
 const version = config.get('version');
 
 function getVersion(request: Request, response: Response) {
-    logger.info('In getVersion! Returning - ', version);
+    logger.info('[get-version] Returning - ', version);
     response.status(200);
     response.json(version);
     return;
