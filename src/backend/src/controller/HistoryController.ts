@@ -4,30 +4,55 @@ import { decodeAuthHeader } from '../utils';
 import { getUserByUsername } from '../dao/UserDao';
 import { addHistoryDao, getHistoryDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
+import e = require('express');
+import { User } from '../entity/User';
 
 async function addToHistory(request: Request, response: Response) {
     let [username, _] = decodeAuthHeader(request.headers.authorization);
     let user = await getUserByUsername(username);
-
-    let history = new History();
-
-    history.timestamp = new Date();
-    history.raw = {};
-    history.type = 'instagram_saved';
-    history.savedBy = user;
+    let incomingHistory = [];
 
     try {
-        logger.info('[addToHistory] Adding to History - ', history);
+        if (Array.isArray(request.body)) {
+            // handle a multiple History array
+            request.body.map((singleHistory) => {
+                incomingHistory.push(validateIncomingHistory(singleHistory, user));
+            });
+        } else {
+            // handle a single History
+            incomingHistory.push(validateIncomingHistory(request.body, user));
+        }
+    } catch (error) {
+        logger.error('[add-history] caught error in request validation - ', error);
+        response.status(400);
+        response.json({
+            error: 'Bad Request!',
+            error_description: 'Validation Error - ' + error.message
+        });
+        return;
+    }
 
-        await addHistoryDao(history);
+    try {
+        logger.info('[add-history] Adding to History - ', incomingHistory);
+
+        let savedHistory = await addHistoryDao(incomingHistory);
+
+        let savedHistoryIds = [];
+        savedHistory.map((history) => {
+            savedHistoryIds.push(history.id);
+        });
 
         response.status(200);
         response.json({
-            message: 'Added History!'
+            message: 'Added History!',
+            result: {
+                length: savedHistory.length,
+                id: savedHistoryIds
+            }
         });
         return;
     } catch (error) {
-        logger.error('[addToHistory] Caught Error - ', error);
+        logger.error('[add-history] Caught Error - ', error);
         response.status(400);
         response.json({
             error: 'Bad Request!',
@@ -37,11 +62,41 @@ async function addToHistory(request: Request, response: Response) {
     }
 }
 
+function validateIncomingHistory(body, user: User) {
+    let history = new History();
+
+    if (body.timestamp) {
+        history.timestamp = new Date(body.timestamp);
+    } else {
+        history.timestamp = new Date();
+    }
+
+    if (body.raw) {
+        history.raw = body.raw;
+    } else {
+        throw new Error('Required field raw not provided');
+    }
+
+    if (body.type) {
+        if (['instagram_saved', 'web_history'].includes(body.type)) {
+            history.type = body.type;
+        } else {
+            throw new Error('Invalid type - ' + body.type);
+        }
+    } else {
+        throw new Error('Required field type not provided');
+    }
+
+    history.savedBy = user;
+
+    return history;
+}
+
 async function getHistory(request: Request, response: Response) {
     let [username, _] = decodeAuthHeader(request.headers.authorization);
 
     let requestParams = request.query;
-    logger.info('[getHistory] Request from username=%s requestParams=%s', username, requestParams);
+    logger.info('[get-history] Request from username=%s requestParams=%s', username, requestParams);
 
     let parsedParams = {};
 
@@ -79,7 +134,7 @@ async function getHistory(request: Request, response: Response) {
             parsedParams['type'] = 'instagram_saved';
         }
     } catch (error) {
-        logger.error('[getHistory] Parsing threw an error - ', error);
+        logger.error('[get-history] Parsing threw an error - ', error);
         response.status(400);
         response.json({
             error: 'Bad Request!',
@@ -99,13 +154,13 @@ async function getHistory(request: Request, response: Response) {
                 timestamp: parsedParams['order']
             }
         );
-        logger.info('[getHistory] Retrived History - ', history);
+        logger.info('[get-history] Retrived History - ', history);
 
         response.status(200);
         response.json(history);
         return;
     } catch (error) {
-        logger.error('[getHistory] Caught Error - ', error);
+        logger.error('[get-history] Caught Error - ', error);
         response.status(400);
         response.json({
             error: 'Bad Request!',

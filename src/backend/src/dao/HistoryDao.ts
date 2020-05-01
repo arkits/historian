@@ -4,7 +4,7 @@ import { logger } from '../domain/Logger';
 
 async function addHistoryDao(history) {
     let historyRepository = getRepository(History);
-    await historyRepository.save(history);
+    return await historyRepository.save(history);
 }
 
 async function getHistoryDao(where: object, limit: number, order: object) {
@@ -22,7 +22,7 @@ async function deleteUserHistory(user) {
     let result = await historyRepository.delete({
         savedBy: user
     });
-    logger.debug('[deleteUserHistory] result - ', result);
+    logger.debug('[delete-user-history] result - ', result);
 }
 
 export { addHistoryDao, getHistoryDao, deleteUserHistory };
