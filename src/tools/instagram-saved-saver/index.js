@@ -43,7 +43,7 @@ let igClient = new instagramApi.IgApiClient();
                 continueFetching = true;
                 log.info('More saved posts are available... waiting before requesting...');
                 dumpJson(archivedItems, 'archive.json');
-                await timeout(200);
+                await timeout(500);
                 log.info('Requesting more posts!');
                 savedItems = await saved.items();
             } else {
