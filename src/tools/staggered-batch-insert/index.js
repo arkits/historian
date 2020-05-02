@@ -19,29 +19,33 @@ function createBasicAuthHeader(username, password) {
     return basicAuthHeader;
 }
 
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
 (async () => {
     log.info('Reading file...');
-    let rawHistory = fs.readFileSync('mini.json');
+    let rawHistory = fs.readFileSync('archive_sanitized.json');
     rawHistory = JSON.parse(rawHistory);
 
     log.info('Parsed file! Have %s elements', rawHistory.length);
 
-    let chunkSize = 2;
+    let chunkSize = 50;
 
     for (let i = 0; i < rawHistory.length; i += chunkSize) {
         let chunkRawHistory = rawHistory.slice(i, i + chunkSize);
 
         let chunkBody = [];
 
-        chunkRawHistory.map((metadata) => {
+        await chunkRawHistory.map((metadata) => {
             chunkBody.push({
                 type: 'instagram_saved',
                 metadata: metadata,
                 timestamp: new Date(metadata['taken_at'] * 1000)
             });
         });
-
-        log.info(chunkBody)
 
         axios
             .post(vars.backendUrl, chunkBody, {
@@ -55,5 +59,8 @@ function createBasicAuthHeader(username, password) {
             .catch(function (error) {
                 log.error('Caught Error - ', error.response.data);
             });
+
+        log.info('Waiting...');
+        await sleep(1000);
     }
 })();
