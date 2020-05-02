@@ -1,0 +1,14 @@
+{
+  "name": "instagram-saved-saver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "NODE_ENV=production  node index.js | bunyan"
+  },
+  "dependencies": {
+    "bunyan": "^1.8.12",
+    "config": "^3.3.1",
+    "instagram-private-api": "github:dilame/instagram-private-api"
+  }
+}
