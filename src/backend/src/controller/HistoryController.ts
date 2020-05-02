@@ -8,29 +8,43 @@ import { validateInstagramHistory } from '../domain/HistoryDomain';
 import { User } from '../entity/User';
 
 async function addToHistory(request: Request, response: Response) {
+    // extract username
     let [username, _] = decodeAuthHeader(request.headers.authorization);
+
+    // get User based on extracted username
     let user = await getUserByUsername(username);
+
+    // store received history
     let incomingHistory = [];
 
-    try {
-        if (Array.isArray(request.body)) {
-            // handle a multiple History array
-            for (let singleHistory of request.body) {
+    // store any Histories that failed to be saved partially
+    let failedHistory = [];
+
+    if (Array.isArray(request.body)) {
+        // handle a multiple History array
+        for (let singleHistory of request.body) {
+            try {
                 incomingHistory.push(await validateIncomingHistory(singleHistory, user));
+            } catch (error) {
+                // if there is any validation error, catch it and continue with the rest
+                logger.error('[add-history] caught error in request validation - ', error);
+                failedHistory.push(singleHistory);
             }
-        } else {
-            // handle a single History
-            logger.info('Single');
-            incomingHistory.push(await validateIncomingHistory(request.body, user));
         }
-    } catch (error) {
-        logger.error('[add-history] caught error in request validation - ', error);
-        response.status(400);
-        response.json({
-            error: 'Bad Request!',
-            error_description: 'Validation Error - ' + error.message
-        });
-        return;
+    } else {
+        // handle a single History
+        try {
+            incomingHistory.push(await validateIncomingHistory(request.body, user));
+        } catch (error) {
+            // if there is any validation error, throw a 400
+            logger.error('[add-history] caught error in request validation - ', error);
+            response.status(400);
+            response.json({
+                error: 'Bad Request!',
+                error_description: 'Validation Error - ' + error.message
+            });
+            return;
+        }
     }
 
     try {
@@ -48,7 +62,8 @@ async function addToHistory(request: Request, response: Response) {
             message: 'Added History!',
             result: {
                 length: savedHistory.length,
-                id: savedHistoryIds
+                saved: savedHistoryIds,
+                failed: failedHistory
             }
         });
         return;
