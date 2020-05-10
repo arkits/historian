@@ -6,6 +6,7 @@ import { router } from './routes';
 import { logger } from './domain/Logger';
 import * as config from 'config';
 import * as path from 'path';
+import * as cors from 'cors';
 
 // create express app
 var app = express();
@@ -13,12 +14,15 @@ var app = express();
 // add those middlewares
 app.use(bodyParser.json());
 
-// Serve the static files from the React app
+// serve frontend via backend
 if (config.get('frontend.serve')) {
     let completeFrontendPath = path.join(__dirname, config.get('frontend.location'));
     logger.info('Serving frontend from %s', completeFrontendPath);
     app.use('/historian', express.static(completeFrontendPath));
 }
+
+// allow cors
+app.use(cors());
 
 // add them routes
 app.use('/', router);

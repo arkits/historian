@@ -29,6 +29,7 @@
       "body-parser": "^1.18.1",
       "bunyan": "^1.8.12",
       "config": "^3.3.1",
+      "cors": "^2.8.5",
       "express": "^4.17.1",
       "pg": "^8.0.3",
       "reflect-metadata": "^0.1.10",
