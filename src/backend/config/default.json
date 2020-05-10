@@ -6,5 +6,9 @@
     "runOnPort": 4209,
     "auth": {
         "saltRounds": 10
+    },
+    "frontend": {
+        "serve": false,
+        "location": "../../frontend/build/"
     }
 }
