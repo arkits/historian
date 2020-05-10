@@ -3,12 +3,12 @@ name: (Frontend) Deploy
 on:
     push:
         paths:
-            - src/backend/**
+            - src/frontend/**
         branches: [master]
     pull_request:
         branches: [master]
         paths:
-            - src/backend/**
+            - src/frontend/**
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
