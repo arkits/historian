@@ -1,8 +1,13 @@
 import { createMuiTheme } from '@material-ui/core/styles';
+import amber from '@material-ui/core/colors/amber';
 
 const theme = createMuiTheme({
     palette: {
-        type: 'dark'
+        type: 'dark',
+        primary: amber,
+        secondary: {
+            main: '#ff6e40'
+        }
     },
     typography: {
         fontFamily: [

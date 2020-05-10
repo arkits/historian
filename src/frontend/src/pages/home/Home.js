@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 function ShoutOuts() {
     return (
-        <Typography variant="body2" color="textSecondary" style={{ textAlign: 'center' }}>
+        <Typography variant="body2" color="textSecondary" style={{ textAlign: 'center', color: '#263238' }}>
             {'#NeverForget // '}
             <Link color="inherit" target="_blank" rel="noopener" href="https://github.com/arkits/historian">
                 Historian
@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         padding: theme.spacing(3, 2),
         marginTop: 'auto',
-        backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+        backgroundColor: theme.palette.primary[800]
     }
 }));
 
