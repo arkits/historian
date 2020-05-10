@@ -60,6 +60,9 @@ export default function StickyFooter() {
                 <br />
                 <center>
                     <Button size="large" component={RouterLink} to="/login" style={{ marginRight: '30px' }}>
+                        Demo
+                    </Button>
+                    <Button size="large" component={RouterLink} to="/login" style={{ marginRight: '30px' }}>
                         Login
                     </Button>
                     <Button size="large" component={RouterLink} to="/register">
