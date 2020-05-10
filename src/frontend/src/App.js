@@ -6,7 +6,7 @@ import Login from './pages/onboarding/Login';
 
 function App() {
     return (
-        <Router>
+        <Router basename={process.env.PUBLIC_URL}>
             <div>
                 <Switch>
                     <Route path="/dashboard">
