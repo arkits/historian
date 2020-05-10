@@ -62,7 +62,9 @@ export default function StickyFooter() {
                     <Button size="large" component={RouterLink} to="/login" style={{ marginRight: '30px' }}>
                         Login
                     </Button>
-                    <Button size="large">Register</Button>
+                    <Button size="large" component={RouterLink} to="/register">
+                        Register
+                    </Button>
                 </center>
             </Container>
             <footer className={classes.footer}>

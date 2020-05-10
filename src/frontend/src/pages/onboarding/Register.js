@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function Login() {
+export default function Register() {
     const classes = useStyles();
 
     return (
@@ -48,9 +48,20 @@ export default function Login() {
                 <CssBaseline />
                 <div className={classes.paper}>
                     <Typography component="h1" variant="h5">
-                        Sign In
+                        Create a Historian Account
                     </Typography>
                     <form className={classes.form} noValidate>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="name"
+                            label="Name"
+                            name="name"
+                            autoComplete="name"
+                            autoFocus
+                        />
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -83,15 +94,15 @@ export default function Login() {
                             color="primary"
                             className={classes.submit}
                         >
-                            Sign In
+                            Register
                         </Button>
                         <br />
                         <br />
                         <br />
                         <Grid container>
                             <Grid item>
-                                <Link component={RouterLink} to="/register" variant="body2">
-                                    {"Don't have an account?"}
+                                <Link component={RouterLink} to="/login" variant="body2">
+                                    {'Already have an account?'}
                                 </Link>
                             </Grid>
                         </Grid>
