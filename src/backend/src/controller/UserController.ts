@@ -149,4 +149,17 @@ async function updateUser(request: Request, response: Response) {
     }
 }
 
-export { registerUser, deleteUser, updateUser };
+async function getUser(request: Request, response: Response) {
+    // extract username from request headers
+    let [username, _] = decodeAuthHeader(request.headers.authorization);
+
+    let user = await getUserByUsername(username);
+
+    // remove password
+    delete user.password;
+
+    response.status(200);
+    response.json(user);
+}
+
+export { registerUser, deleteUser, updateUser, getUser };

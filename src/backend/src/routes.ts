@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getVersion } from './controller/VersionController';
-import { registerUser, deleteUser, updateUser } from './controller/UserController';
+import { registerUser, deleteUser, updateUser, getUser } from './controller/UserController';
 import { addToHistory, getHistory } from './controller/HistoryController';
 import { authenticateUser } from './domain/Auth';
 
@@ -13,6 +13,7 @@ router.get('/api', getVersion);
 router.post('/api/users/register', registerUser);
 router.post('/api/users/update', authenticateUser, updateUser);
 router.post('/api/users/delete', authenticateUser, deleteUser);
+router.get('/api/users/user', authenticateUser, getUser);
 
 // History Endpoints
 router.get('/api/history', authenticateUser, getHistory);
