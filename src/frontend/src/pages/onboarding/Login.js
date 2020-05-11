@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button, Link, Container, CssBaseline, Typography, TextField, Grid } from '@material-ui/core';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import ShoutOuts from '../../components/ShoutOut';
+import { useLocalStorage } from '../../store/LocalStorage';
+import axiosInstance from '../../utils/axios';
+import ErrorCard from '../../components/ErrorCard';
+import { observer } from 'mobx-react';
+import { HistorianStoreContext } from '../../store/HistorianStore';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,8 +43,58 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function Login() {
+const Login = observer(() => {
     const classes = useStyles();
+    let history = useHistory();
+    const historianStore = useContext(HistorianStoreContext);
+
+    const [i_username, setUsername] = React.useState('');
+    const [i_password, setPassword] = React.useState('');
+
+    const [errorBanner, setErrorBanner] = React.useState(null);
+
+    const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds', {
+        username: '',
+        password: ''
+    });
+
+    const loginOnClick = () => {
+        try {
+            axiosInstance({
+                method: 'get',
+                url: '/users/user',
+                headers: {
+                    Authorization: 'Basic ' + btoa(i_username + ':' + i_password)
+                }
+            })
+                .then(function (response) {
+                    if (response.status === 200) {
+                        console.log('Auth successful... setting user creds');
+                        setHistorianUserCreds({
+                            username: i_username,
+                            password: i_password
+                        });
+                        historianStore.user = response.data;
+                        history.push('/dashboard');
+                    } else {
+                        handleFailedAuth();
+                    }
+                })
+                .catch(function () {
+                    handleFailedAuth();
+                });
+        } catch (error) {
+            handleFailedAuth();
+        }
+    };
+
+    const handleFailedAuth = () => {
+        console.log('Login failed!');
+        setErrorBanner({
+            errorTitle: 'Login Failed',
+            errorMessage: 'Please check your username and password.'
+        });
+    };
 
     return (
         <div className={classes.root}>
@@ -50,6 +105,7 @@ export default function Login() {
                     <Typography component="h1" variant="h5">
                         Sign In
                     </Typography>
+                    <ErrorCard error={errorBanner} />
                     <form className={classes.form} noValidate>
                         <TextField
                             variant="outlined"
@@ -61,6 +117,9 @@ export default function Login() {
                             name="username"
                             autoComplete="username"
                             autoFocus
+                            type="text"
+                            value={i_username}
+                            onChange={(e) => setUsername(e.target.value)}
                         />
 
                         <TextField
@@ -73,15 +132,15 @@ export default function Login() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
+                            value={i_password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                         <Button
-                            component={RouterLink}
-                            to="/dashboard"
-                            type="submit"
                             fullWidth
                             variant="contained"
                             color="primary"
                             className={classes.submit}
+                            onClick={loginOnClick}
                         >
                             Sign In
                         </Button>
@@ -105,4 +164,6 @@ export default function Login() {
             </footer>
         </div>
     );
-}
+});
+
+export default Login;
