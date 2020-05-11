@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 export default function ShoutOuts() {
     return (
-        <Typography variant="body2" color="textSecondary" style={{ textAlign: 'center', color: '#FFC105' }}>
+        <Typography variant="body2" color="textSecondary" style={{ textAlign: 'center', color: '#263238' }}>
             <Link color="inherit" component={RouterLink} to="/">
                 #NeverForget
             </Link>

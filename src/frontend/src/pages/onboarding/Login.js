@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         padding: theme.spacing(3, 2),
         marginTop: 'auto',
-        backgroundColor: theme.palette.primary[800]
+        backgroundColor: '#FFC105'
     },
     paper: {
         marginTop: theme.spacing(8),
