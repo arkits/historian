@@ -1,14 +1,32 @@
 import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react';
+import { makeStyles } from '@material-ui/core/styles';
 import { HistorianStoreContext } from '../../../store/HistorianStore';
 import axiosInstance from '../../../utils/axios';
 import { InfiniteLoader, List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
-import { Typography, Card, CardContent, CircularProgress } from '@material-ui/core';
+import { Typography, Card, CardContent, Grid, ButtonBase } from '@material-ui/core';
 import './Timeline.css';
 import { useLocalStorage } from '../../../store/LocalStorage';
+import moment from 'moment';
+
+const useStyles = makeStyles((theme) => ({
+    image: {
+        width: 128,
+        height: '100%',
+        paddingRight: '15px'
+    },
+    img: {
+        margin: 'auto',
+        display: 'block',
+        maxWidth: '100%',
+        maxHeight: '100%'
+    }
+}));
 
 const Timeline = observer(() => {
     const historianStore = useContext(HistorianStoreContext);
+
+    const classes = useStyles();
 
     const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
 
@@ -84,8 +102,24 @@ const Timeline = observer(() => {
                         <div ref={registerChild} key={key} onLoad={measure} style={style}>
                             <Card>
                                 <CardContent>
-                                    <Typography variant="h6">{items[index]?.metadata?.caption}</Typography>
-                                    <Typography variant="body1">{items[index]?.metadata?.pk}</Typography>
+                                    <Grid container>
+                                        <Grid item style={{ flex: '1' }}>
+                                            <Typography variant="h6">{items[index]?.metadata?.caption}</Typography>
+                                            <Typography variant="body1">{items[index]?.metadata?.username}</Typography>
+                                            <Typography variant="body1">
+                                                {moment(items[index]?.timestamp).fromNow()}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <ButtonBase className={classes.image}>
+                                                <img
+                                                    className={classes.img}
+                                                    alt="complex"
+                                                    src={items[index]?.metadata?.mediaUrls[0]}
+                                                />
+                                            </ButtonBase>
+                                        </Grid>
+                                    </Grid>
                                 </CardContent>
                             </Card>
                             <br />
@@ -103,7 +137,9 @@ const Timeline = observer(() => {
                     <Typography variant="h4">Timeline</Typography>
                 </div>
                 <div>
-                    <h3>Loaded - {items.length} {isLoadingIndicator()}</h3>
+                    <h3>
+                        Loaded - {items.length} {isLoadingIndicator()}
+                    </h3>
                 </div>
             </div>
 
