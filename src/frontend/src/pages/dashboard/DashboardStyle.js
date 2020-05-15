@@ -4,7 +4,8 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        display: 'flex'
+        display: 'flex',
+        height: '100%'
     },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
@@ -44,8 +45,10 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'flex-end'
     },
     content: {
-        flexGrow: 1,
-        padding: theme.spacing(3),
+        flex: '1',
+        height: '100vh',
+        display: 'flex',
+        paddingTop: theme.spacing(10),
         transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen
@@ -58,6 +61,11 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.enteringScreen
         }),
         marginLeft: 0
+    },
+    mainContent: {
+        height: '100%',
+        width: '100%',
+        paddingRight: '15px'
     }
 }));
 

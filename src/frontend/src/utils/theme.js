@@ -11,7 +11,7 @@ const theme = createMuiTheme({
     },
     typography: {
         fontFamily: [
-            'JetBrains Mono',
+            'Rajdhani',
             '-apple-system',
             'BlinkMacSystemFont',
             '"Segoe UI"',

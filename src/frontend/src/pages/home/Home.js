@@ -31,7 +31,13 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         padding: theme.spacing(3, 2),
         marginTop: 'auto',
-        backgroundColor: theme.palette.primary[800]
+        backgroundColor: theme.palette.primary[500]
+    },
+    titleText: {
+        fontFamily: 'Fondamento'
+    },
+    neverForgetText: {
+        fontFamily: 'Rock Salt'
     }
 }));
 
@@ -42,14 +48,14 @@ export default function StickyFooter() {
         <div className={classes.root}>
             <CssBaseline />
             <Container component="main" className={classes.main} maxWidth="sm">
-                <Typography variant="h5" component="h2" gutterBottom>
+                <Typography variant="h5" component="h2" className={classes.neverForgetText} gutterBottom>
                     #NeverForget
                 </Typography>
                 <Typography variant="h2" component="h1" gutterBottom>
                     <span role="img" aria-label="detective">
                         🕵
                     </span>{' '}
-                    Historian
+                    <span className={classes.titleText}>Historian</span>
                 </Typography>
                 <Typography variant="body1">
                     Historian is a self-hosted full-stack app that gathers your all your data.

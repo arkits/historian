@@ -24,25 +24,24 @@ import TimelineRoundedIcon from '@material-ui/icons/TimelineRounded';
 import SearchRoundedIcon from '@material-ui/icons/SearchRounded';
 import { useLocalStorage } from '../../store/LocalStorage';
 import { Redirect } from 'react-router-dom';
-import useStyles from './styles';
+import useStyles from './DashboardStyle';
 import { observer } from 'mobx-react';
 import { HistorianStoreContext } from '../../store/HistorianStore';
 import { BrowserRouter as Router, Switch, Route, Link as RouterLink, useHistory } from 'react-router-dom';
-
-function Home() {
-    return <h2>Home</h2>;
-}
-
-function About() {
-    return <h2>About</h2>;
-}
+import Timeline from './timeline/Timeline';
+import About from './about/About';
+import axiosInstance from '../../utils/axios';
 
 function Search() {
     return <h2>Search</h2>;
 }
 
 function Settings() {
-    return <h2>Settings</h2>;
+    return (
+        <div>
+            <h2>Settings</h2>
+        </div>
+    );
 }
 
 const Dashboard = observer(() => {
@@ -69,6 +68,30 @@ const Dashboard = observer(() => {
         return <Redirect to="/login" />;
     }
 
+    const displayUsername = () => {
+        if (historianStore?.user?.username) {
+            return historianStore?.user?.username;
+        } else {
+            axiosInstance({
+                method: 'get',
+                url: '/users/user',
+                headers: {
+                    Authorization: 'Basic ' + btoa(historianUserCreds.username + ':' + historianUserCreds.password)
+                }
+            })
+                .then(function (response) {
+                    if (response.status === 200) {
+                        historianStore.user = response.data;
+                    } else {
+                        history.push('/login');
+                    }
+                })
+                .catch(function () {
+                    history.push('/login');
+                });
+        }
+    };
+
     return (
         <div className={classes.root}>
             <CssBaseline />
@@ -90,17 +113,19 @@ const Dashboard = observer(() => {
                             <MenuIcon />
                         </IconButton>
                         <Typography
-                            variant="h6"
+                            variant="h5"
                             noWrap
                             style={{
                                 display: 'flex',
-                                flexGrow: '1'
+                                flexGrow: '1',
+                                fontFamily: 'Fondamento',
+                                fontWeight: 'bold'
                             }}
                         >
                             Historian
                         </Typography>
                         <Typography variant="h6" noWrap>
-                            {historianStore.user.username}
+                            {displayUsername()}
                         </Typography>
                     </Toolbar>
                 </AppBar>
@@ -120,7 +145,7 @@ const Dashboard = observer(() => {
                     </div>
                     <Divider />
                     <List>
-                        <ListItem button component={RouterLink} to="/dashboard">
+                        <ListItem button component={RouterLink} to="/dashboard/timeline">
                             <ListItemIcon>
                                 <TimelineRoundedIcon />
                             </ListItemIcon>
@@ -167,7 +192,7 @@ const Dashboard = observer(() => {
                     })}
                 >
                     <div className={classes.drawerHeader} />
-                    <div>
+                    <div className={classes.mainContent}>
                         <Switch>
                             <Route path="/dashboard/search">
                                 <Search />
@@ -178,8 +203,11 @@ const Dashboard = observer(() => {
                             <Route path="/dashboard/settings">
                                 <Settings />
                             </Route>
+                            <Route path="/dashboard/timeline">
+                                <Timeline />
+                            </Route>
                             <Route path="/dashboard">
-                                <Home />
+                                <Timeline />
                             </Route>
                         </Switch>
                     </div>
