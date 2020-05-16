@@ -63,7 +63,7 @@ const Gallery = observer(() => {
         setIsNextPageLoading(true);
         axiosInstance({
             method: 'get',
-            url: `/history?offset=${index.stopIndex}&order=${sortOrder}`,
+            url: `/history?offset=${index.stopIndex}&order=${sortOrder}&type=instagram_saved`,
             headers: {
                 Authorization: 'Basic ' + btoa(historianUserCreds.username + ':' + historianUserCreds.password)
             }
