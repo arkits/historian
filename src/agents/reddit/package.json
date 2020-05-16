@@ -1,10 +1,10 @@
 {
   "name": "historian-reddit-agent",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node src/index.js | bunyan",
+    "dev": "NODE_ENV=dev node src/index.js | bunyan",
     "prod": "NODE_ENV=production node src/index.js | bunyan"
   },
   "dependencies": {

@@ -13,5 +13,7 @@ const historianDomain = require('./domain/historian');
 
     await historianDomain.staggeredHistoryInsert(histories);
 
+    await historianDomain.updateUserMetadata();
+
     logger.info('Completed Reddit Saves!');
 })();

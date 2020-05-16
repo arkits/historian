@@ -2,7 +2,8 @@
     "historian": {
         "url": "http://localhost:4209/",
         "endpoints": {
-            "addHistory": "api/history/add"
+            "addHistory": "api/history/add",
+            "updateUser": "api/users/update"
         },
         "creds": {
             "username": "arkits",

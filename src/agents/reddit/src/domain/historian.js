@@ -40,15 +40,13 @@ function parseRedditSavedContent(redditSavedContent) {
 /**
  * Takes care of submitting all the Histories in a staggered fashion.
  * Prevent DDOSing the Backend
- * @param {*} histories 
+ * @param {*} histories
  */
 async function staggeredHistoryInsert(histories) {
-
     // This controls the length of each staggered submission to Historian
     let chunkSize = config.get('agent.chunkSize');
 
     for (let i = 0; i < histories.length; i += chunkSize) {
-
         // Slice the passed Histories into a smaller array
         let slicedHistories = histories.slice(i, i + chunkSize);
         // logger.debug('slicedHistories - ', slicedHistories);
@@ -78,9 +76,40 @@ async function staggeredHistoryInsert(histories) {
 }
 
 /**
+ * Updates User's Metadata to document last_saved
+ */
+async function updateUserMetadata() {
+    let body = {
+        metadata: {
+            reddit_saved: {
+                last_saved: new Date()
+            }
+        }
+    };
+
+    try {
+        let updateResponse = await axios.post(
+            config.get('historian.url') + config.get('historian.endpoints.updateUser'),
+            body,
+            {
+                headers: {
+                    Authorization: createBasicAuthHeader(
+                        config.get('historian.creds.username'),
+                        config.get('historian.creds.password')
+                    )
+                }
+            }
+        );
+        logger.info('Updated Metadata - ', updateResponse.data);
+    } catch (error) {
+        logger.error('Caught Error in updateUserMetadata - ', error);
+    }
+}
+
+/**
  * Decodes the HTTP Authorization header
- * @param {*} username 
- * @param {*} password 
+ * @param {*} username
+ * @param {*} password
  */
 function createBasicAuthHeader(username, password) {
     var encodedCreds = Buffer.from(username + ':' + password).toString('base64');
@@ -100,5 +129,6 @@ function sleep(ms) {
 
 module.exports = {
     parseRedditSavedContent,
-    staggeredHistoryInsert
+    staggeredHistoryInsert,
+    updateUserMetadata
 };

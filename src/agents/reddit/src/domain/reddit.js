@@ -1,6 +1,6 @@
 const snoowrap = require('snoowrap');
 const config = require('config');
-const { logger } = require('./logger'); 
+const { logger } = require('./logger');
 
 async function getRedditSavedContent() {
     // Create reddit client
@@ -15,9 +15,14 @@ async function getRedditSavedContent() {
     // Get Saved Content
     logger.info('Getting Saved posts from Reddit...');
     let savedContent = await redditClient.getMe().getSavedContent();
-    let allSavedContent = await savedContent.fetchAll();
 
-    return allSavedContent;
+    // If running as Dev, just get the first 25 saved posts
+    if (process.env.NODE_ENV === 'dev') {
+        return savedContent;
+    } else {
+        let allSavedContent = await savedContent.fetchAll();
+        return allSavedContent;
+    }
 }
 
 module.exports = {
