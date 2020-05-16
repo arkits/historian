@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react';
 // import { HistorianStoreContext } from '../../../store/HistorianStore';
 import axiosInstance from '../../../utils/axios';
-import { InfiniteLoader, List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
+import { InfiniteLoader, List, AutoSizer, CellMeasurer, CellMeasurerCache, WindowScroller } from 'react-virtualized';
 import { Grid, CircularProgress } from '@material-ui/core';
 import { useLocalStorage } from '../../../store/LocalStorage';
 
@@ -86,23 +86,37 @@ const Timeline = observer(() => {
 
     return (
         <div className="Timeline" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <InfiniteLoader isRowLoaded={isRowLoaded} loadMoreRows={loadMoreRows} rowCount={itemCount}>
-                {({ onRowsRendered, registerChild }) => (
-                    <AutoSizer>
-                        {({ height, width }) => (
-                            <List
-                                ref={registerChild}
-                                height={height}
-                                width={width}
-                                rowCount={itemCount}
-                                rowHeight={cache.rowHeight}
-                                rowRenderer={rowRenderer}
-                                onRowsRendered={onRowsRendered}
-                            />
-                        )}
-                    </AutoSizer>
+            <WindowScroller scrollElement={window}>
+                {({ height, isScrolling, registerChild, onChildScroll, scrollTop }) => (
+                    <div className="WindowScroller">
+                        <InfiniteLoader isRowLoaded={isRowLoaded} loadMoreRows={loadMoreRows} rowCount={itemCount}>
+                            {({ onRowsRendered }) => (
+                                <AutoSizer disableHeight>
+                                    {({ width }) => (
+                                        <div ref={registerChild}>
+                                            <List
+                                                ref={(el) => {
+                                                    window.listEl = el;
+                                                }}
+                                                autoHeight
+                                                height={height}
+                                                width={width}
+                                                rowCount={itemCount}
+                                                rowHeight={cache.rowHeight}
+                                                rowRenderer={rowRenderer}
+                                                onRowsRendered={onRowsRendered}
+                                                onScroll={onChildScroll}
+                                                scrollTop={scrollTop}
+                                                isScrolling={isScrolling}
+                                            />
+                                        </div>
+                                    )}
+                                </AutoSizer>
+                            )}
+                        </InfiniteLoader>
+                    </div>
                 )}
-            </InfiniteLoader>
+            </WindowScroller>
         </div>
     );
 });
