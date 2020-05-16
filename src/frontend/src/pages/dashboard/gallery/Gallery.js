@@ -12,7 +12,7 @@ import {
     CircularProgress,
     CardHeader,
     Avatar,
-    ButtonBase
+    CardMedia
 } from '@material-ui/core';
 import { useLocalStorage } from '../../../store/LocalStorage';
 import moment from 'moment';
@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Timeline = observer(() => {
+const Gallery = observer(() => {
     const historianStore = useContext(HistorianStoreContext);
 
     const classes = useStyles();
@@ -106,34 +106,25 @@ const Timeline = observer(() => {
                     {({ measure, registerChild }) => (
                         <div ref={registerChild} key={key} onLoad={measure} style={style}>
                             <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid item xs={12} sm={4}>
                                     <Card className={classes.root}>
+                                        <CardHeader
+                                            avatar={
+                                                <Avatar className={classes.avatar}>
+                                                    <InstagramIcon />
+                                                </Avatar>
+                                            }
+                                            title={items[index]?.metadata?.username}
+                                            subheader={moment(items[index]?.timestamp).fromNow()}
+                                        />
+                                        <CardMedia
+                                            className={classes.media}
+                                            image={items[index]?.metadata?.mediaUrls[0]}
+                                        />
                                         <CardContent>
-                                            <Grid container>
-                                                <Grid item style={{ flex: '1' }}>
-                                                    <Typography variant="body1" color="textPrimary" component="p">
-                                                        {items[index]?.metadata?.caption}
-                                                    </Typography>
-                                                    <CardHeader
-                                                        avatar={
-                                                            <Avatar className={classes.avatar}>
-                                                                <InstagramIcon />
-                                                            </Avatar>
-                                                        }
-                                                        title={items[index]?.metadata?.username}
-                                                        subheader={moment(items[index]?.timestamp).fromNow()}
-                                                    />
-                                                </Grid>
-                                                <Grid item>
-                                                    <ButtonBase className={classes.image}>
-                                                        <img
-                                                            className={classes.img}
-                                                            alt="complex"
-                                                            src={items[index]?.metadata?.mediaUrls[0]}
-                                                        />
-                                                    </ButtonBase>
-                                                </Grid>
-                                            </Grid>
+                                            <Typography variant="body2" color="textSecondary" component="p">
+                                                {items[index]?.metadata?.caption}
+                                            </Typography>
                                         </CardContent>
                                     </Card>
                                 </Grid>
@@ -147,7 +138,7 @@ const Timeline = observer(() => {
     }
 
     return (
-        <div className="Timeline" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div className="Gallery" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <InfiniteLoader isRowLoaded={isRowLoaded} loadMoreRows={loadMoreRows} rowCount={itemCount}>
                 {({ onRowsRendered, registerChild }) => (
                     <AutoSizer>
@@ -169,4 +160,4 @@ const Timeline = observer(() => {
     );
 });
 
-export default Timeline;
+export default Gallery;

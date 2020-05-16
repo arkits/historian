@@ -10,6 +10,7 @@ import Timeline from './timeline/Timeline';
 import About from './about/About';
 import axiosInstance from '../../utils/axios';
 import Drawer from './Drawer';
+import Gallery from './gallery/Gallery';
 
 function Search() {
     return <h2>Search</h2>;
@@ -97,6 +98,9 @@ const Dashboard = observer(() => {
                             </Route>
                             <Route path="/dashboard/settings">
                                 <Settings />
+                            </Route>
+                            <Route path="/dashboard/gallery">
+                                <Gallery />
                             </Route>
                             <Route path="/dashboard/timeline">
                                 <Timeline />
