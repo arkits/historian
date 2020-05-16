@@ -18,10 +18,12 @@ import './Timeline.css';
 import { useLocalStorage } from '../../../store/LocalStorage';
 import moment from 'moment';
 import { red } from '@material-ui/core/colors';
+import InstagramIcon from '@material-ui/icons/Instagram';
 
 const useStyles = makeStyles((theme) => ({
     avatar: {
-        backgroundColor: red[500]
+        backgroundColor: red[500],
+        color: 'white'
     },
     image: {
         width: 128,
@@ -29,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: '15px'
     },
     media: {
-        paddingTop: '100%' // 16:9
+        paddingTop: '100%'
     },
     img: {
         margin: 'auto',
@@ -47,11 +49,10 @@ const Timeline = observer(() => {
     const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
 
     // states
-    const [hasNextPage, setHasNextPage] = React.useState(true);
-    const [isNextPageLoading, setIsNextPageLoading] = React.useState(false);
-    const [items, setItems] = React.useState([]);
-    const [sortOrder, setSortOrder] = React.useState('ASC');
-    const [offset, setOffset] = React.useState(0);
+    const [hasNextPage, setHasNextPage] = useState(true);
+    const [isNextPageLoading, setIsNextPageLoading] = useState(false);
+    const [items, setItems] = useState([]);
+    const [sortOrder, setSortOrder] = useState('DESC');
 
     let cache = new CellMeasurerCache({
         fixedWidth: true,
@@ -59,11 +60,11 @@ const Timeline = observer(() => {
     });
 
     // methods
-    const loadMoreRows = () => {
+    const loadMoreRows = (index) => {
         setIsNextPageLoading(true);
         axiosInstance({
             method: 'get',
-            url: '/history',
+            url: `/history?offset=${index.stopIndex}&order=${sortOrder}`,
             headers: {
                 Authorization: 'Basic ' + btoa(historianUserCreds.username + ':' + historianUserCreds.password)
             }
@@ -81,14 +82,6 @@ const Timeline = observer(() => {
     function isRowLoaded({ index }) {
         return !!items[index];
     }
-
-    const isLoadingIndicator = () => {
-        if (isNextPageLoading) {
-            return <>| Loading...</>;
-        } else {
-            return null;
-        }
-    };
 
     const itemCount = hasNextPage ? items.length + 1 : items.length;
 
@@ -117,7 +110,11 @@ const Timeline = observer(() => {
                                 <Grid item xs={12} sm={4}>
                                     <Card className={classes.root}>
                                         <CardHeader
-                                            avatar={<Avatar className={classes.avatar}>I</Avatar>}
+                                            avatar={
+                                                <Avatar className={classes.avatar}>
+                                                    <InstagramIcon />
+                                                </Avatar>
+                                            }
                                             title={items[index]?.metadata?.username}
                                             subheader={moment(items[index]?.timestamp).fromNow()}
                                         />
@@ -143,16 +140,6 @@ const Timeline = observer(() => {
 
     return (
         <div className="Timeline" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div style={{ display: 'flex', paddingLeft: '15px', paddingRight: '15px' }}>
-                <div style={{ flexGrow: '1' }}>
-                    <Typography variant="h4">Timeline</Typography>
-                </div>
-                <div>
-                    <h3>
-                        Loaded - {items.length} {isLoadingIndicator()}
-                    </h3>
-                </div>
-            </div>
             <InfiniteLoader isRowLoaded={isRowLoaded} loadMoreRows={loadMoreRows} rowCount={itemCount}>
                 {({ onRowsRendered, registerChild }) => (
                     <AutoSizer>
