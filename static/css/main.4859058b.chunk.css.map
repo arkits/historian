@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.css"],"names":[],"mappings":"AAAA,WACI,sBACJ,CAEA,EACI,sBACJ,CAEA,UAEI,QAAS,CACT,WACJ","file":"main.4859058b.chunk.css","sourcesContent":["@font-face {\n    font-family: 'Rajdhani';\n}\n\n* {\n    font-family: 'Rajdhani';\n}\n\nhtml,\nbody {\n    margin: 0;\n    height: 100%;\n}\n"]}
