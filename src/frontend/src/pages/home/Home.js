@@ -2,6 +2,8 @@ import React from 'react';
 import { Button, Link, Container, CssBaseline, Typography } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
+import { useLocalStorage } from '../../store/LocalStorage';
+import { Redirect } from 'react-router-dom';
 
 function ShoutOuts() {
     return (
@@ -41,8 +43,14 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function StickyFooter() {
+export default function Home() {
     const classes = useStyles();
+
+    const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
+
+    if (historianUserCreds?.username && historianUserCreds?.password) {
+        return <Redirect to="/dashboard" />;
+    }
 
     return (
         <div className={classes.root}>
