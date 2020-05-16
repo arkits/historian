@@ -25,7 +25,7 @@ function parseRedditSavedContent(redditSavedContent) {
         let historyBody = {
             type: 'reddit_saved',
             metadata: parsedMetadata,
-            timestamp: new Date(parsedMetadata.created_utc * 1000)
+            timestamp: new Date()
         };
 
         logger.debug('Parsed - ', historyBody.metadata.pk);
