@@ -15,9 +15,9 @@ async function getRedditSavedContent() {
     // Get Saved Content
     logger.info('Getting Saved posts from Reddit...');
     let savedContent = await redditClient.getMe().getSavedContent();
-    // let allSavedContent = await savedContent.fetchAll();
+    let allSavedContent = await savedContent.fetchAll();
 
-    return savedContent;
+    return allSavedContent;
 }
 
 module.exports = {
