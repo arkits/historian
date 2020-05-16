@@ -51,6 +51,7 @@ export default function StickyFooter() {
                 <Typography variant="h5" component="h2" className={classes.neverForgetText} gutterBottom>
                     #NeverForget
                 </Typography>
+                <br />
                 <Typography variant="h2" component="h1" gutterBottom>
                     <span role="img" aria-label="detective">
                         🕵
