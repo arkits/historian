@@ -149,13 +149,13 @@ async function getHistory(request: Request, response: Response) {
 
         // Validate type
         if (requestParams.hasOwnProperty('type')) {
-            if (['instagram_saved', 'web_history'].includes(String(requestParams.type))) {
+            if (['instagram_saved', 'web_history', 'reddit_saved'].includes(String(requestParams.type))) {
                 parsedParams['type'] = String(requestParams.type);
             } else {
                 throw new Error('Invalid type - ' + requestParams.type);
             }
         } else {
-            parsedParams['type'] = 'instagram_saved';
+            parsedParams['type'] = null;
         }
 
         // Validate offset
