@@ -4,9 +4,11 @@ var logger = bunyan.createLogger({
     name: 'historian',
     streams: [
         {
+            level: 'debug',
             stream: process.stdout
         },
         {
+            level: 'debug',
             type: 'rotating-file',
             path: 'logs/historian-backend.log',
             period: '1d'

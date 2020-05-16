@@ -3,6 +3,7 @@ import { User } from '../entity/User';
 import * as bcrypt from 'bcrypt';
 import * as config from 'config';
 import { saveUser, modifyUser, getUserByUsername, deleteUserByUsername } from '../dao/UserDao';
+import { getHistoryCountDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
 import { decodeAuthHeader } from '../utils';
 
@@ -154,12 +155,19 @@ async function getUser(request: Request, response: Response) {
     let [username, _] = decodeAuthHeader(request.headers.authorization);
 
     let user = await getUserByUsername(username);
+    let historyCount = await getHistoryCountDao(user);
 
-    // remove password
-    delete user.password;
+    let toReturn = {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        history: {
+            count: historyCount
+        }
+    };
 
     response.status(200);
-    response.json(user);
+    response.json(toReturn);
 }
 
 export { registerUser, deleteUser, updateUser, getUser };

@@ -7,14 +7,25 @@ async function addHistoryDao(history) {
     return await historyRepository.save(history);
 }
 
-async function getHistoryDao(where: object, limit: number, order: object) {
+async function getHistoryDao(where: object, offset: number, limit: number, order: object) {
     let historyRepository = getRepository(History);
     let history = await historyRepository.find({
         where: where,
+        skip: offset,
         take: limit,
         order: order
     });
     return history;
+}
+
+async function getHistoryCountDao(user) {
+    let historyRepository = getRepository(History);
+    let daoResponse = await historyRepository.count({
+        where: {
+            savedBy: user.id
+        }
+    });
+    return daoResponse;
 }
 
 async function deleteUserHistoryDao(user) {
@@ -31,4 +42,4 @@ async function getHistoryWithInstagramPkDao(instagramPk) {
     return query;
 }
 
-export { addHistoryDao, getHistoryDao, deleteUserHistoryDao, getHistoryWithInstagramPkDao };
+export { addHistoryDao, getHistoryDao, deleteUserHistoryDao, getHistoryWithInstagramPkDao, getHistoryCountDao };
