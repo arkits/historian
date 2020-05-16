@@ -4,16 +4,32 @@ import { makeStyles } from '@material-ui/core/styles';
 import { HistorianStoreContext } from '../../../store/HistorianStore';
 import axiosInstance from '../../../utils/axios';
 import { InfiniteLoader, List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
-import { Typography, Card, CardContent, Grid, ButtonBase } from '@material-ui/core';
+import {
+    Typography,
+    Card,
+    CardContent,
+    Grid,
+    CircularProgress,
+    CardHeader,
+    Avatar,
+    CardMedia
+} from '@material-ui/core';
 import './Timeline.css';
 import { useLocalStorage } from '../../../store/LocalStorage';
 import moment from 'moment';
+import { red } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => ({
+    avatar: {
+        backgroundColor: red[500]
+    },
     image: {
         width: 128,
         height: '100%',
-        paddingRight: '15px'
+        paddingLeft: '15px'
+    },
+    media: {
+        paddingTop: '100%' // 16:9
     },
     img: {
         margin: 'auto',
@@ -82,17 +98,14 @@ const Timeline = observer(() => {
     function rowRenderer({ key, index, parent, style }) {
         if (!isItemLoaded(index)) {
             return (
-                <div
-                    key={key}
-                    style={{
-                        marginBottom: '10px'
-                    }}
-                >
-                    <Card elevation={1}>
-                        <CardContent>
-                            <Typography variant="h6">Loading...</Typography>
-                        </CardContent>
-                    </Card>
+                <div key={key} style={style}>
+                    <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        <Grid item xs={12} sm={4}>
+                            <center>
+                                <CircularProgress />
+                            </center>
+                        </Grid>
+                    </Grid>
                 </div>
             );
         } else {
@@ -100,28 +113,26 @@ const Timeline = observer(() => {
                 <CellMeasurer cache={cache} columnIndex={0} key={key} rowIndex={index} parent={parent}>
                     {({ measure, registerChild }) => (
                         <div ref={registerChild} key={key} onLoad={measure} style={style}>
-                            <Card>
-                                <CardContent>
-                                    <Grid container>
-                                        <Grid item style={{ flex: '1' }}>
-                                            <Typography variant="h6">{items[index]?.metadata?.caption}</Typography>
-                                            <Typography variant="body1">{items[index]?.metadata?.username}</Typography>
-                                            <Typography variant="body1">
-                                                {moment(items[index]?.timestamp).fromNow()}
+                            <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                <Grid item xs={12} sm={4}>
+                                    <Card className={classes.root}>
+                                        <CardHeader
+                                            avatar={<Avatar className={classes.avatar}>I</Avatar>}
+                                            title={items[index]?.metadata?.username}
+                                            subheader={moment(items[index]?.timestamp).fromNow()}
+                                        />
+                                        <CardMedia
+                                            className={classes.media}
+                                            image={items[index]?.metadata?.mediaUrls[0]}
+                                        />
+                                        <CardContent>
+                                            <Typography variant="body2" color="textSecondary" component="p">
+                                                {items[index]?.metadata?.caption}
                                             </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <ButtonBase className={classes.image}>
-                                                <img
-                                                    className={classes.img}
-                                                    alt="complex"
-                                                    src={items[index]?.metadata?.mediaUrls[0]}
-                                                />
-                                            </ButtonBase>
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            </Grid>
                             <br />
                         </div>
                     )}
@@ -132,7 +143,7 @@ const Timeline = observer(() => {
 
     return (
         <div className="Timeline" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', paddingLeft: '15px', paddingRight: '15px' }}>
                 <div style={{ flexGrow: '1' }}>
                     <Typography variant="h4">Timeline</Typography>
                 </div>
@@ -142,7 +153,6 @@ const Timeline = observer(() => {
                     </h3>
                 </div>
             </div>
-
             <InfiniteLoader isRowLoaded={isRowLoaded} loadMoreRows={loadMoreRows} rowCount={itemCount}>
                 {({ onRowsRendered, registerChild }) => (
                     <AutoSizer>
