@@ -109,11 +109,6 @@ async function updateUser(request: Request, response: Response) {
 
     let body = request.body;
 
-    // Failes due to foreign key
-    // if (body.username) {
-    //     user.username = body.username;
-    // }
-
     if (body.name) {
         user.name = body.name;
     }
@@ -121,6 +116,17 @@ async function updateUser(request: Request, response: Response) {
     if (body.password) {
         let hashedPassword = await bcrypt.hash(body.password, config.get('auth.saltRounds'));
         user.password = hashedPassword;
+    }
+
+    if (body.metadata) {
+        let updatedMetadata = null;
+        if (user.metadata !== null) {
+            updatedMetadata = Object.assign(user.metadata, body.metadata);
+        } else {
+            updatedMetadata = body.metadata;
+        }
+        logger.info('[update-user] metadata got updated - ', updatedMetadata);
+        user.metadata = updatedMetadata;
     }
 
     let updateUserResult = await modifyUser(user);
@@ -161,6 +167,7 @@ async function getUser(request: Request, response: Response) {
         id: user.id,
         name: user.name,
         username: user.username,
+        metadata: user.metadata,
         history: {
             count: historyCount
         }
