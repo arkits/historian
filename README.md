@@ -8,17 +8,16 @@
 
 Historian is a self-hosted full-stack app that gathers your all your data.
 
-
 ## Components
 
 ### Backend
 
 Historian's Backend is made in -
 
-* Node.js
-* Typescript
-* Express
-* Typeorm + Postgres
+-   Node.js
+-   Typescript
+-   Express
+-   Typeorm + Postgres
 
 Learn more - [src/backend](src/backend)
 
@@ -26,11 +25,25 @@ Learn more - [src/backend](src/backend)
 
 Historian's Frontend is made in -
 
-* Node.js
-* React.js
+-   Node.js
+-   React.js
 
 Learn more - [src/frontend](src/frontend)
 
 ### Agents
 
-Historian Agents are scripts, tools or extensions that feed data to Historian.
+Historian Agents are scripts or extensions that feed data to Historian.
+
+Available Agents include:
+
+#### Reddit Saved Posts
+
+Learn more - [src/agents/reddit](src/agents/reddit)
+
+#### Instagram Saved Posts
+
+Learn more - [src/agents/instagram](src/agents/instagram)
+
+#### Make your own Agent!
+
+You can make your own Agent with Historian's REST API. Refer to Swagger spec - [docs/historian-swagger.yml](docs/historian-swagger.yml)
