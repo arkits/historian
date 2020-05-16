@@ -4,7 +4,7 @@ import { decodeAuthHeader } from '../utils';
 import { getUserByUsername } from '../dao/UserDao';
 import { addHistoryDao, getHistoryDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
-import { validateInstagramHistory } from '../domain/HistoryDomain';
+import { validateInstagramHistory, validateRedditSavedHistory } from '../domain/HistoryDomain';
 import { User } from '../entity/User';
 
 async function addToHistory(request: Request, response: Response) {
@@ -94,7 +94,7 @@ async function validateIncomingHistory(body, user: User) {
     }
 
     if (body.type) {
-        if (['instagram_saved', 'web_history'].includes(body.type)) {
+        if (['instagram_saved', 'web_history', 'reddit_saved'].includes(body.type)) {
             history.type = body.type;
         } else {
             throw new Error('Invalid type - ' + body.type);
@@ -105,6 +105,10 @@ async function validateIncomingHistory(body, user: User) {
 
     if (history.type == 'instagram_saved') {
         await validateInstagramHistory(history);
+    }
+
+    if (history.type == 'reddit_saved') {
+        await validateRedditSavedHistory(history);
     }
 
     history.savedBy = user;

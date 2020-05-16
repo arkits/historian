@@ -36,10 +36,10 @@ async function deleteUserHistoryDao(user) {
     logger.debug('[delete-user-history] result - ', result);
 }
 
-async function getHistoryWithInstagramPkDao(instagramPk) {
+async function getHistoryWithPkDao(historyPk) {
     let historyRepository = getRepository(History);
-    let query = historyRepository.createQueryBuilder('history').where(`metadata ->> 'pk' = '${instagramPk}'`);
+    let query = historyRepository.createQueryBuilder('history').where(`metadata ->> 'pk' = '${historyPk}'`);
     return query;
 }
 
-export { addHistoryDao, getHistoryDao, deleteUserHistoryDao, getHistoryWithInstagramPkDao, getHistoryCountDao };
+export { addHistoryDao, getHistoryDao, deleteUserHistoryDao, getHistoryWithPkDao, getHistoryCountDao };
