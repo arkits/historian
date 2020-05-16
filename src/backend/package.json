@@ -33,7 +33,6 @@
       "express": "^4.17.1",
       "pg": "^8.0.3",
       "reflect-metadata": "^0.1.10",
-      "sqlite3": "^4.0.3",
       "typeorm": "0.2.24"
    },
    "scripts": {

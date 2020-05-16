@@ -153,6 +153,19 @@ async function getHistory(request: Request, response: Response) {
         } else {
             parsedParams['type'] = 'instagram_saved';
         }
+
+        // Validate offset
+        if (requestParams.hasOwnProperty('offset')) {
+            if (!isNaN(Number(requestParams.offset))) {
+                parsedParams['offset'] = Number(requestParams.offset);
+            } else {
+                throw new Error('Invalid offset - ' + requestParams.offset);
+            }
+        } else {
+            parsedParams['offset'] = 0;
+        }
+
+        logger.debug('[get-history] parsed params - ', parsedParams);
     } catch (error) {
         logger.error('[get-history] Parsing threw an error - ', error);
         response.status(400);
@@ -169,12 +182,14 @@ async function getHistory(request: Request, response: Response) {
             {
                 savedBy: user.id
             },
+            parsedParams['offset'],
             parsedParams['limit'],
             {
                 timestamp: parsedParams['order']
             }
         );
-        logger.info('[get-history] Retrived History - ', history);
+
+        logger.info('[get-history] Retrieved History - ', history.length);
 
         response.status(200);
         response.json(history);
