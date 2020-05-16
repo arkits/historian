@@ -1,53 +1,19 @@
 import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react';
-import { makeStyles } from '@material-ui/core/styles';
-import { HistorianStoreContext } from '../../../store/HistorianStore';
+// import { HistorianStoreContext } from '../../../store/HistorianStore';
 import axiosInstance from '../../../utils/axios';
 import { InfiniteLoader, List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
-import {
-    Typography,
-    Card,
-    CardContent,
-    Grid,
-    CircularProgress,
-    CardHeader,
-    Avatar,
-    ButtonBase
-} from '@material-ui/core';
+import { Grid, CircularProgress } from '@material-ui/core';
 import { useLocalStorage } from '../../../store/LocalStorage';
-import moment from 'moment';
-import { red } from '@material-ui/core/colors';
-import InstagramIcon from '@material-ui/icons/Instagram';
 
-const useStyles = makeStyles((theme) => ({
-    avatar: {
-        backgroundColor: red[500],
-        color: 'white'
-    },
-    image: {
-        width: 128,
-        height: '100%',
-        paddingLeft: '15px'
-    },
-    media: {
-        paddingTop: '100%'
-    },
-    img: {
-        margin: 'auto',
-        display: 'block',
-        maxWidth: '100%',
-        maxHeight: '100%'
-    }
-}));
+import TimelineCard from './TimelineCard';
 
 const Timeline = observer(() => {
-    const historianStore = useContext(HistorianStoreContext);
-
-    const classes = useStyles();
+    // const historianStore = useContext(HistorianStoreContext);
 
     const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
 
-    // states
+    // States
     const [hasNextPage, setHasNextPage] = useState(true);
     const [isNextPageLoading, setIsNextPageLoading] = useState(false);
     const [items, setItems] = useState([]);
@@ -55,7 +21,7 @@ const Timeline = observer(() => {
 
     let cache = new CellMeasurerCache({
         fixedWidth: true,
-        minHeight: 50
+        minHeight: 100
     });
 
     // methods
@@ -69,7 +35,11 @@ const Timeline = observer(() => {
             }
         })
             .then(function (response) {
-                setHasNextPage(true);
+                if (response.data.length == 0) {
+                    setHasNextPage(false);
+                } else {
+                    setHasNextPage(true);
+                }
                 setIsNextPageLoading(false);
                 setItems([...items].concat(response.data));
             })
@@ -105,39 +75,7 @@ const Timeline = observer(() => {
                 <CellMeasurer cache={cache} columnIndex={0} key={key} rowIndex={index} parent={parent}>
                     {({ measure, registerChild }) => (
                         <div ref={registerChild} key={key} onLoad={measure} style={style}>
-                            <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                <Grid item xs={12} sm={6}>
-                                    <Card className={classes.root}>
-                                        <CardContent>
-                                            <Grid container>
-                                                <Grid item style={{ flex: '1' }}>
-                                                    <Typography variant="body1" color="textPrimary" component="p">
-                                                        {items[index]?.metadata?.caption}
-                                                    </Typography>
-                                                    <CardHeader
-                                                        avatar={
-                                                            <Avatar className={classes.avatar}>
-                                                                <InstagramIcon />
-                                                            </Avatar>
-                                                        }
-                                                        title={items[index]?.metadata?.username}
-                                                        subheader={moment(items[index]?.timestamp).fromNow()}
-                                                    />
-                                                </Grid>
-                                                <Grid item>
-                                                    <ButtonBase className={classes.image}>
-                                                        <img
-                                                            className={classes.img}
-                                                            alt="complex"
-                                                            src={items[index]?.metadata?.mediaUrls[0]}
-                                                        />
-                                                    </ButtonBase>
-                                                </Grid>
-                                            </Grid>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            </Grid>
+                            <TimelineCard history={items[index]} />
                             <br />
                         </div>
                     )}
