@@ -182,16 +182,18 @@ async function getHistory(request: Request, response: Response) {
 
     try {
         let user = await getUserByUsername(username);
-        let history = await getHistoryDao(
-            {
-                savedBy: user.id
-            },
-            parsedParams['offset'],
-            parsedParams['limit'],
-            {
-                timestamp: parsedParams['order']
-            }
-        );
+
+        let where = {
+            savedBy: user.id
+        };
+
+        if (parsedParams['type'] !== null) {
+            where['type'] = parsedParams['type'];
+        }
+
+        let history = await getHistoryDao(where, parsedParams['offset'], parsedParams['limit'], {
+            timestamp: parsedParams['order']
+        });
 
         logger.info('[get-history] Retrieved History - ', history.length);
 
