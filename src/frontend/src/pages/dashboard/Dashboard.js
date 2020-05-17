@@ -11,17 +11,10 @@ import About from './about/About';
 import axiosInstance from '../../utils/axios';
 import Drawer from './Drawer';
 import Gallery from './gallery/Gallery';
+import Settings from './settings/Settings';
 
 function Search() {
     return <h2>Search</h2>;
-}
-
-function Settings() {
-    return (
-        <div>
-            <h2>Settings</h2>
-        </div>
-    );
 }
 
 const Dashboard = observer(() => {

@@ -2,12 +2,10 @@ import { observable, decorate } from 'mobx';
 import { createContext } from 'react';
 
 class HistorianStore {
-    drawerOpen = true;
     user = {};
 }
 
 decorate(HistorianStore, {
-    drawerOpen: observable,
     user: observable
 });
 
