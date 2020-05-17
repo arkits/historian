@@ -35,7 +35,7 @@ const Gallery = observer(() => {
             }
         })
             .then(function (response) {
-                if (response.data.length == 0) {
+                if (response.data.length === 0) {
                     setHasNextPage(false);
                 } else {
                     setHasNextPage(true);

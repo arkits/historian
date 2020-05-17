@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Button, Link, Container, CssBaseline, Typography, TextField, Grid } from '@material-ui/core';
-import { Link as RouterLink, useHistory, Redirect } from 'react-router-dom';
+import { Link as RouterLink, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import ShoutOuts from '../../components/ShoutOut';
 import { useLocalStorage } from '../../store/LocalStorage';
@@ -55,10 +55,6 @@ const Login = observer(() => {
 
     const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
 
-    if (historianUserCreds?.username && historianUserCreds?.password) {
-        return <Redirect to="/dashboard" />;
-    }
-
     const loginOnClick = () => {
         try {
             axiosInstance({
@@ -70,7 +66,6 @@ const Login = observer(() => {
             })
                 .then(function (response) {
                     if (response.status === 200) {
-                        console.log('Auth successful... setting user creds');
                         setHistorianUserCreds({
                             username: i_username,
                             password: i_password
@@ -95,7 +90,12 @@ const Login = observer(() => {
             errorTitle: 'Login Failed',
             errorMessage: 'Please check your username and password.'
         });
+        setHistorianUserCreds({});
     };
+
+    if (historianUserCreds?.username && historianUserCreds?.password) {
+        loginOnClick();
+    }
 
     return (
         <div className={classes.root}>

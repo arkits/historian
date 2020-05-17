@@ -1,10 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import {
     Typography,
     Card,
     CardContent,
     Grid,
-    CircularProgress,
     CardHeader,
     Avatar,
     ButtonBase

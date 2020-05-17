@@ -1,11 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
+import { Drawer, List, Divider, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import InfoRoundedIcon from '@material-ui/icons/InfoRounded';
@@ -14,8 +9,8 @@ import TimelineRoundedIcon from '@material-ui/icons/TimelineRounded';
 import SearchRoundedIcon from '@material-ui/icons/SearchRounded';
 import IconButton from '@material-ui/core/IconButton';
 import PhotoLibraryRoundedIcon from '@material-ui/icons/PhotoLibraryRounded';
-import { Typography } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
+import { useLocalStorage } from '../../store/LocalStorage';
 
 const useStyles = makeStyles({
     drawer: {
@@ -27,6 +22,7 @@ const useStyles = makeStyles({
 export default function TemporaryDrawer() {
     const classes = useStyles();
     const [isOpen, setIsOpen] = React.useState(false);
+    const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
 
     const toggleDrawer = (open) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -108,7 +104,14 @@ export default function TemporaryDrawer() {
                                         </ListItemIcon>
                                         <ListItemText primary={'About Historian'} />
                                     </ListItem>
-                                    <ListItem button component={RouterLink} to="/dashboard/login">
+                                    <ListItem
+                                        button
+                                        component={RouterLink}
+                                        to="/login"
+                                        onClick={() => {
+                                            setHistorianUserCreds({});
+                                        }}
+                                    >
                                         <ListItemIcon>
                                             <ExitToAppRoundedIcon />
                                         </ListItemIcon>

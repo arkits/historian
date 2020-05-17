@@ -1,16 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react';
-// import { HistorianStoreContext } from '../../../store/HistorianStore';
 import axiosInstance from '../../../utils/axios';
 import { InfiniteLoader, List, AutoSizer, CellMeasurer, CellMeasurerCache, WindowScroller } from 'react-virtualized';
 import { Grid, CircularProgress } from '@material-ui/core';
 import { useLocalStorage } from '../../../store/LocalStorage';
-
 import TimelineCard from './TimelineCard';
 
 const Timeline = observer(() => {
-    // const historianStore = useContext(HistorianStoreContext);
-
     const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
 
     // States
@@ -35,7 +31,7 @@ const Timeline = observer(() => {
             }
         })
             .then(function (response) {
-                if (response.data.length == 0) {
+                if (response.data.length === 0) {
                     setHasNextPage(false);
                 } else {
                     setHasNextPage(true);

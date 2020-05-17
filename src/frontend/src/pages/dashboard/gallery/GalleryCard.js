@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Typography, Card, CardContent, Grid, CardMedia, CardHeader, Avatar, ButtonBase } from '@material-ui/core';
+import React from 'react';
+import { Typography, Card, CardContent, Grid, CardMedia, CardHeader, Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
 import InstagramIcon from '@material-ui/icons/Instagram';
