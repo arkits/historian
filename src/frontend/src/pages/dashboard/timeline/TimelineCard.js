@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-    Typography,
-    Card,
-    CardContent,
-    Grid,
-    CardHeader,
-    Avatar,
-    ButtonBase
-} from '@material-ui/core';
+import { Typography, Card, CardContent, Grid, CardHeader, Avatar, ButtonBase, CardActionArea } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
 import InstagramIcon from '@material-ui/icons/Instagram';
@@ -78,33 +70,43 @@ function TimelineCard(props) {
             return history?.metadata?.thumbnail;
         }
     };
+
+    const getPermalink = () => {
+        if (history?.type === 'instagram_saved') {
+            return history?.metadata?.mediaUrls[0];
+        } else {
+            return history?.metadata?.content_url;
+        }
+    };
     return (
         <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
             <Grid item xs={12} sm={6}>
                 <Card className={classes.root}>
-                    <CardContent>
-                        <Grid container>
-                            <Grid item style={{ flex: '1' }}>
-                                <Typography variant="body1" color="textPrimary" component="p">
-                                    {getPrettyTitle()}
-                                </Typography>
-                                <CardHeader
-                                    avatar={<Avatar className={classes.avatar}>{getPrettyAvatar()}</Avatar>}
-                                    title={getPrettyUsername()}
-                                    subheader={moment(history?.timestamp).fromNow()}
-                                    style={{
-                                        paddingLeft: '0',
-                                        paddingBottom: '0'
-                                    }}
-                                />
+                    <CardActionArea target="_blank" href={getPermalink()}>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item style={{ flex: '1' }}>
+                                    <Typography variant="body1" color="textPrimary" component="p">
+                                        {getPrettyTitle()}
+                                    </Typography>
+                                    <CardHeader
+                                        avatar={<Avatar className={classes.avatar}>{getPrettyAvatar()}</Avatar>}
+                                        title={getPrettyUsername()}
+                                        subheader={moment(history?.timestamp).fromNow()}
+                                        style={{
+                                            paddingLeft: '0',
+                                            paddingBottom: '0'
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <ButtonBase className={classes.image}>
+                                        <img className={classes.img} alt="complex" src={getThumbnail()} />
+                                    </ButtonBase>
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <ButtonBase className={classes.image}>
-                                    <img className={classes.img} alt="complex" src={getThumbnail()} />
-                                </ButtonBase>
-                            </Grid>
-                        </Grid>
-                    </CardContent>
+                        </CardContent>
+                    </CardActionArea>
                 </Card>
             </Grid>
         </Grid>

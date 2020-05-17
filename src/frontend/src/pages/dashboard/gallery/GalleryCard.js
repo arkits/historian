@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Card, CardContent, Grid, CardMedia, CardHeader, Avatar } from '@material-ui/core';
+import { Typography, Card, CardContent, Grid, CardMedia, CardHeader, Avatar, CardActionArea } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
 import InstagramIcon from '@material-ui/icons/Instagram';
@@ -74,21 +74,31 @@ function GalleryCard(props) {
             }
         }
     };
+
+    const getPermalink = () => {
+        if (history?.type === 'instagram_saved') {
+            return history?.metadata?.mediaUrls[0];
+        } else {
+            return history?.metadata?.content_url;
+        }
+    };
     return (
         <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
             <Grid item xs={12} sm={4}>
                 <Card className={classes.root}>
-                    <CardHeader
-                        avatar={<Avatar className={classes.avatar}>{getPrettyAvatar()}</Avatar>}
-                        title={getPrettyUsername()}
-                        subheader={moment(history?.timestamp).fromNow()}
-                    />
-                    <CardMedia className={classes.media} image={getThumbnail()} />
-                    <CardContent>
-                        <Typography variant="body2" color="textSecondary" component="p">
-                            {getPrettyTitle()}
-                        </Typography>
-                    </CardContent>
+                    <CardActionArea target="_blank" href={getPermalink()}>
+                        <CardHeader
+                            avatar={<Avatar className={classes.avatar}>{getPrettyAvatar()}</Avatar>}
+                            title={getPrettyUsername()}
+                            subheader={moment(history?.timestamp).fromNow()}
+                        />
+                        <CardMedia className={classes.media} image={getThumbnail()} />
+                        <CardContent>
+                            <Typography variant="body2" color="textSecondary" component="p">
+                                {getPrettyTitle()}
+                            </Typography>
+                        </CardContent>
+                    </CardActionArea>
                 </Card>
             </Grid>
         </Grid>
