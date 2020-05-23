@@ -7,7 +7,8 @@ import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow: 1
+        flexGrow: 1,
+        paddingTop: "20px"
     }
 }));
 
@@ -47,14 +48,14 @@ const Settings = observer(() => {
                             </Typography>
                             <br />
                             <Typography variant="body1">
-                                <Typography>Name: {historianStore.user.name}</Typography>
-                                <Typography>ID: {historianStore.user.id}</Typography>
-                                <Typography>Username: {historianStore.user.username}</Typography>
-                                <Typography>History Count: {historianStore?.user?.history?.count}</Typography>
-                                <Typography>
+                                <>Name: {historianStore.user.name}</>
+                                <>ID: {historianStore.user.id}</>
+                                <>Username: {historianStore.user.username}</>
+                                <>History Count: {historianStore?.user?.history?.count}</>
+                                <>
                                     {'Reddit Last Saved: '}
                                     {moment(historianStore?.user?.metadata?.reddit_saved?.last_saved).fromNow()}
-                                </Typography>
+                                </>
                             </Typography>
                         </CardContent>
                     </Card>
