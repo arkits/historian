@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
         flex: '1',
         height: '100vh',
         display: 'flex',
-        paddingTop: theme.spacing(10),
+        paddingTop: theme.spacing(8),
         transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen
