@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     speedDial: {
         position: 'absolute',
         bottom: theme.spacing(2),
-        right: theme.spacing(2)
+        right: theme.spacing(3)
     },
     loadingIndicator: {
         position: 'absolute',
@@ -101,7 +101,10 @@ const Timeline = observer(() => {
 
     return (
         <div className={classes.root}>
-            <div className={classes.content} style={{ height: '100%', overflowX: 'scroll', paddingTop: '20px' }}>
+            <div
+                className={classes.content}
+                style={{ height: '100%',  overflowX: 'hidden', paddingTop: '20px' }}
+            >
                 <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <Grid item xs={12} sm={6}>
                         {histories.map((history, index) => (
