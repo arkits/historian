@@ -10,5 +10,13 @@
     "frontend": {
         "serve": false,
         "location": "../../frontend/build/"
+    },
+    "domain": {
+        "historyTypes": [
+            "instagram_saved",
+            "web_history",
+            "reddit_saved",
+            "lastfm_nowplaying"
+        ]
     }
 }

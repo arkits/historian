@@ -6,6 +6,9 @@ import { addHistoryDao, getHistoryDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
 import { validateInstagramHistory, validateRedditSavedHistory } from '../domain/HistoryDomain';
 import { User } from '../entity/User';
+import * as config from 'config';
+
+const validHistoryTypes = <string[]>config.get('domain.historyTypes');
 
 async function addToHistory(request: Request, response: Response) {
     // extract username
@@ -94,7 +97,7 @@ async function validateIncomingHistory(body, user: User) {
     }
 
     if (body.type) {
-        if (['instagram_saved', 'web_history', 'reddit_saved'].includes(body.type)) {
+        if (validHistoryTypes.includes(body.type)) {
             history.type = body.type;
         } else {
             throw new Error('Invalid type - ' + body.type);
@@ -149,7 +152,7 @@ async function getHistory(request: Request, response: Response) {
 
         // Validate type
         if (requestParams.hasOwnProperty('type')) {
-            if (['instagram_saved', 'web_history', 'reddit_saved'].includes(String(requestParams.type))) {
+            if (validHistoryTypes.includes(String(requestParams.type))) {
                 parsedParams['type'] = String(requestParams.type);
             } else {
                 throw new Error('Invalid type - ' + requestParams.type);
