@@ -43,9 +43,7 @@ export default function Register() {
 
     return (
         <div className={classes.root}>
-            <CssBaseline />
             <Container component="main" maxWidth="xs">
-                <CssBaseline />
                 <div className={classes.paper}>
                     <Typography component="h1" variant="h5">
                         Create a Historian Account

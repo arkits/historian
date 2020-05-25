@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, Link, Container, CssBaseline, Typography, TextField, Grid } from '@material-ui/core';
+import { Button, Link, Container, CssBaseline, Typography, TextField, Grid, Paper } from '@material-ui/core';
 import { Link as RouterLink, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import ShoutOuts from '../../components/ShoutOut';
@@ -99,9 +99,7 @@ const Login = observer(() => {
 
     return (
         <div className={classes.root}>
-            <CssBaseline />
             <Container component="main" maxWidth="xs">
-                <CssBaseline />
                 <div className={classes.paper}>
                     <Typography component="h1" variant="h5">
                         Sign In
@@ -122,7 +120,6 @@ const Login = observer(() => {
                             value={i_username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-
                         <TextField
                             variant="outlined"
                             margin="normal"
