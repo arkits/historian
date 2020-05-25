@@ -7,15 +7,25 @@ import RedditIcon from '@material-ui/icons/Reddit';
 import DescriptionIcon from '@material-ui/icons/Description';
 import MusicNoteRoundedIcon from '@material-ui/icons/MusicNoteRounded';
 import moment from 'moment';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
+import { useTheme } from '@material-ui/core/styles';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
 
 const useStyles = makeStyles((theme) => ({
     card: {
         display: 'flex'
     },
     contentPreview: {
-        width: '100%',
-        height: '100%',
-        maxHeight: '120px'
+        width: theme.spacing(18),
+        height: theme.spacing(18)
     },
     avatar: {
         backgroundColor: red[500],
@@ -23,8 +33,53 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box
+                    p={3}
+                    style={{
+                        borderStyle: 'hidden solid solid',
+                        borderRadius: '0px 0px 10px 10px',
+                        borderWidth: '1px'
+                    }}
+                >
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
 function TimelineCard(props) {
     const classes = useStyles();
+
+    const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const handleClickOpen = () => {
+        setInfoDialogOpen(true);
+    };
+
+    const handleClose = () => {
+        setInfoDialogOpen(false);
+    };
+
+    const [value, setValue] = React.useState(0);
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
 
     let history = props.history;
 
@@ -93,10 +148,10 @@ function TimelineCard(props) {
     return (
         <div>
             <Card className={classes.card}>
-                <CardActionArea target="_blank" href={getPermalink()}>
+                <CardActionArea>
                     <Grid container spacing={0}>
                         <Grid item xs={9}>
-                            <CardContent className={classes.content}>
+                            <CardContent className={classes.content} onClick={handleClickOpen}>
                                 <Typography variant="body1" color="textPrimary" component="p">
                                     {getPrettyTitle()}
                                 </Typography>
@@ -111,12 +166,61 @@ function TimelineCard(props) {
                                 />
                             </CardContent>
                         </Grid>
-                        <Grid align="right" item xs={3}>
+                        <Grid align="right" item xs={3} onClick={() => window.open(getPermalink(), '_blank')}>
                             <Avatar variant="square" className={classes.contentPreview} src={getThumbnail()}></Avatar>
                         </Grid>
                     </Grid>
                 </CardActionArea>
             </Card>
+
+            <Dialog
+                fullScreen={fullScreen}
+                open={infoDialogOpen}
+                onClose={handleClose}
+                aria-labelledby="responsive-dialog-title"
+                maxWidth={'md'}
+                fullWidth
+            >
+                <DialogTitle id="responsive-dialog-title">{getPrettyTitle()}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        <Tabs
+                            value={value}
+                            onChange={handleChange}
+                            indicatorColor="primary"
+                            textColor="primary"
+                            centered
+                            style={{
+                                backgroundColor: '#212121'
+                            }}
+                        >
+                            <Tab label="About" />
+                            <Tab label="Raw" />
+                        </Tabs>
+
+                        <TabPanel value={value} index={0}>
+                            <img src={getThumbnail()} />
+                        </TabPanel>
+                        <TabPanel value={value} index={1}>
+                            <pre
+                                style={{
+                                    fontFamily: 'monospace'
+                                }}
+                            >
+                                {JSON.stringify(history, null, 4)}
+                            </pre>
+                        </TabPanel>
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button autoFocus href={getPermalink()} target="_blank" color="primary">
+                        Permalink
+                    </Button>
+                    <Button onClick={handleClose} color="primary" autoFocus>
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <br />
         </div>
