@@ -6,7 +6,7 @@ import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import InfoRoundedIcon from '@material-ui/icons/InfoRounded';
 import SettingsRoundedIcon from '@material-ui/icons/SettingsRounded';
 import TimelineRoundedIcon from '@material-ui/icons/TimelineRounded';
-import SearchRoundedIcon from '@material-ui/icons/SearchRounded';
+import DashboardRoundedIcon from '@material-ui/icons/DashboardRounded';
 import IconButton from '@material-ui/core/IconButton';
 import PhotoLibraryRoundedIcon from '@material-ui/icons/PhotoLibraryRounded';
 import { Link as RouterLink } from 'react-router-dom';
@@ -71,23 +71,17 @@ export default function TemporaryDrawer() {
                                 </center>
                                 <Divider />
                                 <List>
+                                    <ListItem button component={RouterLink} to="/dashboard">
+                                        <ListItemIcon>
+                                            <DashboardRoundedIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary={'Dashboard'} />
+                                    </ListItem>
                                     <ListItem button component={RouterLink} to="/dashboard/timeline">
                                         <ListItemIcon>
                                             <TimelineRoundedIcon />
                                         </ListItemIcon>
                                         <ListItemText primary={'Timeline'} />
-                                    </ListItem>
-                                    <ListItem button component={RouterLink} to="/dashboard/search">
-                                        <ListItemIcon>
-                                            <SearchRoundedIcon />
-                                        </ListItemIcon>
-                                        <ListItemText primary={'Search'} />
-                                    </ListItem>
-                                    <ListItem button component={RouterLink} to="/dashboard/gallery">
-                                        <ListItemIcon>
-                                            <PhotoLibraryRoundedIcon />
-                                        </ListItemIcon>
-                                        <ListItemText primary={'Gallery'} />
                                     </ListItem>
                                 </List>
                                 <Divider />

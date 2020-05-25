@@ -10,12 +10,8 @@ import Timeline from './timeline/Timeline';
 import About from './about/About';
 import axiosInstance from '../../utils/axios';
 import Drawer from './Drawer';
-import Gallery from './gallery/Gallery';
 import Settings from './settings/Settings';
-
-function Search() {
-    return <h2>Search</h2>;
-}
+import Landing from './landing/Landing';
 
 const Dashboard = observer(() => {
     const classes = useStyles();
@@ -33,7 +29,7 @@ const Dashboard = observer(() => {
 
     const displayUsername = () => {
         if (historianStore?.user?.username) {
-            return historianStore?.user?.name + ' | ' + historianStore?.user?.history?.count + ' saved';
+            return historianStore?.user?.name + ' | ' + historianStore?.user?.stats?.total_count + ' saved';
         } else {
             axiosInstance({
                 method: 'get',
@@ -83,23 +79,17 @@ const Dashboard = observer(() => {
                 <main className={classes.content}>
                     <div className={classes.mainContent}>
                         <Switch>
-                            <Route path="/dashboard/search">
-                                <Search />
-                            </Route>
                             <Route path="/dashboard/about">
                                 <About />
                             </Route>
                             <Route path="/dashboard/settings">
                                 <Settings />
                             </Route>
-                            <Route path="/dashboard/gallery">
-                                <Gallery />
-                            </Route>
                             <Route path="/dashboard/timeline">
                                 <Timeline />
                             </Route>
                             <Route path="/dashboard">
-                                <Timeline />
+                                <Landing />
                             </Route>
                         </Switch>
                     </div>
