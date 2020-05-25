@@ -3,9 +3,11 @@ import { User } from '../entity/User';
 import * as bcrypt from 'bcrypt';
 import * as config from 'config';
 import { saveUser, modifyUser, getUserByUsername, deleteUserByUsername } from '../dao/UserDao';
-import { getHistoryCountDao } from '../dao/HistoryDao';
+import { getHistoryDao, getHistoryCountDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
 import { decodeAuthHeader } from '../utils';
+
+const validHistoryTypes = <string[]>config.get('domain.historyTypes');
 
 async function registerUser(request: Request, response: Response) {
     let body = request.body;
@@ -161,17 +163,51 @@ async function getUser(request: Request, response: Response) {
     let [username, _] = decodeAuthHeader(request.headers.authorization);
 
     let user = await getUserByUsername(username);
-    let historyCount = await getHistoryCountDao(user);
+
+    let totalHistoryCount = await getHistoryCountDao({
+        savedBy: user.id
+    });
 
     let toReturn = {
         id: user.id,
         name: user.name,
         username: user.username,
         metadata: user.metadata,
-        history: {
-            count: historyCount
+        stats: {
+            total_count: totalHistoryCount
         }
     };
+
+    for (let historyType of validHistoryTypes) {
+        let typeStats = {};
+
+        let typeCount = await getHistoryCountDao({
+            savedBy: user.id,
+            type: historyType
+        });
+
+        typeStats['count'] = typeCount;
+
+        let lastPost = await getHistoryDao(
+            {
+                savedBy: user.id,
+                type: historyType
+            },
+            0,
+            1,
+            {
+                timestamp: 'DESC'
+            }
+        );
+
+        if(lastPost.length > 0){
+            typeStats['latest'] = lastPost[0].timestamp;
+        } else {
+            typeStats['latest'] = null;
+        }
+
+        toReturn['stats'][historyType] = typeStats;
+    }
 
     response.status(200);
     response.json(toReturn);

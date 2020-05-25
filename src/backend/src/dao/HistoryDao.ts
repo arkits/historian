@@ -18,12 +18,10 @@ async function getHistoryDao(where: object, offset: number, limit: number, order
     return history;
 }
 
-async function getHistoryCountDao(user) {
+async function getHistoryCountDao(where) {
     let historyRepository = getRepository(History);
     let daoResponse = await historyRepository.count({
-        where: {
-            savedBy: user.id
-        }
+        where: where
     });
     return daoResponse;
 }
