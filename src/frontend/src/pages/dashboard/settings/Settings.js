@@ -8,7 +8,7 @@ import moment from 'moment';
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
-        paddingTop: "20px"
+        paddingTop: '20px'
     }
 }));
 
@@ -16,10 +16,6 @@ const Settings = observer(() => {
     const classes = useStyles();
 
     const historianStore = useContext(HistorianStoreContext);
-
-    const [userMetadata, setUserMetadata] = useState({});
-
-    useEffect(() => {});
 
     return (
         <div className={classes.root}>
@@ -48,14 +44,18 @@ const Settings = observer(() => {
                             </Typography>
                             <br />
                             <Typography variant="body1">
-                                <>Name: {historianStore.user.name}</>
-                                <>ID: {historianStore.user.id}</>
-                                <>Username: {historianStore.user.username}</>
-                                <>History Count: {historianStore?.user?.history?.count}</>
-                                <>
-                                    {'Reddit Last Saved: '}
-                                    {moment(historianStore?.user?.metadata?.reddit_saved?.last_saved).fromNow()}
-                                </>
+                                <b>Name: </b> {historianStore.user.name} <br />
+                                <b>User ID: </b>
+                                {historianStore.user.id}
+                                <br />
+                                <b>Username: </b>
+                                {historianStore.user.username}
+                                <br /> <br />
+                                <b>History Count: </b>
+                                {historianStore?.user?.history?.count}
+                                <br />
+                                <b>{'Reddit Last Saved: '}</b>
+                                {moment(historianStore?.user?.metadata?.reddit_saved?.last_saved).fromNow()}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -65,7 +65,7 @@ const Settings = observer(() => {
                     <Card>
                         <CardContent>
                             <Typography variant="h4" style={{ fontFamily: 'Fondamento' }}>
-                                Debug
+                                Debug Store
                             </Typography>
                             <br />
                             <pre
