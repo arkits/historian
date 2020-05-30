@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Link, Container, CssBaseline, Typography, TextField, Grid } from '@material-ui/core';
+import { Button, Link, Container, Typography, TextField, Grid } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import ShoutOuts from '../../components/ShoutOut';

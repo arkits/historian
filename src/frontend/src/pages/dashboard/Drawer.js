@@ -8,7 +8,6 @@ import SettingsRoundedIcon from '@material-ui/icons/SettingsRounded';
 import TimelineRoundedIcon from '@material-ui/icons/TimelineRounded';
 import DashboardRoundedIcon from '@material-ui/icons/DashboardRounded';
 import IconButton from '@material-ui/core/IconButton';
-import PhotoLibraryRoundedIcon from '@material-ui/icons/PhotoLibraryRounded';
 import { Link as RouterLink } from 'react-router-dom';
 import { useLocalStorage } from '../../store/LocalStorage';
 

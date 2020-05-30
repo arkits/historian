@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Home() {
     const classes = useStyles();
 
-    const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
+    const [historianUserCreds] = useLocalStorage('historianUserCreds');
 
     if (historianUserCreds?.username && historianUserCreds?.password) {
         return <Redirect to="/dashboard" />;

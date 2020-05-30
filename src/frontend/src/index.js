@@ -5,6 +5,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
 import theme from './utils/theme';
 import * as serviceWorker from './serviceWorker';
+import 'mobx-react-lite/batchingForReactDom';
 
 import './index.css';
 

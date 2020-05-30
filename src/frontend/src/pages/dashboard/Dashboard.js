@@ -20,7 +20,7 @@ const Dashboard = observer(() => {
 
     const historianStore = useContext(HistorianStoreContext);
 
-    const [historianUserCreds, setHistorianUserCreds] = useLocalStorage('historianUserCreds');
+    const [historianUserCreds] = useLocalStorage('historianUserCreds');
 
     // not accessible without creds being set
     if (!historianUserCreds?.username && !historianUserCreds?.password) {

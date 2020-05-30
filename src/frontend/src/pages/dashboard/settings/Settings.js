@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Typography, Card, CardContent, Grid } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react';

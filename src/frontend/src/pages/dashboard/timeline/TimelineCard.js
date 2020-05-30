@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Card, CardContent, Grid, CardHeader, Avatar, ButtonBase, CardActionArea } from '@material-ui/core';
+import { Typography, Card, CardContent, Grid, CardHeader, Avatar, CardActionArea } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
 import InstagramIcon from '@material-ui/icons/Instagram';
@@ -199,7 +199,7 @@ function TimelineCard(props) {
                         </Tabs>
 
                         <TabPanel value={value} index={0}>
-                            <img src={getThumbnail()} />
+                            <img src={getThumbnail()} alt={getPrettyTitle()} />
                         </TabPanel>
                         <TabPanel value={value} index={1}>
                             <pre
