@@ -19,7 +19,7 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "react-virtualized": "^9.21.2"
+    "react-waypoint": "^9.0.2"
   },
   "scripts": {
     "start": "NODE_ENV=prod react-scripts start",

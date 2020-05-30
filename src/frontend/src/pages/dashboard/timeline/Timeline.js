@@ -3,13 +3,14 @@ import { observer } from 'mobx-react';
 import axiosInstance from '../../../utils/axios';
 import { useLocalStorage } from '../../../store/LocalStorage';
 import TimelineCard from './TimelineCard';
-import { Grid, CircularProgress, InputLabel, MenuItem, FormHelperText, FormControl, Select } from '@material-ui/core';
+import { Grid, CircularProgress, InputLabel, MenuItem, FormControl, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import FilterListIcon from '@material-ui/icons/FilterList';
+import { Waypoint } from 'react-waypoint';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -63,14 +64,13 @@ const Timeline = observer(() => {
     // States
     const [histories, setHistories] = useState([]);
     const [offset, setOffset] = useState(0);
-    const [speedDialOpen, setSpeedDialOpen] = React.useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [historyType, setHistoryType] = useState('all');
     const [clearSavedHistories, setClearSavedHistories] = useState(false);
 
     // Loads more rows and appends them to histories
     const loadMoreRows = () => {
-        // console.log('Loading...', historyType, clearSavedHistories, offset);
+        console.log('Loading...', historyType, clearSavedHistories, offset);
         let url = `/history?offset=${offset}&limit=${limit}`;
         if (historyType !== 'all') {
             url = `/history?offset=${offset}&limit=${limit}&type=${historyType}`;
@@ -105,17 +105,8 @@ const Timeline = observer(() => {
         loadMoreRows();
     }, [historyType]);
 
-    const handleSpeedDialClose = () => {
-        setSpeedDialOpen(false);
-    };
-
-    const handleSpeedDialOpen = () => {
-        setSpeedDialOpen(true);
-    };
-
     const handleSpeedDialLoadMore = () => {
         loadMoreRows();
-        setSpeedDialOpen(false);
     };
 
     const handleHistoryTypeChange = (event) => {
@@ -145,31 +136,22 @@ const Timeline = observer(() => {
                         {histories.map((history, index) => (
                             <TimelineCard history={history} key={index} />
                         ))}
+                        <div>
+                            <Waypoint
+                                onEnter={() => {
+                                    loadMoreRows();
+                                }}
+                            />
+                        </div>
                     </Grid>
                 </Grid>
             </div>
             <SpeedDial
-                ariaLabel="SpeedDial example"
+                ariaLabel="Load More"
                 className={classes.speedDial}
-                icon={<EditIcon />}
-                onClose={handleSpeedDialClose}
-                onOpen={handleSpeedDialOpen}
-                open={speedDialOpen}
-                direction={'up'}
-            >
-                <SpeedDialAction
-                    icon={<AddIcon />}
-                    tooltipTitle={'Load More'}
-                    onClick={handleSpeedDialLoadMore}
-                    tooltipOpen
-                />
-                <SpeedDialAction
-                    icon={<FilterListIcon />}
-                    tooltipTitle={'Filter'}
-                    onClick={handleSpeedDialClose}
-                    tooltipOpen
-                />
-            </SpeedDial>
+                icon={<AddIcon />}
+                onClick={handleSpeedDialLoadMore}
+            ></SpeedDial>
             <div className={classes.loadingIndicator}>
                 <RenderIsLoading isLoading={isLoading} />
             </div>
