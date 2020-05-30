@@ -3,14 +3,13 @@ import { observer } from 'mobx-react';
 import axiosInstance from '../../../utils/axios';
 import { useLocalStorage } from '../../../store/LocalStorage';
 import TimelineCard from './TimelineCard';
-import { Grid } from '@material-ui/core';
+import { Grid, CircularProgress, InputLabel, MenuItem, FormHelperText, FormControl, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -27,6 +26,13 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         bottom: theme.spacing(2),
         left: theme.spacing(2)
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120
+    },
+    selectEmpty: {
+        marginTop: theme.spacing(2)
     }
 }));
 
@@ -59,20 +65,33 @@ const Timeline = observer(() => {
     const [offset, setOffset] = useState(0);
     const [speedDialOpen, setSpeedDialOpen] = React.useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [historyType, setHistoryType] = useState('all');
+    const [clearSavedHistories, setClearSavedHistories] = useState(false);
 
     // Loads more rows and appends them to histories
     const loadMoreRows = () => {
+        // console.log('Loading...', historyType, clearSavedHistories, offset);
+        let url = `/history?offset=${offset}&limit=${limit}`;
+        if (historyType !== 'all') {
+            url = `/history?offset=${offset}&limit=${limit}&type=${historyType}`;
+        }
         setIsLoading(true);
         axiosInstance({
             method: 'get',
-            url: `/history?offset=${offset}&limit=${limit}`,
+            url: url,
             headers: {
                 Authorization: 'Basic ' + btoa(historianUserCreds.username + ':' + historianUserCreds.password)
             }
         })
             .then(function (response) {
                 setIsLoading(false);
-                setHistories([...histories].concat(response.data));
+                if (clearSavedHistories) {
+                    setHistories([]);
+                    setClearSavedHistories(false);
+                    setHistories(response.data);
+                } else {
+                    setHistories([...histories].concat(response.data));
+                }
                 setOffset(offset + limit);
             })
             .catch(function (error) {
@@ -84,7 +103,7 @@ const Timeline = observer(() => {
     // Load rows on page load
     useEffect(() => {
         loadMoreRows();
-    }, []);
+    }, [historyType]);
 
     const handleSpeedDialClose = () => {
         setSpeedDialOpen(false);
@@ -99,12 +118,28 @@ const Timeline = observer(() => {
         setSpeedDialOpen(false);
     };
 
+    const handleHistoryTypeChange = (event) => {
+        setHistoryType(event.target.value);
+        setClearSavedHistories(true);
+        setOffset(0);
+    };
+
     return (
         <div className={classes.root}>
-            <div
-                className={classes.content}
-                style={{ height: '100%',  overflowX: 'hidden', paddingTop: '20px' }}
-            >
+            <div className={classes.content} style={{ height: '100%', overflowX: 'hidden', paddingTop: '20px' }}>
+                <Grid container style={{ justifyContent: 'center', marginBottom: '20px' }}>
+                    <Grid item xs={12} sm={6}>
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <InputLabel>History Type</InputLabel>
+                            <Select value={historyType} onChange={handleHistoryTypeChange} label="History Type">
+                                <MenuItem value={'all'}>All</MenuItem>
+                                <MenuItem value={'instagram_saved'}>Instagram: Saved</MenuItem>
+                                <MenuItem value={'lastfm_nowplaying'}>LastFM: Now Playing</MenuItem>
+                                <MenuItem value={'reddit_saved'}>Reddit: Saved</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                </Grid>
                 <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <Grid item xs={12} sm={6}>
                         {histories.map((history, index) => (
