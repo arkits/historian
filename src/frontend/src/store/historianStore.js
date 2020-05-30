@@ -3,10 +3,12 @@ import { createContext } from 'react';
 
 class HistorianStore {
     user = {};
+    landingPosts = {};
 }
 
 decorate(HistorianStore, {
-    user: observable
+    user: observable,
+    landingPosts: observable
 });
 
 export const HistorianStoreContext = createContext(new HistorianStore());
