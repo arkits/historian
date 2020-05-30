@@ -6,10 +6,7 @@ import TimelineCard from './TimelineCard';
 import { Grid, CircularProgress, InputLabel, MenuItem, FormControl, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import SpeedDial from '@material-ui/lab/SpeedDial';
-import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 import AddIcon from '@material-ui/icons/Add';
-import EditIcon from '@material-ui/icons/Edit';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import { Waypoint } from 'react-waypoint';
 
 const useStyles = makeStyles((theme) => ({
