@@ -1,6 +1,7 @@
 import { History } from '../entity/History';
 import { getRepository } from 'typeorm';
 import { logger } from '../domain/Logger';
+import { User } from '../entity/User';
 
 async function addHistoryDao(history) {
     let historyRepository = getRepository(History);
@@ -26,7 +27,7 @@ async function getHistoryCountDao(where) {
     return daoResponse;
 }
 
-async function deleteUserHistoryDao(user) {
+async function deleteUserHistoryDao(user: User) {
     let historyRepository = getRepository(History);
     let result = await historyRepository.delete({
         savedBy: user
@@ -40,4 +41,33 @@ async function getHistoryWithPkDao(historyPk) {
     return query;
 }
 
-export { addHistoryDao, getHistoryDao, deleteUserHistoryDao, getHistoryWithPkDao, getHistoryCountDao };
+async function getRandomHistoryDao(user: User, limit: number, type: string) {
+    let result = [];
+
+    if (type == null) {
+        result = await getRepository(History)
+            .createQueryBuilder('history')
+            .where('history.savedBy = :user', { user: user.id })
+            .orderBy('RANDOM()')
+            .limit(limit)
+            .getMany();
+    } else {
+        result = await getRepository(History)
+            .createQueryBuilder('history')
+            .where('history.savedBy = :user and history.type = :type', { user: user.id, type: type })
+            .orderBy('RANDOM()')
+            .limit(limit)
+            .getMany();
+    }
+
+    return result;
+}
+
+export {
+    addHistoryDao,
+    getHistoryDao,
+    deleteUserHistoryDao,
+    getHistoryWithPkDao,
+    getHistoryCountDao,
+    getRandomHistoryDao
+};

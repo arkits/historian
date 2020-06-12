@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { History } from '../entity/History';
 import { decodeAuthHeader } from '../utils';
 import { getUserByUsername } from '../dao/UserDao';
-import { addHistoryDao, getHistoryDao } from '../dao/HistoryDao';
+import { addHistoryDao, getHistoryDao, getRandomHistoryDao } from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
 import { validateInstagramHistory, validateRedditSavedHistory } from '../domain/HistoryDomain';
 import { User } from '../entity/User';
@@ -214,4 +214,68 @@ async function getHistory(request: Request, response: Response) {
     }
 }
 
-export { addToHistory, getHistory };
+async function getRandomHistory(request: Request, response: Response) {
+    try {
+        // get the username
+        let [username, _] = decodeAuthHeader(request.headers.authorization);
+
+        let parsedParams = {};
+
+        // get the requestParams
+        let requestParams = request.query;
+        logger.info('[get-history-random] Request from username=%s requestParams=%s', username, requestParams);
+
+        try {
+            // Validate limit
+            if (requestParams.hasOwnProperty('limit')) {
+                if (1 < Number(requestParams.limit) && Number(requestParams.limit) < 100) {
+                    parsedParams['limit'] = Number(requestParams.limit);
+                } else {
+                    throw new Error('Limit can only be between 0 and 100.');
+                }
+            } else {
+                parsedParams['limit'] = 10;
+            }
+
+            // Validate type
+            if (requestParams.hasOwnProperty('type')) {
+                if (validHistoryTypes.includes(String(requestParams.type))) {
+                    parsedParams['type'] = String(requestParams.type);
+                } else {
+                    throw new Error('Invalid type - ' + requestParams.type);
+                }
+            } else {
+                parsedParams['type'] = null;
+            }
+        } catch (error) {
+            logger.error('[get-history-random] Parsing threw an error - ', error);
+            response.status(400);
+            response.json({
+                error: 'Bad Request!',
+                error_description: error.message
+            });
+            return;
+        }
+
+        // retrieve the user object
+        let user = await getUserByUsername(username);
+
+        // retrieve random histories
+        let histories = await getRandomHistoryDao(user, parsedParams['limit'], parsedParams['type']);
+
+        // finish the request
+        response.status(200);
+        response.json(histories);
+        return;
+    } catch (error) {
+        logger.error('[get-history-random] Caught Error - ', error);
+        response.status(400);
+        response.json({
+            error: 'Bad Request!',
+            error_description: 'Bad Request!'
+        });
+        return;
+    }
+}
+
+export { addToHistory, getHistory, getRandomHistory };
