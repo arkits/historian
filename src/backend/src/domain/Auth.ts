@@ -30,4 +30,16 @@ const authenticateUser = async (request: Request, response: Response, next: Next
     }
 };
 
-export { authenticateUser };
+const checkCreds = async (reqUsername, reqPassword, validUsername, validPassword) => {
+    let result = false;
+
+    // check if username is valid
+    if (reqUsername === validUsername) {
+        // check if password is valid
+        result = await bcrypt.compare(reqPassword, validPassword);
+    }
+
+    return result;
+};
+
+export { authenticateUser, checkCreds };

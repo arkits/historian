@@ -2,17 +2,21 @@ import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { router } from './routes';
-import { logger } from './domain/Logger';
 import * as config from 'config';
 import * as path from 'path';
 import * as cors from 'cors';
+
+import { router } from './routes';
+import { logger } from './domain/Logger';
+import { historianMetricsMiddleware } from './domain/Metrics';
 
 // create express app
 var app = express();
 
 // add those middlewares
 app.use(bodyParser.json());
+
+app.use(historianMetricsMiddleware);
 
 // serve frontend via backend
 if (config.get('frontend.serve')) {

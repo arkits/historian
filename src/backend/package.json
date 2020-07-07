@@ -31,6 +31,8 @@
       "config": "^3.3.1",
       "cors": "^2.8.5",
       "express": "^4.17.1",
+      "express-prometheus-middleware": "^0.9.6",
+      "prom-client": "^10.0.0",
       "pg": "^8.0.3",
       "reflect-metadata": "^0.1.10",
       "typeorm": "0.2.24"
