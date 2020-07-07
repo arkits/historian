@@ -16,13 +16,13 @@ function createRecentTrackStream() {
         logger.info('New nowPlaying Track - trackName=%s | artist=%s', track.name, track.artist['#text']);
         let history = historianDomain.parseTrackToHistory(track);
 
-        await historianDomain.postToHistorian(
+        historianDomain.postToHistorian(
             history,
             config.get('historian.creds.username'),
             config.get('historian.creds.password')
         );
 
-        await historianDomain.postToHistorian(
+        historianDomain.postToHistorian(
             history,
             config.get('historian.debugCreds.username'),
             config.get('historian.debugCreds.password')
