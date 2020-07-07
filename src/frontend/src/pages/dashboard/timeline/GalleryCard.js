@@ -101,24 +101,28 @@ function GalleryCard(props) {
     };
     return (
         <div>
-            <Card className={classes.root}>
-                <CardActionArea>
-                    <CardHeader
-                        avatar={<Avatar className={classes.avatar}>{getPrettyAvatar()}</Avatar>}
-                        title={HistoryParser.getPrettyUsername(history)}
-                        subheader={moment(history?.timestamp).fromNow()}
-                        onClick={handleDialogOpen}
-                    />
-                    <a href={HistoryParser.getPermalink(history)}>
-                        <CardMedia className={classes.media} image={HistoryParser.getThumbnail(history)} />
-                    </a>
-                    <CardContent onClick={handleDialogOpen}>
-                        <Typography variant="body2" color="textSecondary" component="p">
-                            {HistoryParser.getPrettyTitle(history)}
-                        </Typography>
-                    </CardContent>
-                </CardActionArea>
-            </Card>
+            <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Grid item xs={8}>
+                    <Card className={classes.root}>
+                        <CardActionArea>
+                            <CardHeader
+                                avatar={<Avatar className={classes.avatar}>{getPrettyAvatar()}</Avatar>}
+                                title={HistoryParser.getPrettyUsername(history)}
+                                subheader={moment(history?.timestamp).fromNow()}
+                                onClick={handleDialogOpen}
+                            />
+                            <a href={HistoryParser.getPermalink(history)}>
+                                <CardMedia className={classes.media} image={HistoryParser.getThumbnail(history)} />
+                            </a>
+                            <CardContent onClick={handleDialogOpen}>
+                                <Typography variant="body2" color="textSecondary" component="p">
+                                    {HistoryParser.getPrettyTitle(history)}
+                                </Typography>
+                            </CardContent>
+                        </CardActionArea>
+                    </Card>
+                </Grid>
+            </Grid>
 
             <TimelineCardDialog history={history} handleDialogClose={handleDialogClose} open={infoDialogOpen} />
 
