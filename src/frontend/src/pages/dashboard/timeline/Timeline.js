@@ -1,13 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import axiosInstance from '../../../utils/axios';
-import { useLocalStorage } from '../../../store/LocalStorage';
-import TimelineCard from './TimelineCard';
-import { Grid, CircularProgress, InputLabel, MenuItem, FormControl, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { Waypoint } from 'react-waypoint';
+
+import axiosInstance from '../../../utils/axios';
+
+import { useLocalStorage } from '../../../store/LocalStorage';
+
+import {
+    Grid,
+    CircularProgress,
+    InputLabel,
+    MenuItem,
+    FormControl,
+    Select,
+    Button,
+    TextField
+} from '@material-ui/core';
+
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import AddIcon from '@material-ui/icons/Add';
-import { Waypoint } from 'react-waypoint';
+import CasinoIcon from '@material-ui/icons/Casino';
+
+import TimelineCard from './TimelineCard';
 import GalleryCard from './GalleryCard';
 
 const useStyles = makeStyles((theme) => ({
@@ -99,6 +114,31 @@ const Timeline = observer(() => {
             });
     };
 
+    const loadRandomHistory = () => {
+        console.log('Loading Random...', historyType, offset);
+        let url = `/history/random?limit=${limit}`;
+        if (historyType !== 'all') {
+            url = `/history/random?limit=${limit}&type=${historyType}`;
+        }
+        setIsLoading(true);
+        axiosInstance({
+            method: 'get',
+            url: url,
+            headers: {
+                Authorization: 'Basic ' + btoa(historianUserCreds.username + ':' + historianUserCreds.password)
+            }
+        })
+            .then(function (response) {
+                setIsLoading(false);
+                setHistories([]);
+                setHistories(response.data);
+            })
+            .catch(function (error) {
+                setIsLoading(false);
+                console.log(error);
+            });
+    };
+
     // Load rows on page load
     useEffect(() => {
         loadMoreRows();
@@ -138,22 +178,42 @@ const Timeline = observer(() => {
             <div className={classes.content} style={{ height: '100%', overflowX: 'hidden', paddingTop: '20px' }}>
                 <Grid container style={{ justifyContent: 'center', marginBottom: '20px' }}>
                     <Grid item xs={12} sm={6}>
-                        <FormControl variant="outlined" className={classes.formControl}>
-                            <InputLabel>History Type</InputLabel>
-                            <Select value={historyType} onChange={handleHistoryTypeChange} label="History Type">
-                                <MenuItem value={'all'}>All</MenuItem>
-                                <MenuItem value={'instagram_saved'}>Instagram: Saved</MenuItem>
-                                <MenuItem value={'lastfm_nowplaying'}>LastFM: Now Playing</MenuItem>
-                                <MenuItem value={'reddit_saved'}>Reddit: Saved</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl variant="outlined" className={classes.formControl}>
-                            <InputLabel>Card Type</InputLabel>
-                            <Select value={cardType} onChange={handleCardTypeChange} label="Card Type">
-                                <MenuItem value={'compact'}>Compact</MenuItem>
-                                <MenuItem value={'gallery'}>Gallery</MenuItem>
-                            </Select>
-                        </FormControl>
+                        <TextField id="search-histories" label="Search Histories..." variant="outlined" fullWidth />
+                        <br /> <br />
+                        <div style={{ display: 'flex' }}>
+                            <div style={{ flex: '1' }}>
+                                {' '}
+                                <Button
+                                    size="large"
+                                    variant="outlined"
+                                    color="primary"
+                                    style={{ marginTop: '15px' }}
+                                    startIcon={<CasinoIcon />}
+                                    onClick={loadRandomHistory}
+                                >
+                                    Randomize!
+                                </Button>
+                            </div>
+
+                            <div>
+                                <FormControl variant="outlined" className={classes.formControl}>
+                                    <InputLabel>History Type</InputLabel>
+                                    <Select value={historyType} onChange={handleHistoryTypeChange} label="History Type">
+                                        <MenuItem value={'all'}>All</MenuItem>
+                                        <MenuItem value={'instagram_saved'}>Instagram: Saved</MenuItem>
+                                        <MenuItem value={'lastfm_nowplaying'}>LastFM: Now Playing</MenuItem>
+                                        <MenuItem value={'reddit_saved'}>Reddit: Saved</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <FormControl variant="outlined" className={classes.formControl}>
+                                    <InputLabel>Card Type</InputLabel>
+                                    <Select value={cardType} onChange={handleCardTypeChange} label="Card Type">
+                                        <MenuItem value={'compact'}>Compact</MenuItem>
+                                        <MenuItem value={'gallery'}>Gallery</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+                        </div>
                     </Grid>
                 </Grid>
                 <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
