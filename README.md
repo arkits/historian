@@ -28,6 +28,8 @@ Historian's Frontend is made in -
 -   Node.js
 -   React.js
 
+<img src="docs/images/timeline.png"></img>
+
 Learn more - [src/frontend](src/frontend)
 
 ### Agents

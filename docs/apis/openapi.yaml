@@ -1,0 +1,71 @@
+openapi: 3.0.0
+
+info:
+    title: Historian Client API Specification
+    description: Historian Client API Specification
+    version: 0.0.1
+
+servers:
+    - url: https://archit.xyz/historian/
+      description: Production Historian API instance
+
+tags:
+    - name: History
+
+paths:
+    '/api/history/add':
+        post:
+            tags:
+                - History
+            summary: Persist History
+            description: Submit a list of Histories to be Persisted
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/History'
+                description: Operation to Persist
+                required: true
+            responses:
+                '200':
+                    description: History Submission Response
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: 'Added History!'
+                                    result:
+                                        type: object
+                                        properties:
+                                            length:
+                                                type: number
+                                                example: 1
+                                                description: 'Number of Histories that were persisted'
+                                    saved:
+                                        type: array
+                                        items:
+                                            type: string
+                                            format: uuid
+                                            description: 'An Array of History IDs that were persisted'
+                                    failed:
+                                        type: array
+                                        description: 'An Array of History IDs that were NOT persisted'
+                                        items:
+                                            $ref: '#/components/schemas/History'
+
+components:
+    schemas:
+        History:
+            type: object
+            properties:
+                type:
+                    type: string
+                    enum:
+                        - 'instagram_saved'
+                raw:
+                    type: object
