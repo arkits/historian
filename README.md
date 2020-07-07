@@ -44,6 +44,10 @@ Learn more - [src/agents/reddit](src/agents/reddit)
 
 Learn more - [src/agents/instagram](src/agents/instagram)
 
+#### Last.fm Scrobbles
+
+Learn more - [src/agents/lastfm](src/agents/lastfm)
+
 #### Make your own Agent!
 
 You can make your own Agent with Historian's REST API. Refer to Swagger spec - [docs/historian-swagger.yml](docs/historian-swagger.yml)
