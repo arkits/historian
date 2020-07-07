@@ -21,17 +21,14 @@ function parseTrackToHistory(track) {
 /**
  * Post Track to Historian
  */
-async function postToHistorian(body) {
+async function postToHistorian(body, username, password) {
     try {
         let updateResponse = await axios.post(
             config.get('historian.url') + config.get('historian.endpoints.addHistory'),
             body,
             {
                 headers: {
-                    Authorization: createBasicAuthHeader(
-                        config.get('historian.creds.username'),
-                        config.get('historian.creds.password')
-                    )
+                    Authorization: createBasicAuthHeader(username, password)
                 }
             }
         );

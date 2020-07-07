@@ -8,6 +8,10 @@
         "creds": {
             "username": "arkits",
             "password": "hunter2"
+        },
+        "debugCreds": {
+            "username": "demo",
+            "password": "aTWK%Fw^$$88"
         }
     },
     "lastfm": {
