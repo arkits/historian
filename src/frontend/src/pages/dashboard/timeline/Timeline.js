@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import AddIcon from '@material-ui/icons/Add';
 import { Waypoint } from 'react-waypoint';
+import GalleryCard from './GalleryCard';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -64,6 +65,7 @@ const Timeline = observer(() => {
     const [isLoading, setIsLoading] = useState(false);
     const [historyType, setHistoryType] = useState('all');
     const [clearSavedHistories, setClearSavedHistories] = useState(false);
+    const [cardType, setCardType] = useState('compact');
 
     // Loads more rows and appends them to histories
     const loadMoreRows = () => {
@@ -112,6 +114,25 @@ const Timeline = observer(() => {
         setOffset(0);
     };
 
+    const handleCardTypeChange = (event) => {
+        setCardType(event.target.value);
+        RenderCardContent();
+    };
+
+    const RenderCardContent = () => {
+        let elements = [];
+
+        histories.map((history, index) => {
+            if (cardType === 'compact') {
+                elements.push(<TimelineCard history={history} key={index} />);
+            } else {
+                elements.push(<GalleryCard history={history} key={index} />);
+            }
+        });
+
+        return elements;
+    };
+
     return (
         <div className={classes.root}>
             <div className={classes.content} style={{ height: '100%', overflowX: 'hidden', paddingTop: '20px' }}>
@@ -126,13 +147,18 @@ const Timeline = observer(() => {
                                 <MenuItem value={'reddit_saved'}>Reddit: Saved</MenuItem>
                             </Select>
                         </FormControl>
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <InputLabel>Card Type</InputLabel>
+                            <Select value={cardType} onChange={handleCardTypeChange} label="Card Type">
+                                <MenuItem value={'compact'}>Compact</MenuItem>
+                                <MenuItem value={'gallery'}>Gallery</MenuItem>
+                            </Select>
+                        </FormControl>
                     </Grid>
                 </Grid>
                 <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <Grid item xs={12} sm={6}>
-                        {histories.map((history, index) => (
-                            <TimelineCard history={history} key={index} />
-                        ))}
+                        <RenderCardContent />
                         <div>
                             <Waypoint
                                 onEnter={() => {
@@ -148,6 +174,7 @@ const Timeline = observer(() => {
                 className={classes.speedDial}
                 icon={<AddIcon />}
                 onClick={handleSpeedDialLoadMore}
+                open={false}
             ></SpeedDial>
             <div className={classes.loadingIndicator}>
                 <RenderIsLoading isLoading={isLoading} />
