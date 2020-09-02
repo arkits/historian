@@ -52,7 +52,7 @@ const Settings = observer(() => {
                                 {historianStore.user.username}
                                 <br /> <br />
                                 <b>History Count: </b>
-                                {historianStore?.user?.history?.count}
+                                {historianStore?.user?.stats?.total_count}
                                 <br />
                                 <b>{'Reddit Last Saved: '}</b>
                                 {moment(historianStore?.user?.metadata?.reddit_saved?.last_saved).fromNow()}
@@ -61,22 +61,6 @@ const Settings = observer(() => {
                     </Card>
 
                     <br />
-
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h4" style={{ fontFamily: 'Fondamento' }}>
-                                Debug Store
-                            </Typography>
-                            <br />
-                            <pre
-                                style={{
-                                    fontFamily: 'monospace'
-                                }}
-                            >
-                                {JSON.stringify(historianStore, null, 2)}
-                            </pre>
-                        </CardContent>
-                    </Card>
                 </Grid>
             </Grid>
         </div>

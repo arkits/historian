@@ -102,7 +102,7 @@ function GalleryCard(props) {
     return (
         <div>
             <Grid container style={{ alignItems: 'center', justifyContent: 'center' }}>
-                <Grid item xs={8}>
+                <Grid item xs={12} sm={8}>
                     <Card className={classes.root}>
                         <CardActionArea>
                             <CardHeader

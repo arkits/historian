@@ -203,6 +203,7 @@ const Timeline = observer(() => {
                                         <MenuItem value={'instagram_saved'}>Instagram: Saved</MenuItem>
                                         <MenuItem value={'lastfm_nowplaying'}>LastFM: Now Playing</MenuItem>
                                         <MenuItem value={'reddit_saved'}>Reddit: Saved</MenuItem>
+                                        <MenuItem value={'web_history'}>Web Browsing History</MenuItem>
                                     </Select>
                                 </FormControl>
                                 <FormControl variant="outlined" className={classes.formControl}>
