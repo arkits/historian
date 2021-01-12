@@ -7,7 +7,7 @@
     "start": "node index.js | bunyan"
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bunyan": "^1.8.12"
   }
 }
