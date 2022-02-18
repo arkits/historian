@@ -7,11 +7,14 @@ const theme = createMuiTheme({
         primary: amber,
         secondary: {
             main: '#ff6e40'
+        },
+        background: {
+            default: '#121212',
         }
     },
     typography: {
         fontFamily: [
-            'Rajdhani',
+            'Rubik',
             '-apple-system',
             'BlinkMacSystemFont',
             '"Segoe UI"',
