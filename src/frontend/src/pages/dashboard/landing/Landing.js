@@ -15,10 +15,10 @@ import {
 } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react';
-import { HistorianStoreContext } from '../../../store/HistorianStore';
+import { HistorianStoreContext } from '../../../store/historianStore';
 import moment from 'moment';
 import axiosInstance from '../../../utils/axios';
-import { useLocalStorage } from '../../../store/LocalStorage';
+import { useLocalStorage } from '../../../store/localStorage';
 import * as HistoryParser from '../api/HistoryParser';
 
 const HistoryList = ({ histories }) => {

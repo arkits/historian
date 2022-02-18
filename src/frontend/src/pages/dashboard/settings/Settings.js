@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Typography, Card, CardContent, Grid } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react';
-import { HistorianStoreContext } from '../../../store/HistorianStore';
+import { HistorianStoreContext } from '../../../store/historianStore';
 import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({

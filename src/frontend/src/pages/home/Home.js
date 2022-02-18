@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Link, Container, CssBaseline, Typography } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { useLocalStorage } from '../../store/LocalStorage';
+import { useLocalStorage } from '../../store/localStorage';
 import { Redirect } from 'react-router-dom';
 
 function ShoutOuts() {

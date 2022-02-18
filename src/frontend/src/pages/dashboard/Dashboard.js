@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { CssBaseline, AppBar, Toolbar, Typography } from '@material-ui/core/';
-import { useLocalStorage } from '../../store/LocalStorage';
+import { useLocalStorage } from '../../store/localStorage';
 import { Redirect } from 'react-router-dom';
 import useStyles from './DashboardStyle';
 import { observer } from 'mobx-react';
-import { HistorianStoreContext } from '../../store/HistorianStore';
+import { HistorianStoreContext } from '../../store/historianStore';
 import { BrowserRouter as Router, Switch, Route, useHistory } from 'react-router-dom';
 import Timeline from './timeline/Timeline';
 import About from './about/About';

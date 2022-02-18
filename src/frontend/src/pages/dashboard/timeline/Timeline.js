@@ -5,7 +5,7 @@ import { Waypoint } from 'react-waypoint';
 
 import axiosInstance from '../../../utils/axios';
 
-import { useLocalStorage } from '../../../store/LocalStorage';
+import { useLocalStorage } from '../../../store/localStorage';
 
 import {
     Grid,

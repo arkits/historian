@@ -6,7 +6,7 @@ const dev = {
 
 const prod = {
     api: {
-        url: 'https://archit.xyz/historian/api'
+        url: 'https://historian-api.archit.xyz/api'
     }
 };
 

@@ -3,11 +3,11 @@ import { Button, Link, Container, Typography, TextField, Grid } from '@material-
 import { Link as RouterLink, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import ShoutOuts from '../../components/ShoutOut';
-import { useLocalStorage } from '../../store/LocalStorage';
+import { useLocalStorage } from '../../store/localStorage';
 import axiosInstance from '../../utils/axios';
 import ErrorCard from '../../components/ErrorCard';
 import { observer } from 'mobx-react';
-import { HistorianStoreContext } from '../../store/HistorianStore';
+import { HistorianStoreContext } from '../../store/historianStore';
 
 const useStyles = makeStyles((theme) => ({
     root: {

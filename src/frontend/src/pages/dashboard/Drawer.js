@@ -9,7 +9,7 @@ import TimelineRoundedIcon from '@material-ui/icons/TimelineRounded';
 import DashboardRoundedIcon from '@material-ui/icons/DashboardRounded';
 import IconButton from '@material-ui/core/IconButton';
 import { Link as RouterLink } from 'react-router-dom';
-import { useLocalStorage } from '../../store/LocalStorage';
+import { useLocalStorage } from '../../store/localStorage';
 
 const useStyles = makeStyles({
     drawer: {
