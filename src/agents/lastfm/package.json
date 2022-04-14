@@ -8,7 +8,7 @@
     "prod": "NODE_ENV=production node src/index.js | bunyan"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bunyan": "^1.8.12",
     "config": "^3.3.1",
     "lastfm": "^0.9.3"
