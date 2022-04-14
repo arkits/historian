@@ -4,6 +4,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useTheme } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import * as HistoryParser from '../api/HistoryParser';
+import { deleteHistory } from '../api/HistorianApi';
+import { useLocalStorage } from '../../../store/localStorage';
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -41,6 +43,9 @@ function TabPanel(props) {
 }
 
 function TimelineCardDialog(props) {
+
+    const [historianUserCreds] = useLocalStorage('historianUserCreds');
+
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -53,6 +58,11 @@ function TimelineCardDialog(props) {
     const handleTabChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    const handleDelete = () => {
+        deleteHistory(history.id, 'Basic ' + btoa(historianUserCreds.username + ':' + historianUserCreds.password));
+        handleDialogClose();
+    }
 
     return (
         <div>
@@ -94,6 +104,11 @@ function TimelineCardDialog(props) {
                     </TabPanel>
                 </DialogContent>
                 <DialogActions>
+                    <div style={{ flex: 1 }}>
+                        <Button color="primary" onClick={handleDelete}>
+                            Delete
+                        </Button>
+                    </div>
                     <Button autoFocus href={HistoryParser.getPermalink(history)} target="_blank" color="primary">
                         Permalink
                     </Button>
