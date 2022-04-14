@@ -2,7 +2,13 @@ import { Request, Response } from 'express';
 import { History } from '../entity/History';
 import { decodeAuthHeader } from '../utils';
 import { getUserByUsername } from '../dao/UserDao';
-import { addHistoryDao, getHistoryDao, getRandomHistoryDao } from '../dao/HistoryDao';
+import {
+    addHistoryDao,
+    deleteHistoryByIdDao,
+    getHistoryByIdDao,
+    getHistoryDao,
+    getRandomHistoryDao
+} from '../dao/HistoryDao';
 import { logger } from '../domain/Logger';
 import { validateInstagramHistory, validateRedditSavedHistory } from '../domain/HistoryDomain';
 import { User } from '../entity/User';
@@ -119,11 +125,11 @@ async function validateIncomingHistory(body, user: User) {
     return history;
 }
 
-async function getHistory(request: Request, response: Response) {
+async function getUserHistory(request: Request, response: Response) {
     let [username, _] = decodeAuthHeader(request.headers.authorization);
 
     let requestParams = request.query;
-    logger.info('[get-history] Request from username=%s requestParams=%s', username, requestParams);
+    logger.info('[get-user-history] Request from username=%s requestParams=%s', username, requestParams);
 
     let parsedParams = {};
 
@@ -214,6 +220,88 @@ async function getHistory(request: Request, response: Response) {
     }
 }
 
+async function getHistory(request: Request, response: Response) {
+    let [username, _] = decodeAuthHeader(request.headers.authorization);
+
+    let historyId = request.params.historyId;
+    logger.info('[get-history] Request from username=%s historyId=%s', username, historyId);
+
+    if (!historyId) {
+        throw new Error('historyId is required');
+    }
+
+    try {
+        let user = await getUserByUsername(username);
+
+        let history = await getHistoryByIdDao(historyId);
+        logger.debug('[get-history] Retrieved History - ', history);
+
+        if (!history) {
+            response.status(404);
+            response.json(null);
+            return;
+        }
+
+        if (history.savedBy.id !== user.id) {
+            throw new Error("User doesn't have access to this History");
+        }
+
+        response.status(200);
+        response.json(history);
+        return;
+    } catch (error) {
+        logger.error('[get-history] Caught Error - ', error);
+        response.status(400);
+        response.json({
+            error: 'Bad Request!',
+            error_description: error.message
+        });
+        return;
+    }
+}
+
+async function deleteHistory(request: Request, response: Response) {
+    let [username, _] = decodeAuthHeader(request.headers.authorization);
+
+    let historyId = request.params.historyId;
+    logger.info('[delete-history] Request from username=%s historyId=%s', username, historyId);
+
+    if (!historyId) {
+        throw new Error('historyId is required');
+    }
+
+    try {
+        let user = await getUserByUsername(username);
+
+        let history = await getHistoryByIdDao(historyId);
+        logger.debug('[delete-history] Retrieved History - ', history);
+
+        if (!history) {
+            response.status(404);
+            response.json(null);
+            return;
+        }
+
+        if (history.savedBy.id !== user.id) {
+            throw new Error("User doesn't have access to this History");
+        }
+
+        await deleteHistoryByIdDao(historyId);
+
+        response.status(200);
+        response.json({ message: 'History deleted successfully', historyId: historyId });
+        return;
+    } catch (error) {
+        logger.error('[delete-history] Caught Error - ', error);
+        response.status(400);
+        response.json({
+            error: 'Bad Request!',
+            error_description: error.message
+        });
+        return;
+    }
+}
+
 async function getRandomHistory(request: Request, response: Response) {
     try {
         // get the username
@@ -278,4 +366,4 @@ async function getRandomHistory(request: Request, response: Response) {
     }
 }
 
-export { addToHistory, getHistory, getRandomHistory };
+export { addToHistory, getUserHistory, getHistory, getRandomHistory, deleteHistory };

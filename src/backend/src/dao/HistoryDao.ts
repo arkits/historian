@@ -8,6 +8,23 @@ async function addHistoryDao(history) {
     return await historyRepository.save(history);
 }
 
+async function getHistoryByIdDao(historyId: string) {
+    let historyRepository = getRepository(History);
+    let history = await historyRepository.findOne({
+        where: {
+            id: historyId
+        },
+        loadRelationIds: true
+    });
+    return history;
+}
+
+async function deleteHistoryByIdDao(historyId: string) {
+    let historyRepository = getRepository(History);
+    let history = await historyRepository.delete(historyId);
+    return history;
+}
+
 async function getHistoryDao(where: object, offset: number, limit: number, order: object) {
     let historyRepository = getRepository(History);
     let history = await historyRepository.find({
@@ -66,8 +83,10 @@ async function getRandomHistoryDao(user: User, limit: number, type: string) {
 export {
     addHistoryDao,
     getHistoryDao,
+    deleteHistoryByIdDao,
     deleteUserHistoryDao,
     getHistoryWithPkDao,
     getHistoryCountDao,
-    getRandomHistoryDao
+    getRandomHistoryDao,
+    getHistoryByIdDao
 };
