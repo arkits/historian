@@ -45,7 +45,7 @@ async function performRedditSyncForUser(user) {
         refreshToken: user.preferences['reddit']['accessToken']['token']['refresh_token']
     });
 
-    const savedPosts = await r.getMe().getSavedContent();
+    const savedPosts = await (await r.getMe().getSavedContent()).fetchAll();
 
     for (let post of savedPosts) {
         logger.info({ post }, 'Saved Post');
