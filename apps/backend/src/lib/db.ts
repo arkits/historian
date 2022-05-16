@@ -17,3 +17,7 @@ export function getUserHistory(user: User) {
         }
     });
 }
+
+export function getAllUsers() {
+    return prisma.user.findMany();
+}

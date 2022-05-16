@@ -3,14 +3,15 @@ import * as express from 'express';
 import * as cors from 'cors';
 import * as cookieParser from 'cookie-parser';
 import * as sessions from 'express-session';
+import { PrismaClient } from '@prisma/client';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import * as cron from 'node-cron';
 
 import logger from './lib/logger';
 import router from './lib/router';
 import logRequest from './lib/controllers/requestLogger';
 import errorHandler from './lib/controllers/errorHandler';
-import redditOAuthRouter from './lib/reddit';
-import { PrismaClient } from '@prisma/client';
+import redditOAuthRouter, { performRedditSync } from './lib/reddit';
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
@@ -55,6 +56,10 @@ app.use('/', redditOAuthRouter);
 app.use(errorHandler);
 
 const port = process.env.port || 3333;
+
+cron.schedule('0 * * * *', function () {
+    performRedditSync();
+});
 
 app.listen(port, () => {
     logger.info('Backend has started!', { port });
