@@ -6,9 +6,9 @@ import * as sessions from 'express-session';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 
 import logger from './lib/logger';
-import apiRouter from './lib/apiRouter';
-import logRequest from './lib/requestLoggingMiddleware';
-import errorHandler from './lib/errorHandlingMiddleware';
+import router from './lib/router';
+import logRequest from './lib/controllers/requestLogger';
+import errorHandler from './lib/controllers/errorHandler';
 import redditOAuthRouter from './lib/reddit';
 import { PrismaClient } from '@prisma/client';
 
@@ -49,7 +49,7 @@ app.use(
 
 app.use(logRequest);
 
-app.use('/', apiRouter);
+app.use('/', router);
 app.use('/', redditOAuthRouter);
 
 app.use(errorHandler);

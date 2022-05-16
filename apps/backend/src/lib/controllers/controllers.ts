@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
-import logger from './logger';
+import logger from '../logger';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -87,10 +87,6 @@ export async function userLogin(request, response: Response, next: NextFunction)
 }
 
 export async function userLogout(request, response: Response, next: NextFunction) {
-    if (!request.session.loggedIn) {
-        return next({ message: 'User not logged in', code: 400 });
-    }
-
     try {
         logger.info(request.session, 'Logging out User');
 
@@ -106,11 +102,6 @@ export async function userLogout(request, response: Response, next: NextFunction
 }
 
 export async function getUser(request, response: Response, next: NextFunction) {
-    logger.debug({ reqSession: request.session }, 'Getting user');
-    if (!request.session.loggedIn) {
-        return next({ message: 'User not logged in', code: 400 });
-    }
-
     try {
         let user = await prisma.user.findFirst({
             where: {

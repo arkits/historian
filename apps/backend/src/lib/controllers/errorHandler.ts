@@ -1,4 +1,4 @@
-import logger from './logger';
+import logger from '../logger';
 import { Request, Response } from 'express';
 
 interface ErrorResponse {
