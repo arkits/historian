@@ -50,7 +50,7 @@ app.use(
 
 app.use(logRequest);
 
-app.use('/', router);
+app.use('/api', router);
 app.use('/', redditOAuthRouter);
 
 app.use(errorHandler);

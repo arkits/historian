@@ -6,6 +6,7 @@
         "start": "nx serve",
         "build": "nx build",
         "test": "nx test",
+        "dev": "nx run-many --target=serve --projects=frontend,backend",
         "dev:frontend": "nx serve --project frontend",
         "dev:backend": "nx serve --project backend | pino-pretty"
     },
@@ -14,7 +15,7 @@
         "@emotion/babel-plugin": "11.9.2",
         "@nrwl/cli": "14.1.4",
         "@nrwl/cypress": "14.1.4",
-        "@nrwl/express": "^14.1.4",
+        "@nrwl/express": "^14.1.5",
         "@nrwl/jest": "14.1.4",
         "@nrwl/next": "^14.1.5",
         "@nrwl/node": "14.1.4",

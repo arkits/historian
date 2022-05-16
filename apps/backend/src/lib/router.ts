@@ -6,7 +6,7 @@ import { getHistory } from './controllers/history';
 let router = Router();
 
 // Version Endpoints
-router.get('/api', getVersion);
+router.get('/', getVersion);
 
 router.get('/user', authUserSignedIn, getUser);
 router.post('/user/signup', userSignUp);

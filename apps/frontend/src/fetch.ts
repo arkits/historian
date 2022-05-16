@@ -1,7 +1,7 @@
 const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
 
-const baseUrl = 'http://localhost:3333';
+const baseUrl = '/api';
 
 function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
