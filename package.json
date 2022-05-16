@@ -54,6 +54,7 @@
         "@mui/material": "^5.7.0",
         "@nrwl/next": "14.1.5",
         "@prisma/client": "^3.14.0",
+        "@quixo3/prisma-session-store": "^3.1.5",
         "argon2": "^0.28.5",
         "clsx": "^1.1.1",
         "cookie-parser": "^1.4.6",

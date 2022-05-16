@@ -28,7 +28,7 @@ function getRedditLoginUrl() {
 }
 
 function getUser() {
-    return fetch(`${baseUrl}/user/logout`, {
+    return fetch(`${baseUrl}/user`, {
         method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,
