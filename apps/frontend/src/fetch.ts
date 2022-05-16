@@ -27,6 +27,10 @@ function getRedditLoginUrl() {
     return `${baseUrl}/auth/reddit`;
 }
 
+function getRedditCollectUrl() {
+    return `${baseUrl}/agent/reddit/collect`;
+}
+
 function getUser() {
     return fetch(`${baseUrl}/user`, {
         method: 'GET',
@@ -36,4 +40,4 @@ function getUser() {
     });
 }
 
-export { defaultHeaders, userLogin, userLogout, getRedditLoginUrl, getUser };
+export { defaultHeaders, userLogin, userLogout, getRedditLoginUrl, getUser, getRedditCollectUrl };

@@ -27,7 +27,12 @@ const Dashboard: NextPage = () => {
                         justifyContent: 'center'
                     }}
                 >
-                    <Typography variant="h4" component="h1" gutterBottom>
+                    <Typography
+                        variant="h4"
+                        component="h1"
+                        gutterBottom
+                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4 }}
+                    >
                         Dashboard
                     </Typography>
                 </Box>

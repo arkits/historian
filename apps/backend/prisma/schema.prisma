@@ -13,6 +13,7 @@ datasource db {
 model History {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamp(6)
+  type      String
   content   Json     @db.Json
 
   User   User   @relation(fields: [userId], references: [id])

@@ -6,10 +6,10 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Link from '../../src/Link';
 import HistorianContext from 'apps/frontend/context/historian';
-import { getRedditLoginUrl } from '../../src/fetch';
+import { getRedditCollectUrl, getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
 
-const Settings: NextPage = () => {
+const Agents: NextPage = () => {
     const router = useRouter();
 
     const [user, setUser] = React.useContext(HistorianContext);
@@ -38,7 +38,7 @@ const Settings: NextPage = () => {
                         gutterBottom
                         sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4 }}
                     >
-                        Settings
+                        Agents
                     </Typography>
 
                     <Typography
@@ -47,16 +47,34 @@ const Settings: NextPage = () => {
                         gutterBottom
                         sx={{ fontFamily: 'Playfair Display SC, serif' }}
                     >
-                        General
+                        Reddit
                     </Typography>
-                    <Typography variant="body1" component="p" gutterBottom>
-                        ID: {user?.id} <br />
-                        Username: {user?.username}
-                    </Typography>
+
+                    <Button
+                        variant="contained"
+                        component={Link}
+                        noLinkStyle
+                        href={getRedditLoginUrl()}
+                        target={'_blank'}
+                    >
+                        Login with Reddit
+                    </Button>
+
+                    <br />
+
+                    <Button
+                        variant="contained"
+                        component={Link}
+                        noLinkStyle
+                        href={getRedditCollectUrl()}
+                        target={'_blank'}
+                    >
+                        Collect Saves
+                    </Button>
                 </Box>
             </Container>
         </>
     );
 };
 
-export default Settings;
+export default Agents;

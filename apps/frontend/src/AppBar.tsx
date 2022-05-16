@@ -19,7 +19,8 @@ import { teal } from '@mui/material/colors';
 
 const pages = [
     { name: 'About', href: '/about' },
-    { name: 'Dashboard', href: '/dashboard' }
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Agents', href: '/agents' }
 ];
 const settings = [
     { name: 'Settings', href: '/settings' },
