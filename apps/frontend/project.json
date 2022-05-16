@@ -1,69 +1,42 @@
 {
-    "sourceRoot": "apps/frontend/src",
+    "sourceRoot": "apps/frontend",
     "projectType": "application",
     "targets": {
         "build": {
-            "executor": "@nrwl/web:webpack",
+            "executor": "@nrwl/next:build",
             "outputs": ["{options.outputPath}"],
             "defaultConfiguration": "production",
             "options": {
-                "compiler": "babel",
-                "outputPath": "dist/apps/frontend",
-                "index": "apps/frontend/src/index.html",
-                "baseHref": "/",
-                "main": "apps/frontend/src/main.tsx",
-                "polyfills": "apps/frontend/src/polyfills.ts",
-                "tsConfig": "apps/frontend/tsconfig.app.json",
-                "assets": ["apps/frontend/src/favicon.ico", "apps/frontend/src/assets"],
-                "styles": [],
-                "scripts": [],
-                "webpackConfig": "@nrwl/react/plugins/webpack"
+                "root": "apps/frontend",
+                "outputPath": "dist/apps/frontend"
             },
             "configurations": {
-                "development": {
-                    "extractLicenses": false,
-                    "optimization": false,
-                    "sourceMap": true,
-                    "vendorChunk": true
-                },
-                "production": {
-                    "fileReplacements": [
-                        {
-                            "replace": "apps/frontend/src/environments/environment.ts",
-                            "with": "apps/frontend/src/environments/environment.prod.ts"
-                        }
-                    ],
-                    "optimization": true,
-                    "outputHashing": "all",
-                    "sourceMap": false,
-                    "namedChunks": false,
-                    "extractLicenses": true,
-                    "vendorChunk": false
-                }
+                "development": {},
+                "production": {}
             }
         },
         "serve": {
-            "executor": "@nrwl/web:dev-server",
+            "executor": "@nrwl/next:server",
             "defaultConfiguration": "development",
             "options": {
                 "buildTarget": "frontend:build",
-                "hmr": true
+                "dev": true
             },
             "configurations": {
                 "development": {
-                    "buildTarget": "frontend:build:development"
+                    "buildTarget": "frontend:build:development",
+                    "dev": true
                 },
                 "production": {
                     "buildTarget": "frontend:build:production",
-                    "hmr": false
+                    "dev": false
                 }
             }
         },
-        "lint": {
-            "executor": "@nrwl/linter:eslint",
-            "outputs": ["{options.outputFile}"],
+        "export": {
+            "executor": "@nrwl/next:export",
             "options": {
-                "lintFilePatterns": ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
+                "buildTarget": "frontend:build:production"
             }
         },
         "test": {
@@ -72,6 +45,13 @@
             "options": {
                 "jestConfig": "apps/frontend/jest.config.ts",
                 "passWithNoTests": true
+            }
+        },
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "outputs": ["{options.outputFile}"],
+            "options": {
+                "lintFilePatterns": ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
             }
         }
     },

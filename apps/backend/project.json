@@ -28,7 +28,8 @@
         "serve": {
             "executor": "@nrwl/node:node",
             "options": {
-                "buildTarget": "backend:build"
+                "buildTarget": "backend:build",
+                "watch": true
             }
         },
         "lint": {
