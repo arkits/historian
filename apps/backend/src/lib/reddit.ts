@@ -1,5 +1,5 @@
 import * as simpleOAuth2Reddit from '@jimmycode/simple-oauth2-reddit';
-import { Router } from 'express';
+import { response, Router } from 'express';
 import logger from './logger';
 import * as snoowrap from 'snoowrap';
 import { PrismaClient } from '@prisma/client';
@@ -45,7 +45,17 @@ async function performRedditSyncForUser(user) {
         refreshToken: user.preferences['reddit']['accessToken']['token']['refresh_token']
     });
 
-    const savedPosts = await (await r.getMe().getSavedContent()).fetchAll();
+    let response = {
+        savedPosts: {
+            fetched: 0,
+            saved: 0,
+            skipped: 0
+        }
+    };
+
+    const savedPosts = await await r.getMe().getSavedContent();
+
+    response.savedPosts.fetched = savedPosts.length;
 
     for (let post of savedPosts) {
         const history = await prisma.history.findFirst({
@@ -59,10 +69,9 @@ async function performRedditSyncForUser(user) {
 
         if (history) {
             logger.info({ history }, 'History already exists');
+            response.savedPosts.skipped++;
             continue;
         }
-
-        logger.info({ post }, 'Saved Post');
 
         await prisma.history.create({
             data: {
@@ -81,7 +90,12 @@ async function performRedditSyncForUser(user) {
                 userId: user.id
             }
         });
+
+        logger.info({ post }, 'Saved Post');
+        response.savedPosts.saved++;
     }
+
+    return response;
 }
 
 redditRouter.get('/agent/reddit/collect', async (req, res, next) => {
@@ -97,15 +111,18 @@ redditRouter.get('/agent/reddit/collect', async (req, res, next) => {
                 return next({ message: 'User not found', code: 400 });
             }
 
+            let response = null;
+
             try {
-                await performRedditSyncForUser(user);
+                response = await performRedditSyncForUser(user);
             } catch (error) {
                 return next({ message: 'Error Performing Reddit Sync', code: 500, description: error.message });
             }
 
             res.status(200);
             res.json({
-                message: 'OK'
+                message: 'OK',
+                details: response
             });
         } catch (error) {
             return next({ message: 'Error in collecting Saved', code: 400, description: error.message });
