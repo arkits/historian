@@ -8,8 +8,12 @@ import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 import { HistorianContextProvider } from '../context/historian';
 import HistorianAppBar from '../src/AppBar';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import './app.css';
+
+// Create a client
+const queryClient = new QueryClient();
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -28,10 +32,12 @@ export default function MyApp(props: MyAppProps) {
             <ThemeProvider theme={theme}>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline />
-                <HistorianContextProvider>
-                    <HistorianAppBar />
-                    <Component {...pageProps} />
-                </HistorianContextProvider>
+                <QueryClientProvider client={queryClient}>
+                    <HistorianContextProvider>
+                        <HistorianAppBar />
+                        <Component {...pageProps} />
+                    </HistorianContextProvider>
+                </QueryClientProvider>
             </ThemeProvider>
         </CacheProvider>
     );

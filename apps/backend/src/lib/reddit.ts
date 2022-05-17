@@ -48,13 +48,35 @@ async function performRedditSyncForUser(user) {
     const savedPosts = await (await r.getMe().getSavedContent()).fetchAll();
 
     for (let post of savedPosts) {
+        const history = await prisma.history.findFirst({
+            where: {
+                content: {
+                    path: ['pk'],
+                    equals: post.id
+                }
+            }
+        });
+
+        if (history) {
+            logger.info({ history }, 'History already exists');
+            continue;
+        }
+
         logger.info({ post }, 'Saved Post');
+
         await prisma.history.create({
             data: {
                 type: 'reddit',
                 content: {
+                    pk: post.id,
                     subreddit: post.subreddit_name_prefixed,
-                    title: post['title']
+                    title: post['title'],
+                    author: post.author.name,
+                    score: post.score,
+                    content_url: post['url'],
+                    created_utc: post.created_utc,
+                    thumbnail: post['thumbnail'],
+                    permalink: post['permalink']
                 },
                 userId: user.id
             }

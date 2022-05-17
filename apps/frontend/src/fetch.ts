@@ -2,6 +2,7 @@ const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
 
 const baseUrl = '/api';
+const oauthBaseUrl = 'http://localhost:3333';
 
 function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
@@ -24,11 +25,11 @@ function userLogin(username: string, password: string) {
 }
 
 function getRedditLoginUrl() {
-    return `${baseUrl}/auth/reddit`;
+    return `${oauthBaseUrl}/auth/reddit`;
 }
 
 function getRedditCollectUrl() {
-    return `${baseUrl}/agent/reddit/collect`;
+    return `${oauthBaseUrl}/agent/reddit/collect`;
 }
 
 function getUser() {
@@ -40,4 +41,13 @@ function getUser() {
     });
 }
 
-export { defaultHeaders, userLogin, userLogout, getRedditLoginUrl, getUser, getRedditCollectUrl };
+function getHistory() {
+    return fetch(`${baseUrl}/history`, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export { defaultHeaders, userLogin, userLogout, getRedditLoginUrl, getUser, getRedditCollectUrl, getHistory };

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authUserSignedIn } from './controllers/auth';
 import { getUser, getVersion, userLogin, userLogout, userSignUp } from './controllers/controllers';
-import { getHistory } from './controllers/history';
+import { deleteUserHistory, getHistory } from './controllers/history';
 
 let router = Router();
 
@@ -14,5 +14,6 @@ router.post('/user/login', userLogin);
 router.post('/user/logout', authUserSignedIn, userLogout);
 
 router.get('/history', authUserSignedIn, getHistory);
+router.delete('/history/:id', authUserSignedIn, deleteUserHistory);
 
 export default router;
