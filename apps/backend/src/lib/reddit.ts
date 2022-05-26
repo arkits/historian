@@ -12,7 +12,7 @@ let redditRouter = Router();
 const redditOAuth2Client = simpleOAuth2Reddit.create({
     clientId: process.env.REDDIT_APP_ID,
     clientSecret: process.env.REDDIT_APP_SECRET,
-    callbackURL: 'http://localhost:3333/auth/reddit/callback',
+    callbackURL: process.env.REDDIT_APP_CALLBACK_URL,
     state: 'random-unique-string',
     scope: ['identity', 'save', 'history', 'read'],
     authorizeOptions: {
