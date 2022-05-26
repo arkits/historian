@@ -6,8 +6,6 @@ import Box from '@mui/material/Box';
 import Link from '../src/Link';
 import HistorianAppBar from '../src/AppBar';
 import { Button } from '@mui/material';
-import StickyFooter from '../src/components/Footer';
-import theme from '../src/theme';
 
 const Home: NextPage = () => {
     return (
@@ -75,9 +73,23 @@ const Home: NextPage = () => {
                     <li>Instagram - Saved Posts, Likes</li>
                     <li>YouTube - Liked Videos</li>
                 </ul>
+                <Button
+                    variant="contained"
+                    component={Link}
+                    noLinkStyle
+                    href="https://github.com/arkits/historian"
+                    target={'_blank'}
+                    sx={{
+                        mt: 4
+                    }}
+                >
+                    Learn more
+                </Button>
             </Container>
 
-            <Container maxWidth="sm" sx={{ marginBottom: 20 }}>
+            <hr />
+
+            <Container maxWidth="sm" sx={{ marginTop: 20, marginBottom: 20 }}>
                 <Typography
                     variant="h4"
                     component="h3"
@@ -116,6 +128,7 @@ const Home: NextPage = () => {
                 }}
             >
                 <Container maxWidth="sm">
+                    <br />
                     <Typography variant="body1">Historian</Typography>
                     <Typography variant="body2" color="text.secondary">
                         <Link color="inherit" href="https://github.com/arkits/historian">
@@ -129,9 +142,9 @@ const Home: NextPage = () => {
                         <Link color="inherit" href="https://github.com/arkits/historian">
                             Privacy Policy
                         </Link>
-                        <br />
-                        <br />
                     </Typography>
+                    <br />
+                    <br />
                 </Container>
             </Box>
         </>
