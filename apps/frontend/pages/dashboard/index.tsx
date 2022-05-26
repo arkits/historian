@@ -64,7 +64,7 @@ const HistoryDetailsCard = ({ history }) => {
                             />
                         </CardContent>
                     </Grid>
-                    <Grid align="right" item xs={3}>
+                    <Grid item xs={3}>
                         <a href={'/'} target={'_blank'}>
                             <Avatar
                                 variant="square"
@@ -81,7 +81,7 @@ const HistoryDetailsCard = ({ history }) => {
 
 const Dashboard: NextPage = () => {
     const router = useRouter();
-    const [user, setUser] = React.useContext(HistorianContext);
+    const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
         if (!user) {

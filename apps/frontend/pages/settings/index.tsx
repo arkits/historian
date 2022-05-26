@@ -3,8 +3,6 @@ import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Link from '../../src/Link';
 import HistorianContext from 'apps/frontend/context/historian';
 import { getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
@@ -12,7 +10,7 @@ import { useRouter } from 'next/router';
 const Settings: NextPage = () => {
     const router = useRouter();
 
-    const [user, setUser] = React.useContext(HistorianContext);
+    const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
         if (!user) {
