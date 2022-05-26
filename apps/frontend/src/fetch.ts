@@ -1,12 +1,12 @@
-const defaultHeaders = new Headers();
+export const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
 
-// const baseUrl = process.env.BASE_URL || '/api';
-// const oauthBaseUrl = process.env.OAUTH_BASE_URL || 'http://localhost:3333';
-const baseUrl = 'https://historian-api.archit.xyz/api';
-const oauthBaseUrl = 'https://historian-api.archit.xyz';
+const baseUrl = process.env.BASE_URL || '/api';
+const oauthBaseUrl = process.env.OAUTH_BASE_URL || 'http://localhost:3333';
+// const baseUrl = 'https://historian-api.archit.xyz/api';
+// const oauthBaseUrl = 'https://historian-api.archit.xyz';
 
-function userLogout() {
+export function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
         method: 'POST',
         headers: defaultHeaders,
@@ -14,7 +14,7 @@ function userLogout() {
     });
 }
 
-function userLogin(username: string, password: string) {
+export function userLogin(username: string, password: string) {
     return fetch(`${baseUrl}/user/login`, {
         method: 'POST',
         headers: defaultHeaders,
@@ -26,7 +26,7 @@ function userLogin(username: string, password: string) {
     });
 }
 
-function userRegister(username: string, password: string) {
+export function userRegister(username: string, password: string) {
     return fetch(`${baseUrl}/user/signup`, {
         method: 'POST',
         headers: defaultHeaders,
@@ -38,15 +38,15 @@ function userRegister(username: string, password: string) {
     });
 }
 
-function getRedditLoginUrl() {
+export function getRedditLoginUrl() {
     return `${oauthBaseUrl}/auth/reddit`;
 }
 
-function getRedditCollectUrl() {
+export function getRedditCollectUrl() {
     return `${oauthBaseUrl}/agent/reddit/collect`;
 }
 
-function getUser() {
+export function getUser() {
     return fetch(`${baseUrl}/user`, {
         method: 'GET',
         redirect: 'follow',
@@ -55,7 +55,7 @@ function getUser() {
     });
 }
 
-function getHistory() {
+export function getHistory() {
     return fetch(`${baseUrl}/history`, {
         method: 'GET',
         redirect: 'follow',
@@ -64,13 +64,11 @@ function getHistory() {
     });
 }
 
-export {
-    defaultHeaders,
-    userLogin,
-    userLogout,
-    getRedditLoginUrl,
-    getUser,
-    getRedditCollectUrl,
-    getHistory,
-    userRegister
-};
+export function getRedditAgentDetails() {
+    return fetch(`${baseUrl}/agent/reddit`, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}

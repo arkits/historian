@@ -45,7 +45,10 @@ export async function userSignUp(request, response: Response, next: NextFunction
 
     logger.info(request.session, 'Session created');
 
-    response.json(user);
+    response.json({
+        id: user.id,
+        username: user.username
+    });
 }
 
 export async function userLogin(request, response: Response, next: NextFunction) {

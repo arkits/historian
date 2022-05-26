@@ -4,6 +4,7 @@ import logger from './logger';
 import * as snoowrap from 'snoowrap';
 import { PrismaClient } from '@prisma/client';
 import { getAllUsers } from './db';
+import { lstatSync } from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -95,10 +96,27 @@ async function performRedditSyncForUser(user) {
         response.savedPosts.saved++;
     }
 
+    const redditUsername = await r.getMe().name;
+
+    await prisma.user.update({
+        where: {
+            id: user.id
+        },
+        data: {
+            preferences: {
+                reddit: {
+                    ...user.preferences['reddit'],
+                    username: redditUsername,
+                    lastSync: new Date().getTime()
+                }
+            }
+        }
+    });
+
     return response;
 }
 
-redditRouter.get('/agent/reddit/collect', async (req, res, next) => {
+redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
     if (req['session'].loggedIn) {
         try {
             const user = await prisma.user.findFirst({
@@ -124,6 +142,47 @@ redditRouter.get('/agent/reddit/collect', async (req, res, next) => {
                 message: 'OK',
                 details: response
             });
+        } catch (error) {
+            return next({ message: 'Error in collecting Saved', code: 400, description: error.message });
+        }
+    } else {
+        return next({ message: 'User not logged in', code: 400 });
+    }
+});
+
+redditRouter.get('/api/agent/reddit', async (req, res, next) => {
+    if (req['session'].loggedIn) {
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    id: req['session'].userId
+                }
+            });
+
+            if (!user) {
+                return next({ message: 'User not found', code: 400 });
+            }
+
+            const redditPrefs = user.preferences['reddit'];
+
+            if (!redditPrefs) {
+                return next({ message: 'User has no reddit preferences', code: 400 });
+            }
+
+            const historyTotal = await prisma.history.count({
+                where: {
+                    userId: user.id
+                }
+            });
+
+            let response = {
+                redditUsername: redditPrefs['username'],
+                lastSync: redditPrefs['lastSync'],
+                historyTotal: historyTotal
+            };
+
+            res.status(200);
+            res.json(response);
         } catch (error) {
             return next({ message: 'Error in collecting Saved', code: 400, description: error.message });
         }
