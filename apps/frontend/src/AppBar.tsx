@@ -90,7 +90,7 @@ const UserOptions = ({ user }) => {
 };
 
 const HistorianAppBar = () => {
-    const [user, setUser] = React.useContext(HistorianContext);
+    const { user, setUser } = React.useContext(HistorianContext);
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 

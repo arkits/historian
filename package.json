@@ -8,7 +8,8 @@
         "test": "nx test",
         "dev": "nx run-many --target=serve --projects=frontend,backend",
         "dev:frontend": "nx serve --project frontend",
-        "dev:backend": "nx serve --project backend | pino-pretty"
+        "dev:backend": "nx serve --project backend | pino-pretty",
+        "build:frontend": "nx export frontend" 
     },
     "private": true,
     "devDependencies": {

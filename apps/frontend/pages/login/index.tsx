@@ -25,7 +25,7 @@ const Login: NextPage = () => {
     const router = useRouter();
 
     const [loginError, setLoginError] = React.useState<string | null>(null);
-    const [user, setUser] = React.useContext(HistorianContext);
+    const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
         if (user) {
@@ -37,6 +37,7 @@ const Login: NextPage = () => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
 
+        // @ts-ignore
         userLogin(data.get('username'), data.get('password'))
             .then((response) => response.json())
             .then((result) => {

@@ -12,7 +12,7 @@ import { useRouter } from 'next/router';
 const Agents: NextPage = () => {
     const router = useRouter();
 
-    const [user, setUser] = React.useContext(HistorianContext);
+    const { user } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
         if (!user) {
