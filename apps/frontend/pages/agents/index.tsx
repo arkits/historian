@@ -9,6 +9,7 @@ import HistorianContext from 'apps/frontend/context/historian';
 import { getRedditAgentDetails, getRedditCollectUrl, getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
 import { useQuery, useQueryClient } from 'react-query';
+import { formatDistance } from 'date-fns';
 
 const RedditAgent = () => {
     // Access the client
@@ -24,7 +25,9 @@ const RedditAgent = () => {
             return (
                 <Typography variant="body1" component="p" gutterBottom>
                     Reddit Username: /u/{query?.data?.redditUsername} <br />
-                    Last Refreshed: {query?.data?.lastSync} <br />
+                    Last Refreshed: {formatDistance(new Date(query?.data?.lastSync), new Date())} //{' '}
+                    {query?.data?.lastSync}
+                    <br />
                     <br />
                     Total Saved: {query?.data?.historyTotal} <br />
                     <br />
@@ -37,7 +40,12 @@ const RedditAgent = () => {
 
     return (
         <>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontFamily: 'Playfair Display SC, serif' }}>
+            <Typography
+                variant="h5"
+                component="h2"
+                gutterBottom
+                sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 700 }}
+            >
                 Reddit
             </Typography>
 
@@ -83,7 +91,7 @@ const Agents: NextPage = () => {
                         variant="h4"
                         component="h1"
                         gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4 }}
+                        sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 700, mb: 4 }}
                     >
                         Agents
                     </Typography>

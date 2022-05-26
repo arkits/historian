@@ -7,7 +7,7 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 import { HistorianContextProvider } from '../context/historian';
-import HistorianAppBar from '../src/AppBar';
+import HistorianAppBar from '../src/components/AppBar';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import './app.css';

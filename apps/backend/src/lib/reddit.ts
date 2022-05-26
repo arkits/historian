@@ -26,10 +26,14 @@ export async function performRedditSync() {
     try {
         const allUsers = await getAllUsers();
         for (let user of allUsers) {
-            await performRedditSyncForUser(user);
+            try {
+                await performRedditSyncForUser(user);
+            } catch (error) {
+                logger.error(error, user, 'Caught Error in RedditSync for User');
+            }
         }
     } catch (error) {
-        logger.error(error, 'Caught Error in RedditSync');
+        logger.error(error, 'Caught Error in PerformRedditSync');
     }
 }
 

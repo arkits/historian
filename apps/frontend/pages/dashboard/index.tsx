@@ -17,6 +17,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import RedditIcon from '@mui/icons-material/Reddit';
 import DescriptionIcon from '@mui/icons-material/Description';
 import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const HistoryDetailsCard = ({ history }) => {
     const getTitle = (history) => {
@@ -80,7 +81,7 @@ const HistoryDetailsCard = ({ history }) => {
 };
 
 const HistoryCards = ({ histories }) => {
-    if (histories?.length === 0) {
+    if (!histories || histories.length === 0) {
         return (
             <div style={{ textAlign: 'center' }}>
                 <Container maxWidth="sm">
@@ -113,9 +114,36 @@ const Dashboard: NextPage = () => {
     const queryClient = useQueryClient();
 
     // Queries
-    const query = useQuery('history', async () => {
+    const { isLoading, error, data, isFetching } = useQuery('history', async () => {
         return await getHistory().then((res) => res.json());
     });
+
+    if (isLoading || isFetching) {
+        return (
+            <>
+                <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
+                    <Container maxWidth="sm">
+                        <CircularProgress size={60} />
+                        <br />
+                        <br />
+                        <h2>Loading...</h2>
+                    </Container>
+                </div>
+            </>
+        );
+    }
+
+    if (error || !data) {
+        return (
+            <>
+                <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
+                    <Container maxWidth="sm">
+                        <h3>Error</h3>
+                    </Container>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
@@ -132,16 +160,12 @@ const Dashboard: NextPage = () => {
                         variant="h4"
                         component="h1"
                         gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4 }}
+                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4, fontWeight: 'bold' }}
                     >
                         Dashboard
                     </Typography>
 
-                    <Typography variant="h5" component="p" gutterBottom>
-                        {query?.data?.length} items
-                    </Typography>
-
-                    <HistoryCards histories={query?.data} />
+                    <HistoryCards histories={data} />
                 </Box>
             </Container>
         </>

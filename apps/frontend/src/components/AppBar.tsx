@@ -12,9 +12,9 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import SearchIcon from '@mui/icons-material/Search';
-import Link from './Link';
-import HistorianContext from '../context/historian';
-import { getUser } from './fetch';
+import Link from '../Link';
+import HistorianContext from '../../context/historian';
+import { getUser } from '../fetch';
 import { teal } from '@mui/material/colors';
 
 const pages = [
@@ -164,17 +164,16 @@ const HistorianAppBar = () => {
                             ))}
                         </Menu>
                     </Box>
-                    <SearchIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
                     <Typography
                         variant="h5"
                         noWrap
-                        component="a"
+                        component={Link}
                         href="/"
                         sx={{
                             mr: 2,
                             display: { xs: 'flex', md: 'none' },
                             flexGrow: 1,
-                            fontFamily: 'monospace',
+                            fontFamily: 'Playfair Display SC, serif',
                             fontWeight: 700,
                             color: 'inherit',
                             textDecoration: 'none'
