@@ -1,14 +1,14 @@
-name: (Backend) Deploy
+name: Deploy Backend
 
 on:
     push:
         paths:
-            - src/backend/**
+            - apps/backend/**
         branches: [master]
     pull_request:
         branches: [master]
         paths:
-            - src/backend/**
+            - apps/backend/**
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -29,4 +29,4 @@ jobs:
                   privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
                   debug: false
                   command: |
-                      /home/arkits/software/historian/src/backend/scripts/deploy.sh
+                      /opt/software/historian/scripts/deploy-backend.sh
