@@ -48,7 +48,7 @@ const HistoryDetailsCard = ({ history }) => {
     return (
         <div style={{ marginTop: '1rem' }}>
             <Card sx={{ display: 'flex' }}>
-                <Grid container spacing={0}>
+                <Grid container spacing={0} sx={{ flex: '1', maxHeight: theme.spacing(20) }}>
                     <Grid item xs={9}>
                         <CardContent>
                             <Typography variant="body1" color="textPrimary" component="p">
@@ -64,12 +64,12 @@ const HistoryDetailsCard = ({ history }) => {
                             />
                         </CardContent>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <a href={'/'} target={'_blank'}>
                             <Avatar
                                 variant="square"
                                 src={history?.content?.thumbnail}
-                                style={{ width: theme.spacing(18), height: theme.spacing(18) }}
+                                style={{ width: theme.spacing(22), height: '100%' }}
                             ></Avatar>
                         </a>
                     </Grid>
