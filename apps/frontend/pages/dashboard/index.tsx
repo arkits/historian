@@ -89,7 +89,13 @@ const HistoryCards = ({ histories }) => {
             </div>
         );
     } else {
-        return histories?.map((history) => <HistoryDetailsCard key={history.id} history={history} />);
+        return (
+            <>
+                {histories?.map((history) => (
+                    <HistoryDetailsCard key={history.id} history={history} />
+                ))}
+            </>
+        );
     }
 };
 
@@ -136,8 +142,6 @@ const Dashboard: NextPage = () => {
                     </Typography>
 
                     <HistoryCards histories={query?.data} />
-
-                    {query?.data}
                 </Box>
             </Container>
         </>
