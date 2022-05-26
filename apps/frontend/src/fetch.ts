@@ -1,8 +1,8 @@
 const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
 
-const baseUrl = '/api';
-const oauthBaseUrl = 'http://localhost:3333';
+const baseUrl = 'https://historian-api.archit.xyz/api';
+const oauthBaseUrl = 'https://historian-api.archit.xyz';
 
 function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {

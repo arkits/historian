@@ -12,4 +12,4 @@ npm install
 
 pm2 restart "historian-backend"
 
-# pm2 start --name "historian-backend" npm -- start
+# pm2 start --name "historian-backend" npm -- run serve:backend 
