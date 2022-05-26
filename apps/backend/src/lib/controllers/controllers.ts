@@ -13,18 +13,21 @@ export function getVersion(request: Request, response: Response) {
     return;
 }
 
-export async function userSignUp(request: Request, response: Response, next: NextFunction) {
-    const { username, passwordHash } = request.body;
-    logger.debug({ username, passwordHash, reqBody: request.body }, 'Creating user');
+export async function userSignUp(request, response: Response, next: NextFunction) {
+    const { username, password } = request.body;
 
-    if (!username || !passwordHash) {
+    if (!username || !password) {
         return next({ message: 'Username and password are required', code: 400 });
     }
 
-    let result = null;
+    const passwordHash = await argon2.hash(password);
+
+    logger.debug({ username, passwordHash, reqBody: request.body }, 'Creating user');
+
+    let user = null;
 
     try {
-        result = await prisma.user.create({
+        user = await prisma.user.create({
             data: {
                 username,
                 passwordHash
@@ -35,7 +38,14 @@ export async function userSignUp(request: Request, response: Response, next: Nex
         return next({ message: 'Failed to create User!', code: 400, description: error.message });
     }
 
-    response.json(result);
+    // set the session
+    request.session.userId = user.id;
+    request.session.loggedIn = true;
+    request.session.save();
+
+    logger.info(request.session, 'Session created');
+
+    response.json(user);
 }
 
 export async function userLogin(request, response: Response, next: NextFunction) {

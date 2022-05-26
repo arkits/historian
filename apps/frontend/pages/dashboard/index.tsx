@@ -79,6 +79,20 @@ const HistoryDetailsCard = ({ history }) => {
     );
 };
 
+const HistoryCards = ({ histories }) => {
+    if (histories?.length === 0) {
+        return (
+            <div style={{ textAlign: 'center' }}>
+                <Container maxWidth="sm">
+                    <h3>*dust*</h3>
+                </Container>
+            </div>
+        );
+    } else {
+        return histories?.map((history) => <HistoryDetailsCard key={history.id} history={history} />);
+    }
+};
+
 const Dashboard: NextPage = () => {
     const router = useRouter();
     const { user, setUser } = React.useContext(HistorianContext);
@@ -121,9 +135,9 @@ const Dashboard: NextPage = () => {
                         {query?.data?.length} items
                     </Typography>
 
-                    {query?.data?.map((history) => (
-                        <HistoryDetailsCard key={history.id} history={history} />
-                    ))}
+                    <HistoryCards histories={query?.data} />
+
+                    {query?.data}
                 </Box>
             </Container>
         </>

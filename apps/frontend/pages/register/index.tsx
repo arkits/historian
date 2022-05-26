@@ -3,25 +3,14 @@ import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Link from '../../src/Link';
-import { Alert, Button, Checkbox, FormControlLabel, Grid, TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import HistorianContext from 'apps/frontend/context/historian';
-import { userLogin } from 'apps/frontend/src/fetch';
+import { userRegister } from 'apps/frontend/src/fetch';
+import { ErrorBanner } from 'apps/frontend/src/components/ErrorBanner';
+import Link from 'apps/frontend/src/Link';
 
-const LoginError = ({ error }) => {
-    if (!error) {
-        return null;
-    }
-
-    return (
-        <Alert variant="filled" severity="error" sx={{ mt: 5 }}>
-            {error}
-        </Alert>
-    );
-};
-
-const Login: NextPage = () => {
+const Register: NextPage = () => {
     const router = useRouter();
 
     const [loginError, setLoginError] = React.useState<string | null>(null);
@@ -37,8 +26,7 @@ const Login: NextPage = () => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
 
-        // @ts-ignore
-        userLogin(data.get('username'), data.get('password'))
+        userRegister(data.get('username') as string, data.get('password') as string)
             .then((response) => response.json())
             .then((result) => {
                 if (result?.error) {
@@ -52,7 +40,7 @@ const Login: NextPage = () => {
     };
 
     return (
-        <Container maxWidth="md">
+        <Container maxWidth="sm">
             <Box
                 sx={{
                     my: 4,
@@ -63,7 +51,7 @@ const Login: NextPage = () => {
                 }}
             >
                 <Typography variant="h3" component="h1" gutterBottom sx={{ fontFamily: 'Playfair Display SC, serif' }}>
-                    Login
+                    Register
                 </Typography>
 
                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -88,24 +76,23 @@ const Login: NextPage = () => {
                         autoComplete="current-password"
                     />
                     <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                        Sign In
+                        Create Account
                     </Button>
                     <Button
-                        type="submit"
                         fullWidth
                         variant="outlined"
                         component={Link}
                         noLinkStyle
-                        href="/register"
+                        href="/login"
                         sx={{ mt: 3, mb: 2 }}
                     >
-                        Register
+                        Login
                     </Button>
-                    <LoginError error={loginError} />
+                    <ErrorBanner error={loginError} />
                 </Box>
             </Box>
         </Container>
     );
 };
 
-export default Login;
+export default Register;
