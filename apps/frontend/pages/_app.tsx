@@ -8,6 +8,7 @@ import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 import { HistorianContextProvider } from '../context/historian';
 import HistorianAppBar from '../src/components/AppBar';
+import HistorianSnackbar from '../src/components/HistorianSnackbar';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import './app.css';
@@ -42,6 +43,7 @@ export default function MyApp(props: MyAppProps) {
                 <QueryClientProvider client={queryClient}>
                     <HistorianContextProvider>
                         <HistorianAppBar />
+                        <HistorianSnackbar />
                         <Component {...pageProps} />
                     </HistorianContextProvider>
                 </QueryClientProvider>

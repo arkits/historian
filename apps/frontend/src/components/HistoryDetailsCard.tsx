@@ -6,8 +6,12 @@ import { getPrettyAvatar } from '../historyUtils';
 import theme from '../theme';
 import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
+import HistorianContext from 'apps/frontend/context/historian';
+import { useContext } from 'react';
 
 export const HistoryDetailsCard = ({ history }) => {
+    const { setSnackbarDetails } = useContext(HistorianContext);
+
     const getTitle = (history) => {
         return history?.content?.title ?? 'NO TITLE';
     };
@@ -72,6 +76,10 @@ export const HistoryDetailsCard = ({ history }) => {
                                     sx={{ marginRight: '12px', color: '#B9C2C6' }}
                                     startIcon={<DeleteIcon />}
                                     onClick={() => {
+                                        setSnackbarDetails({
+                                            open: true,
+                                            message: 'Deleted History'
+                                        });
                                         deleteHistoryById(history?.id)
                                             .then((response) => response.json())
                                             .then((res) => {
