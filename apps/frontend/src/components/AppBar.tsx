@@ -97,17 +97,6 @@ const HistorianAppBar = () => {
         setAnchorElNav(event.currentTarget);
     };
 
-    React.useEffect(() => {
-        getUser()
-            .then((response) => response.json())
-            .then((result) => {
-                if (result?.id) {
-                    setUser(result);
-                }
-            })
-            .catch((error) => console.log('error', error));
-    }, []);
-
     return (
         <AppBar position="static" color="primary" enableColorOnDark>
             <Container maxWidth="xl">

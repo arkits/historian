@@ -4,8 +4,8 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
-import { getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
+import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 
 const Settings: NextPage = () => {
     const router = useRouter();
@@ -13,11 +13,8 @@ const Settings: NextPage = () => {
     const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
-        if (!user) {
-            router.push('/login');
-        }
-    }, [user]);
-
+        isUserLoggedIn(router);
+    }, []);
     return (
         <>
             <Container maxWidth="sm">

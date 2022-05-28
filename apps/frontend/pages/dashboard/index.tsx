@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { getDashboardData, getHistory } from 'apps/frontend/src/fetch';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -20,6 +20,8 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import { getPrettyAvatar } from 'apps/frontend/src/historyUtils';
+import { useEffect } from 'react';
+import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 
 function RecentHistoryList({ history }) {
     return (
@@ -42,15 +44,9 @@ function RecentHistoryList({ history }) {
 const Dashboard: NextPage = () => {
     const router = useRouter();
     const { user, setUser } = React.useContext(HistorianContext);
-
-    React.useEffect(() => {
-        if (!user) {
-            router.push('/login');
-        }
-    }, [user]);
-
-    // Access the client
-    const queryClient = useQueryClient();
+    useEffect(() => {
+        isUserLoggedIn(router, setUser);
+    }, []);
 
     // Queries
     const dashboardDataQuery = useQuery('dashboardData', async () => {
@@ -165,7 +161,7 @@ const Dashboard: NextPage = () => {
                             <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
                                 Recently Saved
                             </Typography>
-                            <RecentHistoryList history={historyQuery.data.history} />
+                            <RecentHistoryList history={historyQuery.data?.history} />
                         </CardContent>
                     </Card>
 

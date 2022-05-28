@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { deleteHistory, getHistoryById, getUserHistory } from '../db';
+import { deleteHistory, getHistoryById, getUserHistory, getUserHistoryById as dbGetUserHistoryById } from '../db';
 import logger from '../logger';
 import { getUserFromSession } from './auth';
 
@@ -73,5 +73,26 @@ export async function deleteUserHistory(request, response, next) {
         response.json({ message: 'OK', history: history });
     } catch (error) {
         logger.error(error, 'Failed to Delete History!');
+    }
+}
+
+export async function getUserHistoryById(request, response: Response, next: NextFunction) {
+    try {
+        const user = await getUserFromSession(request.session);
+        if (!user) {
+            return next({ message: 'User not found', code: 400 });
+        }
+
+        const id = request.params.id;
+        if (!id) {
+            return next({ message: 'ID required', code: 400 });
+        }
+
+        const history = await dbGetUserHistoryById(user, id);
+
+        response.status(200);
+        response.json(history);
+    } catch (error) {
+        logger.error(error, 'Failed to logout User!');
     }
 }

@@ -13,7 +13,13 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import './app.css';
 
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false
+        }
+    }
+});
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();

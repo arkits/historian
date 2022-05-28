@@ -50,3 +50,12 @@ export function deleteHistory(historyId) {
         }
     });
 }
+
+export function getUserHistoryById(user, id) {
+    return prisma.history.findFirst({
+        where: {
+            id: id,
+            userId: user.id
+        }
+    });
+}

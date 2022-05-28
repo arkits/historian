@@ -1,4 +1,3 @@
-import * as React from 'react';
 import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -8,13 +7,12 @@ import Link from '../../src/Link';
 import HistorianContext from 'apps/frontend/context/historian';
 import { getRedditAgentCollect, getRedditAgentDetails, getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { formatDistance } from 'date-fns';
+import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
+import { useContext, useEffect, useState } from 'react';
 
 const RedditAgent = () => {
-    // Access the client
-    const queryClient = useQueryClient();
-
     // Queries
     const query = useQuery('redditAgentDetails', async () => {
         return await getRedditAgentDetails().then((res) => res.json());
@@ -41,7 +39,7 @@ const RedditAgent = () => {
         }
     };
 
-    const [isManuallyCollecting, setIsManuallyCollecting] = React.useState(false);
+    const [isManuallyCollecting, setIsManuallyCollecting] = useState(false);
 
     const manuallyCollect = () => {
         setIsManuallyCollecting(true);
@@ -86,14 +84,10 @@ const RedditAgent = () => {
 
 const Agents: NextPage = () => {
     const router = useRouter();
-
-    const { user } = React.useContext(HistorianContext);
-
-    React.useEffect(() => {
-        if (!user) {
-            router.push('/login');
-        }
-    }, [user]);
+    const { user, setUser } = useContext(HistorianContext);
+    useEffect(() => {
+        isUserLoggedIn(router, setUser);
+    }, []);
 
     return (
         <>

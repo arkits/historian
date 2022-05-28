@@ -86,3 +86,21 @@ export function getDashboardData() {
         credentials: 'include'
     });
 }
+
+export function getHistoryById(id) {
+    return fetch(`${baseUrl}/history/${id}`, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function deleteHistoryById(id) {
+    return fetch(`${baseUrl}/history/${id}`, {
+        method: 'DELETE',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
