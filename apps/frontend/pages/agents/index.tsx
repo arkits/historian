@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Link from '../../src/Link';
 import HistorianContext from 'apps/frontend/context/historian';
-import { getRedditAgentDetails, getRedditCollectUrl, getRedditLoginUrl } from '../../src/fetch';
+import { getRedditAgentCollect, getRedditAgentDetails, getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
 import { useQuery, useQueryClient } from 'react-query';
 import { formatDistance } from 'date-fns';
@@ -25,8 +25,11 @@ const RedditAgent = () => {
             return (
                 <Typography variant="body1" component="p" gutterBottom>
                     Reddit Username: /u/{query?.data?.redditUsername} <br />
-                    Last Refreshed: {formatDistance(new Date(query?.data?.lastSync), new Date())} //{' '}
-                    {query?.data?.lastSync}
+                    Last Refreshed:{' '}
+                    {formatDistance(new Date(query?.data?.lastSync), new Date(), {
+                        addSuffix: true
+                    })}{' '}
+                    // {query?.data?.lastSync}
                     <br />
                     <br />
                     Total Saved: {query?.data?.historyTotal} <br />
@@ -36,6 +39,22 @@ const RedditAgent = () => {
         } else {
             return <></>;
         }
+    };
+
+    const [isManuallyCollecting, setIsManuallyCollecting] = React.useState(false);
+
+    const manuallyCollect = () => {
+        setIsManuallyCollecting(true);
+        getRedditAgentCollect()
+            .then((res) => res.json())
+            .then((response) => {
+                setIsManuallyCollecting(false);
+                // window.location.reload();
+            })
+            .catch((err) => {
+                setIsManuallyCollecting(false);
+                console.log(err);
+            });
     };
 
     return (
@@ -48,18 +67,19 @@ const RedditAgent = () => {
             >
                 Reddit
             </Typography>
-
             <br />
-
             <AgentDetails />
-
             <Button variant="contained" component={Link} noLinkStyle href={getRedditLoginUrl()} target={'_blank'}>
                 Login with Reddit
             </Button>
             <br />
-            <Button variant="outlined" component={Link} noLinkStyle href={getRedditCollectUrl()} target={'_blank'}>
-                Manually Collect
-            </Button>
+            {isManuallyCollecting ? (
+                'Collecting... Please wait!'
+            ) : (
+                <Button variant="outlined" onClick={() => manuallyCollect()}>
+                    Manually Collect
+                </Button>
+            )}
         </>
     );
 };

@@ -42,10 +42,6 @@ export function getRedditLoginUrl() {
     return `${oauthBaseUrl}/auth/reddit`;
 }
 
-export function getRedditCollectUrl() {
-    return `${oauthBaseUrl}/agent/reddit/collect`;
-}
-
 export function getUser() {
     return fetch(`${baseUrl}/user`, {
         method: 'GET',
@@ -55,8 +51,8 @@ export function getUser() {
     });
 }
 
-export function getHistory() {
-    return fetch(`${baseUrl}/history`, {
+export function getHistory(limit) {
+    return fetch(`${baseUrl}/history?limit=${limit}`, {
         method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,
@@ -66,6 +62,24 @@ export function getHistory() {
 
 export function getRedditAgentDetails() {
     return fetch(`${baseUrl}/agent/reddit`, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function getRedditAgentCollect() {
+    return fetch(`${baseUrl}/agent/reddit/collect`, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function getDashboardData() {
+    return fetch(`${baseUrl}/ui/dashboard`, {
         method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,

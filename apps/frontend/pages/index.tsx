@@ -4,12 +4,13 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Link from '../src/Link';
-import { Button } from '@mui/material';
+import { Button, Divider } from '@mui/material';
+import { green, red } from '@mui/material/colors';
 
 const Home: NextPage = () => {
     return (
         <>
-            <div style={{ backgroundColor: '#8e0000', paddingBottom: 50, paddingTop: 10, marginBottom: 50 }}>
+            <div style={{ paddingBottom: 50, paddingTop: 10, marginBottom: 50 }}>
                 <Container maxWidth="sm">
                     <Box
                         sx={{
@@ -50,10 +51,9 @@ const Home: NextPage = () => {
                 </Container>
             </div>
 
-            <br />
-            <br />
+            <Divider />
 
-            <Container maxWidth="sm" sx={{ marginBottom: 20 }}>
+            <Container maxWidth="sm" sx={{ marginTop: 20, marginBottom: 20 }}>
                 <Typography
                     variant="h4"
                     component="h3"
@@ -86,7 +86,7 @@ const Home: NextPage = () => {
                 </Button>
             </Container>
 
-            <hr />
+            <Divider />
 
             <Container maxWidth="sm" sx={{ marginTop: 20, marginBottom: 20 }}>
                 <Typography
@@ -115,24 +115,20 @@ const Home: NextPage = () => {
                 </Button>
             </Container>
 
-            <br />
+            <Divider />
 
             <Box
                 component="footer"
                 sx={{
                     py: 3,
                     px: 2,
-                    mt: 'auto',
-                    backgroundColor: '#8e0000'
+                    mt: 'auto'
                 }}
             >
                 <Container maxWidth="sm">
                     <br />
                     <Typography variant="body1">Historian</Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <Link color="inherit" href="https://github.com/arkits/historian">
-                            About
-                        </Link>
                         <br />
                         <Link color="inherit" href="https://github.com/arkits/historian">
                             Github

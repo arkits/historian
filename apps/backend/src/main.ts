@@ -12,6 +12,8 @@ import router from './lib/router';
 import logRequest from './lib/controllers/requestLogger';
 import errorHandler from './lib/controllers/errorHandler';
 import redditOAuthRouter, { performRedditSync } from './lib/reddit';
+import { timeStart, version } from './lib/version';
+import * as compression from 'compression';
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
@@ -22,6 +24,8 @@ const app = express();
 app.disable('x-powered-by');
 
 app.use(express.json());
+
+app.use(compression());
 
 app.use(cookieParser());
 
@@ -62,5 +66,5 @@ cron.schedule('0 * * * *', function () {
 });
 
 app.listen(port, () => {
-    logger.info('Backend has started!', { port });
+    logger.info({ port, version, timeStart }, 'historian-backend has started!');
 });

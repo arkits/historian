@@ -11,14 +11,14 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import SearchIcon from '@mui/icons-material/Search';
 import Link from '../Link';
 import HistorianContext from '../../context/historian';
 import { getUser } from '../fetch';
-import { teal } from '@mui/material/colors';
+import { amber, teal } from '@mui/material/colors';
 
 const pages = [
     { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Timeline', href: '/timeline' },
     { name: 'Agents', href: '/agents' }
 ];
 const settings = [
@@ -109,7 +109,7 @@ const HistorianAppBar = () => {
     }, []);
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" color="primary" enableColorOnDark>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Typography

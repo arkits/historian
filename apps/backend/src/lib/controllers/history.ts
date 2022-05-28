@@ -21,10 +21,25 @@ export async function getHistory(request, response: Response, next: NextFunction
             return next({ message: 'User not found', code: 400 });
         }
 
-        const history = await getUserHistory(user, 50);
+        let limit = request.query.limit ? parseInt(request.query.limit) : 50;
+        if (limit > 50) {
+            limit = 50;
+        }
+
+        let skip = request.query.skip ? parseInt(request.query.skip) : 0;
+
+        let cursor = request.query.cursor ? request.query.cursor : null;
+
+        const history = await getUserHistory(user, limit, skip, cursor);
+
+        const data = {
+            history: history,
+            limit: limit,
+            skip: skip
+        };
 
         response.status(200);
-        response.json(history);
+        response.json(data);
     } catch (error) {
         logger.error(error, 'Failed to logout User!');
     }

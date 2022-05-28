@@ -10,13 +10,25 @@ export function getUserById(userId: string) {
     });
 }
 
-export function getUserHistory(user: User, take: number) {
-    return prisma.history.findMany({
+export function getUserHistory(user: User, take: number, skip: number, cursor?: string) {
+    const defaults = {
         where: {
             userId: user.id
         },
-        take: take
-    });
+        take: take,
+        skip: skip
+    };
+
+    if (cursor) {
+        return prisma.history.findMany({
+            ...defaults,
+            cursor: {
+                id: cursor
+            }
+        });
+    } else {
+        return prisma.history.findMany({ ...defaults });
+    }
 }
 
 export function getAllUsers() {
