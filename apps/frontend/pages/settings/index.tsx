@@ -13,7 +13,7 @@ const Settings: NextPage = () => {
     const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
-        isUserLoggedIn(router);
+        isUserLoggedIn(router, setUser);
     }, []);
     return (
         <>
