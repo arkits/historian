@@ -34,19 +34,34 @@ export const HistoryDetailsCard = ({ history }) => {
             <Card sx={{ display: 'flex' }}>
                 <Grid container spacing={0} sx={{ flex: '1', height: theme.spacing(25) }}>
                     <Grid item xs={9}>
-                        <CardContent>
-                            <Typography variant="body1" color="textPrimary" component="p">
-                                {getTitle(history)}
-                            </Typography>
-                            <CardHeader
-                                avatar={<Avatar>{getPrettyAvatar(history)}</Avatar>}
-                                subheader={getSubtitle(history)}
-                                style={{
-                                    paddingLeft: '0',
-                                    paddingBottom: '10px'
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: '100%'
+                            }}
+                        >
+                            <CardContent
+                                sx={{
+                                    flexGrow: '1',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-around'
                                 }}
-                            />
-                            <CardActions>
+                            >
+                                <Typography variant="body1" color="textPrimary" component="p">
+                                    {getTitle(history)}
+                                </Typography>
+                                <CardHeader
+                                    avatar={<Avatar>{getPrettyAvatar(history)}</Avatar>}
+                                    subheader={getSubtitle(history)}
+                                    style={{
+                                        paddingLeft: '0',
+                                        paddingBottom: '10px'
+                                    }}
+                                />
+                            </CardContent>
+                            <CardActions sx={{ paddingLeft: '12px' }}>
                                 <Button
                                     color="inherit"
                                     size="small"
@@ -93,7 +108,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                     Delete
                                 </Button>
                             </CardActions>
-                        </CardContent>
+                        </div>
                     </Grid>
                     <Grid item xs={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <a href={history?.content?.content_url} target={'_blank'}>
