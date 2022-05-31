@@ -32,7 +32,7 @@ export const HistoryDetailsCard = ({ history }) => {
     return (
         <div style={{ marginTop: '1rem' }}>
             <Card sx={{ display: 'flex' }}>
-                <Grid container spacing={0} sx={{ flex: '1', height: theme.spacing(20) }}>
+                <Grid container spacing={0} sx={{ flex: '1', height: theme.spacing(25) }}>
                     <Grid item xs={9}>
                         <CardContent>
                             <Typography variant="body1" color="textPrimary" component="p">
@@ -100,7 +100,7 @@ export const HistoryDetailsCard = ({ history }) => {
                             <Avatar
                                 variant="square"
                                 src={history?.content?.thumbnail}
-                                style={{ width: theme.spacing(22), height: '100%' }}
+                                style={{ width: theme.spacing(25), height: '100%' }}
                             ></Avatar>
                         </a>
                     </Grid>
