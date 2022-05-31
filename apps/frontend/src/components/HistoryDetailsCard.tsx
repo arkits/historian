@@ -8,6 +8,7 @@ import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useContext } from 'react';
+import { prettyDate } from '../dateFormat';
 
 export const HistoryDetailsCard = ({ history }) => {
     const { setSnackbarDetails } = useContext(HistorianContext);
@@ -23,7 +24,7 @@ export const HistoryDetailsCard = ({ history }) => {
                     /{history?.content?.subreddit} • {history?.content?.author}
                 </Typography>
                 <Typography variant="body2">
-                    Created: {new Date(history?.content?.created_utc * 1000).toDateString()}
+                    Posted: {prettyDate(new Date(history?.content?.created_utc * 1000))}
                 </Typography>
             </>
         );
@@ -53,7 +54,9 @@ export const HistoryDetailsCard = ({ history }) => {
                                     {getTitle(history)}
                                 </Typography>
                                 <CardHeader
-                                    avatar={<Avatar>{getPrettyAvatar(history)}</Avatar>}
+                                    avatar={
+                                        <Avatar sx={{ backgroundColor: '#B9C2C6' }}>{getPrettyAvatar(history)}</Avatar>
+                                    }
                                     subheader={getSubtitle(history)}
                                     style={{
                                         paddingLeft: '0',
@@ -115,7 +118,7 @@ export const HistoryDetailsCard = ({ history }) => {
                             <Avatar
                                 variant="square"
                                 src={history?.content?.thumbnail}
-                                style={{ width: theme.spacing(25), height: '100%' }}
+                                style={{ width: theme.spacing(25), height: '100%', backgroundColor: '#B9C2C6' }}
                             ></Avatar>
                         </a>
                     </Grid>

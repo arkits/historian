@@ -51,7 +51,7 @@ const UserOptions = ({ user }) => {
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
                         alt={user?.username.toUpperCase()}
-                        sx={{ backgroundColor: teal[500] }}
+                        sx={{ backgroundColor: teal.A400 }}
                         src="/static/images/avatar/2.jpg"
                     />
                 </IconButton>

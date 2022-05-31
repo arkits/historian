@@ -10,6 +10,9 @@ import { getHistory } from 'apps/frontend/src/fetch';
 import CircularProgress from '@mui/material/CircularProgress';
 import { HistoryDetailsCard } from 'apps/frontend/src/components/HistoryDetailsCard';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
+import { Card, Fab, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import CasinoIcon from '@mui/icons-material/Casino';
 
 const TimelinePage: NextPage = () => {
     const router = useRouter();
@@ -69,6 +72,49 @@ const TimelinePage: NextPage = () => {
                     >
                         Timeline
                     </Typography>
+
+                    <Card
+                        sx={{
+                            padding: '1rem',
+                            marginBottom: '1rem'
+                        }}
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={6} md={6}>
+                                <TextField id="outlined-basic" label="Search History" variant="outlined" fullWidth />
+                            </Grid>
+                            <Grid item xs={6} md={2}>
+                                <FormControl fullWidth>
+                                    <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        value={10}
+                                        label="Age"
+                                    >
+                                        <MenuItem value={10}>Reddit</MenuItem>
+                                        <MenuItem value={20}>Spotify</MenuItem>
+                                        <MenuItem value={30}>YouTube</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid
+                                item
+                                xs={6}
+                                md={4}
+                                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <Fab color="secondary" variant="extended" aria-label="add" sx={{ marginRight: '12px' }}>
+                                    <SearchIcon />
+                                    Search
+                                </Fab>
+                                <Fab variant="extended" aria-label="randomize">
+                                    <CasinoIcon />
+                                    Randomize
+                                </Fab>
+                            </Grid>
+                        </Grid>
+                    </Card>
 
                     <HistoryTimeline histories={data.history} />
                 </Box>
