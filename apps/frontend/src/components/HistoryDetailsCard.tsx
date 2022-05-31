@@ -7,11 +7,14 @@ import theme from '../theme';
 import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
 import HistorianContext from 'apps/frontend/context/historian';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { prettyDate } from '../dateFormat';
+import clsx from 'clsx';
 
 export const HistoryDetailsCard = ({ history }) => {
     const { setSnackbarDetails } = useContext(HistorianContext);
+
+    const [showActions, setShowActions] = useState(false);
 
     const getTitle = (history) => {
         return history?.content?.title ?? 'NO TITLE';
@@ -32,7 +35,11 @@ export const HistoryDetailsCard = ({ history }) => {
 
     return (
         <div style={{ marginTop: '1rem' }}>
-            <Card sx={{ display: 'flex' }}>
+            <Card
+                sx={{ display: 'flex' }}
+                onMouseEnter={() => setShowActions(true)}
+                onMouseLeave={() => setShowActions(false)}
+            >
                 <Grid container spacing={0} sx={{ flex: '1', height: theme.spacing(25) }}>
                     <Grid item xs={9}>
                         <div
@@ -64,7 +71,9 @@ export const HistoryDetailsCard = ({ history }) => {
                                     }}
                                 />
                             </CardContent>
-                            <CardActions sx={{ paddingLeft: '12px' }}>
+                            <CardActions
+                                sx={{ paddingLeft: '12px', visibility: `${showActions ? 'visible' : 'hidden'}` }}
+                            >
                                 <Button
                                     color="inherit"
                                     size="small"
