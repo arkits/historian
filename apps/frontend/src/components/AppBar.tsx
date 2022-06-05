@@ -13,8 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Link from '../Link';
 import HistorianContext from '../../context/historian';
-import { getUser } from '../fetch';
-import { amber, teal } from '@mui/material/colors';
+import { teal } from '@mui/material/colors';
 
 const pages = [
     { name: 'Dashboard', href: '/dashboard' },

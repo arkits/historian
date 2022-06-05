@@ -35,13 +35,14 @@ export async function getHistory(request, response: Response, next: NextFunction
         const data = {
             history: history,
             limit: limit,
-            skip: skip
+            skip: skip,
+            nextCursor: history.length === limit ? history[history.length - 1].id : null
         };
 
         response.status(200);
         response.json(data);
     } catch (error) {
-        logger.error(error, 'Failed to logout User!');
+        logger.error(error, 'Failed to Get History!');
     }
 }
 

@@ -40,7 +40,7 @@ export const HistoryDetailsCard = ({ history }) => {
                 onMouseEnter={() => setShowActions(true)}
                 onMouseLeave={() => setShowActions(false)}
             >
-                <Grid container spacing={0} sx={{ flex: '1', height: theme.spacing(25) }}>
+                <Grid container spacing={0} sx={{ flex: '1', height: '100%' }}>
                     <Grid item xs={9}>
                         <div
                             style={{

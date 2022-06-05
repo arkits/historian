@@ -1,10 +1,10 @@
 export const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
 
-// const baseUrl = process.env.BASE_URL || '/api';
-// const oauthBaseUrl = process.env.OAUTH_BASE_URL || 'http://localhost:3333';
-const baseUrl = 'https://historian-api.archit.xyz/api';
-const oauthBaseUrl = 'https://historian-api.archit.xyz';
+export const baseUrl = process.env.BASE_URL || '/api';
+export const oauthBaseUrl = process.env.OAUTH_BASE_URL || 'http://localhost:3333';
+// export const baseUrl = 'https://historian-api.archit.xyz/api';
+// export const oauthBaseUrl = 'https://historian-api.archit.xyz';
 
 export function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
@@ -51,8 +51,8 @@ export function getUser() {
     });
 }
 
-export function getHistory(limit) {
-    return fetch(`${baseUrl}/history?limit=${limit}`, {
+export function getHistory(cursor: string, limit: number) {
+    return fetch(`${baseUrl}/history?cursor=${cursor}&limit=${limit}`, {
         method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,

@@ -26,17 +26,19 @@ import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 function RecentHistoryList({ history }) {
     return (
         <List sx={{ width: '100%' }}>
-            {history.map((item) => (
-                <>
-                    <ListItem alignItems="flex-start">
-                        <ListItemAvatar>
-                            <Avatar>{getPrettyAvatar(item)}</Avatar>
-                        </ListItemAvatar>
-                        <ListItemText primary={item?.content?.title} secondary={item?.content?.subreddit} />
-                    </ListItem>
-                    <Divider variant="inset" component="li" />
-                </>
-            ))}
+            {history
+                .map((item) => (
+                    <>
+                        <ListItem alignItems="flex-start">
+                            <ListItemAvatar>
+                                <Avatar>{getPrettyAvatar(item)}</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary={item?.content?.title} secondary={item?.content?.subreddit} />
+                        </ListItem>
+                        <Divider variant="inset" component="li" />
+                    </>
+                ))
+                .slice(0, 10)}
         </List>
     );
 }
@@ -53,8 +55,8 @@ const Dashboard: NextPage = () => {
         return await getDashboardData().then((res) => res.json());
     });
 
-    const historyQuery = useQuery('history', async () => {
-        return await getHistory(5).then((res) => res.json());
+    const historyQuery = useQuery('dashboardHistory', async () => {
+        return await getHistory('', 10).then((res) => res.json());
     });
 
     if (dashboardDataQuery.isLoading) {

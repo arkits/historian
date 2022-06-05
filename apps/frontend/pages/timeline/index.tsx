@@ -5,14 +5,15 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
-import { useQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 import { getHistory } from 'apps/frontend/src/fetch';
-import CircularProgress from '@mui/material/CircularProgress';
 import { HistoryDetailsCard } from 'apps/frontend/src/components/HistoryDetailsCard';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { Card, Fab, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CasinoIcon from '@mui/icons-material/Casino';
+import LoadingButton from '@mui/lab/LoadingButton';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const TimelinePage: NextPage = () => {
     const router = useRouter();
@@ -22,36 +23,22 @@ const TimelinePage: NextPage = () => {
     }, []);
 
     // Queries
-    const { isLoading, error, data, isFetching } = useQuery('history', async () => {
-        return await getHistory(50).then((res) => res.json());
-    });
+    const [cursor, setCursor] = React.useState('');
 
-    if (isLoading || isFetching) {
-        return (
-            <>
-                <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
-                    <Container maxWidth="sm">
-                        <CircularProgress size={60} />
-                        <br />
-                        <br />
-                        <h2>Loading...</h2>
-                    </Container>
-                </div>
-            </>
-        );
-    }
+    const fetchHistory = ({ pageParam = '' }) => {
+        console.log('pageParam', pageParam);
+        return getHistory(pageParam, 50).then((res) => res.json());
+    };
 
-    if (error || !data) {
-        return (
-            <>
-                <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
-                    <Container maxWidth="sm">
-                        <h3>Error</h3>
-                    </Container>
-                </div>
-            </>
-        );
-    }
+    const { isLoading, isError, error, data, fetchNextPage, isFetching, isFetchingNextPage } = useInfiniteQuery(
+        ['history'],
+        fetchHistory,
+        {
+            getNextPageParam: (lastPage, pages) => {
+                return lastPage?.nextCursor;
+            }
+        }
+    );
 
     return (
         <>
@@ -116,15 +103,27 @@ const TimelinePage: NextPage = () => {
                         </Grid>
                     </Card>
 
-                    <HistoryTimeline histories={data.history} />
+                    <HistoryTimeline data={data} />
+
+                    <LoadingButton
+                        size="large"
+                        onClick={() => fetchNextPage()}
+                        endIcon={<RefreshIcon />}
+                        loading={isLoading || isFetching}
+                        loadingPosition="end"
+                        variant="contained"
+                        sx={{ marginTop: '2rem' }}
+                    >
+                        Load More
+                    </LoadingButton>
                 </Box>
             </Container>
         </>
     );
 };
 
-const HistoryTimeline = ({ histories }) => {
-    if (!histories || histories.length === 0) {
+const HistoryTimeline = ({ data }) => {
+    if (!data?.pages || data?.pages.length === 0) {
         return (
             <div style={{ textAlign: 'center' }}>
                 <Container maxWidth="sm">
@@ -135,9 +134,9 @@ const HistoryTimeline = ({ histories }) => {
     } else {
         return (
             <>
-                {histories?.map((history) => (
-                    <HistoryDetailsCard key={history.id} history={history} />
-                ))}
+                {data.pages?.map((group, i) =>
+                    group.history.map((history) => <HistoryDetailsCard key={history.id} history={history} />)
+                )}
             </>
         );
     }
