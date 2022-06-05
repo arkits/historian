@@ -8,6 +8,7 @@ import { Alert, Button, Checkbox, FormControlLabel, Grid, TextField } from '@mui
 import { useRouter } from 'next/router';
 import HistorianContext from 'apps/frontend/context/historian';
 import { userLogin } from 'apps/frontend/src/fetch';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
 
 const LoginError = ({ error }) => {
     if (!error) {
@@ -61,7 +62,7 @@ const Login: NextPage = () => {
                     alignItems: 'center'
                 }}
             >
-                <Typography variant="h3" component="h1" gutterBottom sx={{ fontFamily: 'Playfair Display SC, serif' }}>
+                <Typography variant="h3" component="h1" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                     Login
                 </Typography>
 

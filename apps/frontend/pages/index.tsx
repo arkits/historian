@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Link from '../src/Link';
 import { Button, Divider } from '@mui/material';
-import { green, red } from '@mui/material/colors';
+import { FONT_LOGO } from '../src/constants';
 
 const Home: NextPage = () => {
     return (
@@ -22,13 +22,8 @@ const Home: NextPage = () => {
                         }}
                     >
                         <div style={{ marginTop: '5rem', textAlign: 'center' }}>
-                            <Typography
-                                variant="h2"
-                                component="h1"
-                                gutterBottom
-                                sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 'bold' }}
-                            >
-                                #NeverForget
+                            <Typography variant="h1" component="h1" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
+                                Never Forget
                             </Typography>
                             <Typography variant="h5" component="h5" gutterBottom>
                                 Historian is an open-source app that gathers and archives your all your data from around
@@ -54,12 +49,7 @@ const Home: NextPage = () => {
             <Divider />
 
             <Container maxWidth="sm" sx={{ marginTop: 20, marginBottom: 20 }}>
-                <Typography
-                    variant="h4"
-                    component="h3"
-                    gutterBottom
-                    sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 'bold' }}
-                >
+                <Typography variant="h4" component="h3" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                     Supported Services
                 </Typography>
 
@@ -89,12 +79,7 @@ const Home: NextPage = () => {
             <Divider />
 
             <Container maxWidth="sm" sx={{ marginTop: 20, marginBottom: 20 }}>
-                <Typography
-                    variant="h4"
-                    component="h3"
-                    gutterBottom
-                    sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 'bold' }}
-                >
+                <Typography variant="h4" component="h3" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                     Open Source
                 </Typography>
 
@@ -125,21 +110,22 @@ const Home: NextPage = () => {
                     mt: 'auto'
                 }}
             >
-                <Container maxWidth="sm">
-                    <br />
-                    <Typography variant="body1">Historian</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        <br />
-                        <Link color="inherit" href="https://github.com/arkits/historian">
-                            Github
-                        </Link>
-                        <br />
-                        <Link color="inherit" href="https://github.com/arkits/historian">
-                            Privacy Policy
-                        </Link>
-                    </Typography>
-                    <br />
-                    <br />
+                <Container maxWidth="sm" sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+                    <Box>
+                        <Typography variant="h4" sx={{ fontFamily: FONT_LOGO }}>
+                            Historian
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            <br />
+                            <Link color="inherit" href="https://github.com/arkits/historian">
+                                Github
+                            </Link>
+                            <br />
+                            <Link color="inherit" href="https://github.com/arkits/historian">
+                                Privacy Policy
+                            </Link>
+                        </Typography>
+                    </Box>
                 </Container>
             </Box>
         </>

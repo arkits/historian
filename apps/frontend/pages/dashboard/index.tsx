@@ -22,6 +22,8 @@ import Avatar from '@mui/material/Avatar';
 import { getPrettyAvatar } from 'apps/frontend/src/historyUtils';
 import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
+import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 
 function RecentHistoryList({ history }) {
     return (
@@ -97,15 +99,7 @@ const Dashboard: NextPage = () => {
                         justifyContent: 'center'
                     }}
                 >
-                    <Typography
-                        variant="h4"
-                        component="h1"
-                        gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4, fontWeight: 'bold' }}
-                    >
-                        Dashboard
-                    </Typography>
-
+                    <PageTitle>Dashboard</PageTitle>
                     <Card>
                         <CardContent>
                             <Typography sx={{ fontSize: 14, mb: 2 }} color="text.secondary" gutterBottom>

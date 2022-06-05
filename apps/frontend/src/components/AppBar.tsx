@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Link from '../Link';
 import HistorianContext from '../../context/historian';
 import { teal } from '@mui/material/colors';
+import { FONT_LOGO } from '../constants';
 
 const pages = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -101,17 +102,17 @@ const HistorianAppBar = () => {
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Typography
-                        variant="h5"
+                        variant="h4"
                         noWrap
                         component="a"
                         href="/"
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'Playfair Display SC, serif',
-                            fontWeight: 700,
+                            fontFamily: FONT_LOGO,
                             color: 'inherit',
-                            textDecoration: 'none'
+                            textDecoration: 'none',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
                         }}
                     >
                         Historian
@@ -161,8 +162,7 @@ const HistorianAppBar = () => {
                             mr: 2,
                             display: { xs: 'flex', md: 'none' },
                             flexGrow: 1,
-                            fontFamily: 'Playfair Display SC, serif',
-                            fontWeight: 700,
+                            fontFamily: FONT_LOGO,
                             color: 'inherit',
                             textDecoration: 'none'
                         }}

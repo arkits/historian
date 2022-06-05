@@ -5,3 +5,5 @@
 // for production...
 export const baseUrl = 'https://historian-api.archit.xyz/api';
 export const oauthBaseUrl = 'https://historian-api.archit.xyz';
+
+export const FONT_LOGO = 'Pirata One, cursive';

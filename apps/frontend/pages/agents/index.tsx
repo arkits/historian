@@ -11,6 +11,9 @@ import { useQuery } from 'react-query';
 import { formatDistance } from 'date-fns';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { useContext, useEffect, useState } from 'react';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
+import { PageTitle } from 'apps/frontend/src/components/PageTitle';
+import { Divider } from '@mui/material';
 
 const RedditAgent = () => {
     // Queries
@@ -57,15 +60,9 @@ const RedditAgent = () => {
 
     return (
         <>
-            <Typography
-                variant="h5"
-                component="h2"
-                gutterBottom
-                sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 700 }}
-            >
+            <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                 Reddit
             </Typography>
-            <br />
             <AgentDetails />
             <Button variant="contained" component={Link} noLinkStyle href={getRedditLoginUrl()} target={'_blank'}>
                 Login with Reddit
@@ -78,6 +75,10 @@ const RedditAgent = () => {
                     Manually Collect
                 </Button>
             )}
+
+            <br />
+
+            <Divider />
         </>
     );
 };
@@ -101,14 +102,7 @@ const Agents: NextPage = () => {
                         justifyContent: 'center'
                     }}
                 >
-                    <Typography
-                        variant="h4"
-                        component="h1"
-                        gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif', fontWeight: 700, mb: 4 }}
-                    >
-                        Agents
-                    </Typography>
+                    <PageTitle>Agents</PageTitle>
 
                     <RedditAgent />
                 </Box>

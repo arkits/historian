@@ -14,6 +14,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import CasinoIcon from '@mui/icons-material/Casino';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
+import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 
 const TimelinePage: NextPage = () => {
     const router = useRouter();
@@ -51,14 +53,7 @@ const TimelinePage: NextPage = () => {
                         justifyContent: 'center'
                     }}
                 >
-                    <Typography
-                        variant="h4"
-                        component="h1"
-                        gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4, fontWeight: 'bold' }}
-                    >
-                        Timeline
-                    </Typography>
+                    <PageTitle>Timeline</PageTitle>
 
                     <Card
                         sx={{

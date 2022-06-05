@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
+import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 
 const Settings: NextPage = () => {
     const router = useRouter();
@@ -27,21 +29,9 @@ const Settings: NextPage = () => {
                         justifyContent: 'center'
                     }}
                 >
-                    <Typography
-                        variant="h4"
-                        component="h1"
-                        gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif', mb: 4 }}
-                    >
-                        Settings
-                    </Typography>
+                    <PageTitle>Settings</PageTitle>
 
-                    <Typography
-                        variant="h5"
-                        component="h2"
-                        gutterBottom
-                        sx={{ fontFamily: 'Playfair Display SC, serif' }}
-                    >
+                    <Typography variant="h5" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                         General
                     </Typography>
                     <Typography variant="body1" component="p" gutterBottom>

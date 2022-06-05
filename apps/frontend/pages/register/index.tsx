@@ -9,6 +9,7 @@ import HistorianContext from 'apps/frontend/context/historian';
 import { userRegister } from 'apps/frontend/src/fetch';
 import { ErrorBanner } from 'apps/frontend/src/components/ErrorBanner';
 import Link from 'apps/frontend/src/Link';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
 
 const Register: NextPage = () => {
     const router = useRouter();
@@ -49,7 +50,7 @@ const Register: NextPage = () => {
                     alignItems: 'center'
                 }}
             >
-                <Typography variant="h3" component="h1" gutterBottom sx={{ fontFamily: 'Playfair Display SC, serif' }}>
+                <Typography variant="h3" component="h1" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                     Register
                 </Typography>
 
