@@ -24,10 +24,22 @@ export function getUserHistory(user: User, take: number, skip: number, cursor?: 
             ...defaults,
             cursor: {
                 id: cursor
-            }
+            },
+            orderBy: [
+                {
+                    createdAt: 'desc'
+                }
+            ]
         });
     } else {
-        return prisma.history.findMany({ ...defaults });
+        return prisma.history.findMany({
+            ...defaults,
+            orderBy: [
+                {
+                    createdAt: 'desc'
+                }
+            ]
+        });
     }
 }
 
