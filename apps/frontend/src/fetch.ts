@@ -1,10 +1,7 @@
+import { baseUrl, oauthBaseUrl } from './constants';
+
 export const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
-
-export const baseUrl = process.env.BASE_URL || '/api';
-export const oauthBaseUrl = process.env.OAUTH_BASE_URL || 'http://localhost:3333';
-// export const baseUrl = 'https://historian-api.archit.xyz/api';
-// export const oauthBaseUrl = 'https://historian-api.archit.xyz';
 
 export function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
