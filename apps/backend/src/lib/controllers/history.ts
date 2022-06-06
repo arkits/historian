@@ -34,20 +34,30 @@ export async function getHistory(request, response: Response, next: NextFunction
 
         let cursor = request.query.cursor ? request.query.cursor : null;
 
-        logger.info({ user: user.username, limit, skip, cursor, search, type }, 'Getting History');
-        const history = await getUserHistory(user, limit, skip, cursor, search, type);
+        try {
+            logger.info({ user: user.username, limit, skip, cursor, search, type }, 'Getting History');
+            const history = await getUserHistory(user, limit, skip, cursor, search, type);
 
-        const data = {
-            history: history,
-            limit: limit,
-            skip: skip,
-            nextCursor: history.length === limit ? history[history.length - 1].id : null
-        };
+            const data = {
+                history: history,
+                limit: limit,
+                skip: skip,
+                nextCursor: history.length === limit ? history[history.length - 1].id : null
+            };
 
-        response.status(200);
-        response.json(data);
+            response.status(200);
+            response.json(data);
+        } catch (error) {
+            logger.error(error, 'Caught Error in Get History!');
+            response.status(200);
+            response.json({
+                history: [],
+                nextCursor: null
+            });
+        }
     } catch (error) {
         logger.error(error, 'Failed to Get History!');
+        return next({ message: 'Failed to Get History', code: 500, description: error.message });
     }
 }
 

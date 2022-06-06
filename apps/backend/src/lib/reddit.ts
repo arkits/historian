@@ -40,7 +40,7 @@ export async function performRedditSync() {
 }
 
 function generateSearchContent(post, type, user) {
-    return `${post['title']} ${post['author']['name']} ${post['url']} ${post['permalink']} ${post['selftext']}`;
+    return `${post['title']} ${post['author']['name']} ${post['subreddit']} ${post['url']} ${post['permalink']} ${post['selftext']}`;
 }
 
 function upsertPostToHistory(post, type, user) {
