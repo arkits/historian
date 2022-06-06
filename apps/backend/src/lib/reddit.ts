@@ -4,7 +4,6 @@ import logger from './logger';
 import * as snoowrap from 'snoowrap';
 import { PrismaClient } from '@prisma/client';
 import { getAllUsers } from './db';
-import { lstatSync } from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -171,28 +170,33 @@ redditRouter.get('/api/agent/reddit', async (req, res, next) => {
                 return next({ message: 'User not found', code: 400 });
             }
 
-            const redditPrefs = user.preferences['reddit'];
+            try {
+                const redditPrefs = user.preferences['reddit'];
 
-            if (!redditPrefs) {
-                return next({ message: 'User has no reddit preferences', code: 400 });
-            }
-
-            const historyTotal = await prisma.history.count({
-                where: {
-                    userId: user.id
+                if (!redditPrefs) {
+                    return next({ message: 'No Reddit preferences found. Please setup Agent.', code: 400 });
                 }
-            });
 
-            let response = {
-                redditUsername: redditPrefs['username'],
-                lastSync: redditPrefs['lastSync'],
-                historyTotal: historyTotal
-            };
+                const historyTotal = await prisma.history.count({
+                    where: {
+                        userId: user.id
+                    }
+                });
 
-            res.status(200);
-            res.json(response);
+                let response = {
+                    connected: true,
+                    redditUsername: redditPrefs['username'],
+                    lastSync: redditPrefs['lastSync'],
+                    historyTotal: historyTotal
+                };
+
+                res.status(200);
+                res.json(response);
+            } catch (error) {
+                return next({ message: 'No Reddit preferences found. Please setup Agent.', code: 400 });
+            }
         } catch (error) {
-            return next({ message: 'Error in collecting Saved', code: 400, description: error.message });
+            return next({ message: 'Error in /api/agent/reddit', code: 400, description: error.message });
         }
     } else {
         return next({ message: 'User not logged in', code: 400 });
@@ -238,7 +242,7 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
     }
 
     res.status(200);
-    res.json({ message: 'OK' });
+    res.send('Reddit OAuth flow completed! Please return to Historian.');
 });
 
 export default redditRouter;

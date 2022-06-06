@@ -24,21 +24,34 @@ const RedditAgent = () => {
     });
 
     const AgentDetails = () => {
-        if (query?.data?.redditUsername) {
-            return (
-                <Typography variant="body1" component="p" gutterBottom>
-                    Reddit Username: /u/{query?.data?.redditUsername} <br />
-                    Last Refreshed:{' '}
-                    {formatDistance(new Date(query?.data?.lastSync), new Date(), {
-                        addSuffix: true
-                    })}{' '}
-                    // {prettyDate(new Date(query?.data?.lastSync))}
-                    <br />
-                    <br />
-                    Total Saved: {query?.data?.historyTotal} <br />
-                    <br />
-                </Typography>
-            );
+        if (query?.data?.error) {
+            return <Box sx={{ mb: 4 }}>{query.data.error}</Box>;
+        }
+
+        if (query?.data?.connected) {
+            if (query?.data?.redditUsername) {
+                return (
+                    <Typography variant="body1" component="p" gutterBottom>
+                        Reddit Username: /u/{query?.data?.redditUsername} <br />
+                        Last Refreshed:{' '}
+                        {formatDistance(new Date(query?.data?.lastSync), new Date(), {
+                            addSuffix: true
+                        })}{' '}
+                        // {prettyDate(new Date(query?.data?.lastSync))}
+                        <br />
+                        <br />
+                        Total Saved: {query?.data?.historyTotal} <br />
+                        <br />
+                    </Typography>
+                );
+            } else {
+                return (
+                    <Typography variant="body1" component="p" gutterBottom>
+                        Connected, waiting for initial sync
+                        <br /> <br />
+                    </Typography>
+                );
+            }
         } else {
             return <></>;
         }
@@ -54,7 +67,6 @@ const RedditAgent = () => {
             .then((response) => {
                 setIsManuallyCollecting(false);
                 setConnectionTestResult(response);
-                // window.location.reload();
             })
             .catch((err) => {
                 setIsManuallyCollecting(false);
