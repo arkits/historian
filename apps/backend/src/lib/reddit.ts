@@ -40,7 +40,7 @@ export async function performRedditSync() {
 }
 
 function generateSearchContent(post, type, user) {
-    return `${post['title']} ${post['author']['name']} ${post['subreddit']} ${post['url']} ${post['permalink']} ${post['selftext']}`;
+    return `${post['title']} ${post['author']['name']} ${post?.['subreddit']?.['display_name']} ${post['url']} ${post['permalink']} ${post['selftext']}`;
 }
 
 function upsertPostToHistory(post, type, user) {
@@ -96,6 +96,10 @@ async function performRedditSyncForUser(user, fetchAll = false) {
         clientSecret: process.env.REDDIT_APP_SECRET,
         accessToken: user.preferences['reddit']['accessToken']['token']['access_token'],
         refreshToken: user.preferences['reddit']['accessToken']['token']['refresh_token']
+    });
+
+    r.config({
+        requestDelay: 1000
     });
 
     let response = {
