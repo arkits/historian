@@ -27,3 +27,13 @@ export const getPrettyAvatar = (history) => {
         return <DescriptionIcon />;
     }
 };
+
+export const getSubtitleText = (history) => {
+    switch (history?.type) {
+        case 'reddit-saved':
+        case 'reddit-upvoted':
+            return `${getPrettyType(history?.type)} • /${history?.content?.subreddit} • ${history?.content?.author}`;
+        default:
+            return `${getPrettyType(history?.type)} • ${history?.content?.author}`;
+    }
+};

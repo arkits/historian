@@ -2,7 +2,7 @@ import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Grid, Typog
 import DeleteIcon from '@mui/icons-material/Delete';
 import LaunchIcon from '@mui/icons-material/Launch';
 import InfoIcon from '@mui/icons-material/Info';
-import { getPrettyAvatar, getPrettyType } from '../historyUtils';
+import { getPrettyAvatar, getSubtitleText } from '../historyUtils';
 import theme from '../theme';
 import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
@@ -22,9 +22,7 @@ export const HistoryDetailsCard = ({ history }) => {
     const getSubtitle = (history) => {
         return (
             <>
-                <Typography variant="body2">
-                    {getPrettyType(history?.type)} • /{history?.content?.subreddit} • {history?.content?.author}
-                </Typography>
+                <Typography variant="body2">{getSubtitleText(history)}</Typography>
                 <Typography variant="body2">
                     Posted: {prettyDate(new Date(history?.content?.created_utc * 1000))}
                 </Typography>
@@ -71,7 +69,12 @@ export const HistoryDetailsCard = ({ history }) => {
                                 />
                             </CardContent>
                             <CardActions
-                                sx={{ paddingLeft: '12px', visibility: `${showActions ? 'visible' : 'hidden'}` }}
+                                sx={{
+                                    paddingLeft: '12px',
+                                    // visibility: `${showActions ? 'visible' : 'hidden'}`,
+                                    opacity: `${showActions ? '1' : '0'}`,
+                                    transition: 'opacity 0.1s ease-in-out'
+                                }}
                             >
                                 <Button
                                     color="inherit"

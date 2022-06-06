@@ -19,11 +19,11 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import { getPrettyAvatar } from 'apps/frontend/src/historyUtils';
+import { getPrettyAvatar, getSubtitleText } from 'apps/frontend/src/historyUtils';
 import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
-import { FONT_LOGO } from 'apps/frontend/src/constants';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
+import Link from 'apps/frontend/src/Link';
 
 function RecentHistoryList({ history }) {
     return (
@@ -31,12 +31,12 @@ function RecentHistoryList({ history }) {
             {history
                 .map((item) => (
                     <>
-                        <ListItemButton component="a" href={`/history/${item?.id}`}>
+                        <ListItemButton component={Link} href={`/history/${item?.id}`}>
                             <ListItem alignItems="flex-start">
                                 <ListItemAvatar>
                                     <Avatar>{getPrettyAvatar(item)}</Avatar>
                                 </ListItemAvatar>
-                                <ListItemText primary={item?.content?.title} secondary={item?.content?.subreddit} />
+                                <ListItemText primary={item?.content?.title} secondary={getSubtitleText(item)} />
                             </ListItem>
                         </ListItemButton>
                     </>
