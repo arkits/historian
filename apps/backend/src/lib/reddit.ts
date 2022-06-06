@@ -111,6 +111,7 @@ async function performRedditSyncForUser(user, fetchAll = false) {
     if (fetchAll) {
         savedPosts = await savedPosts.fetchAll();
     }
+    savedPosts.reverse();
 
     response.savedPosts.fetched += savedPosts.length;
 
@@ -125,6 +126,7 @@ async function performRedditSyncForUser(user, fetchAll = false) {
     if (fetchAll) {
         upvotedPosts = await upvotedPosts.fetchAll();
     }
+    upvotedPosts.reverse();
 
     response.savedPosts.fetched += upvotedPosts.length;
 

@@ -7,10 +7,11 @@
         "build": "nx build",
         "test": "nx test",
         "dev": "nx run-many --target=serve --projects=frontend,backend",
-        "dev:frontend": "nx serve --project frontend",
-        "dev:backend": "nx serve --project backend | pino-pretty",
         "build:frontend": "nx export frontend",
-        "serve:backend": "nx serve --project backend"
+        "frontend:dev": "nx serve --project frontend",
+        "backend:dev": "nx serve --project backend | pino-pretty",
+        "backend:build:prod": "nx build --target=build:production --project backend",
+        "backend:run:prod": "node dist/apps/backend/main.js"
     },
     "private": true,
     "devDependencies": {
@@ -73,6 +74,8 @@
         "next": "12.1.5",
         "node-cron": "^3.0.0",
         "pino": "^7.11.0",
+        "pino-multi-stream": "^6.0.0",
+        "pino-pretty": "^8.0.0",
         "react": "18.1.0",
         "react-dom": "18.1.0",
         "react-query": "^3.39.0",
