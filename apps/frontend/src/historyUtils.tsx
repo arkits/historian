@@ -3,10 +3,23 @@ import RedditIcon from '@mui/icons-material/Reddit';
 import DescriptionIcon from '@mui/icons-material/Description';
 import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
 
+export const getPrettyType = (type) => {
+    switch (type) {
+        case 'reddit-saved':
+            return 'Saved';
+        case 'reddit-upvoted':
+            return 'Upvoted';
+        default:
+            return type;
+    }
+};
+
 export const getPrettyAvatar = (history) => {
     if (history?.type === 'instagram') {
         return <InstagramIcon />;
-    } else if (history?.type === 'reddit') {
+    } else if (history?.type === 'reddit-saved') {
+        return <RedditIcon />;
+    } else if (history?.type === 'reddit-upvoted') {
         return <RedditIcon />;
     } else if (history?.type === 'lastfm') {
         return <MusicNoteRoundedIcon />;

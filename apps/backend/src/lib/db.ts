@@ -10,7 +10,14 @@ export function getUserById(userId: string) {
     });
 }
 
-export function getUserHistory(user: User, take: number, skip: number, cursor?: string) {
+export function getUserHistory(
+    user: User,
+    take: number,
+    skip: number,
+    cursor?: string,
+    search?: string,
+    type?: string
+) {
     const defaults = {
         where: {
             userId: user.id
@@ -18,6 +25,18 @@ export function getUserHistory(user: User, take: number, skip: number, cursor?: 
         take: take,
         skip: skip
     };
+
+    if (search !== '') {
+        defaults.where['searchContent'] = {
+            search: search
+        };
+    }
+
+    if (type !== '' && type !== 'all') {
+        defaults.where['type'] = {
+            equals: type
+        };
+    }
 
     if (cursor) {
         return prisma.history.findMany({

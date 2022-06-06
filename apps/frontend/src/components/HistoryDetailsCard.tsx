@@ -2,14 +2,13 @@ import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Grid, Typog
 import DeleteIcon from '@mui/icons-material/Delete';
 import LaunchIcon from '@mui/icons-material/Launch';
 import InfoIcon from '@mui/icons-material/Info';
-import { getPrettyAvatar } from '../historyUtils';
+import { getPrettyAvatar, getPrettyType } from '../historyUtils';
 import theme from '../theme';
 import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useContext, useState } from 'react';
 import { prettyDate } from '../dateFormat';
-import clsx from 'clsx';
 
 export const HistoryDetailsCard = ({ history }) => {
     const { setSnackbarDetails } = useContext(HistorianContext);
@@ -24,7 +23,7 @@ export const HistoryDetailsCard = ({ history }) => {
         return (
             <>
                 <Typography variant="body2">
-                    /{history?.content?.subreddit} • {history?.content?.author}
+                    {getPrettyType(history?.type)} • /{history?.content?.subreddit} • {history?.content?.author}
                 </Typography>
                 <Typography variant="body2">
                     Posted: {prettyDate(new Date(history?.content?.created_utc * 1000))}

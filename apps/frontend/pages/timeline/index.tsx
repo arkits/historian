@@ -27,20 +27,25 @@ const TimelinePage: NextPage = () => {
     // Queries
     const [cursor, setCursor] = React.useState('');
 
+    const [pageSize, setPageSize] = React.useState(50);
+    const [historyType, setHistoryType] = React.useState('all');
+    const [searchTerm, setSearchTerm] = React.useState('');
+
     const fetchHistory = ({ pageParam = '' }) => {
         console.log('pageParam', pageParam);
-        return getHistory(pageParam, 50).then((res) => res.json());
+        return getHistory(pageParam, pageSize, searchTerm, historyType).then((res) => res.json());
     };
 
-    const { isLoading, isError, error, data, fetchNextPage, isFetching, isFetchingNextPage } = useInfiniteQuery(
-        ['history'],
-        fetchHistory,
-        {
+    const { isLoading, isError, error, data, fetchNextPage, isFetching, isFetchingNextPage, refetch } =
+        useInfiniteQuery(['history'], fetchHistory, {
             getNextPageParam: (lastPage, pages) => {
                 return lastPage?.nextCursor;
             }
-        }
-    );
+        });
+
+    const handleSearchClick = () => {
+        refetch();
+    };
 
     return (
         <>
@@ -63,20 +68,29 @@ const TimelinePage: NextPage = () => {
                     >
                         <Grid container spacing={2}>
                             <Grid item xs={6} md={6}>
-                                <TextField id="outlined-basic" label="Search History" variant="outlined" fullWidth />
+                                <TextField
+                                    id="outlined-basic"
+                                    label="Search History"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </Grid>
                             <Grid item xs={6} md={2}>
                                 <FormControl fullWidth>
-                                    <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                                    <InputLabel id="history-type-select-label">Type</InputLabel>
                                     <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        value={10}
-                                        label="Age"
+                                        labelId="history-type-select-label"
+                                        id="history-type-select"
+                                        value={historyType}
+                                        label="Type"
+                                        onChange={(e) => setHistoryType(e.target.value)}
                                     >
-                                        <MenuItem value={10}>Reddit</MenuItem>
-                                        <MenuItem value={20}>Spotify</MenuItem>
-                                        <MenuItem value={30}>YouTube</MenuItem>
+                                        <MenuItem value={'all'}>All</MenuItem>
+                                        <MenuItem value={'reddit-saved'}>Reddit Saved</MenuItem>
+                                        <MenuItem value={'reddit-upvoted'}>Reddit Upvoted</MenuItem>
+                                        <MenuItem value={'youtube-liked'}>YouTube Liked</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -86,7 +100,13 @@ const TimelinePage: NextPage = () => {
                                 md={4}
                                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                                <Fab color="secondary" variant="extended" aria-label="add" sx={{ marginRight: '12px' }}>
+                                <Fab
+                                    color="secondary"
+                                    variant="extended"
+                                    aria-label="add"
+                                    sx={{ marginRight: '12px' }}
+                                    onClick={handleSearchClick}
+                                >
                                     <SearchIcon />
                                     Search
                                 </Fab>

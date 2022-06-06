@@ -36,6 +36,10 @@ export async function performRedditSync() {
     }
 }
 
+function generateSearchContent(post, type, user) {
+    return `${post['title']} ${post['author']['name']} ${post['url']} ${post['permalink']} ${post['selftext']}`;
+}
+
 function upsertPostToHistory(post, type, user) {
     return prisma.history.upsert({
         where: {
@@ -53,7 +57,9 @@ function upsertPostToHistory(post, type, user) {
                 thumbnail: post['thumbnail'],
                 permalink: post['permalink'],
                 media_embed: post['media_embed']
-            }
+            },
+            type: type,
+            searchContent: generateSearchContent(post, type, user)
         },
         create: {
             type: type,
@@ -70,7 +76,8 @@ function upsertPostToHistory(post, type, user) {
                 permalink: post['permalink'],
                 media_embed: post['media_embed']
             },
-            userId: user.id
+            userId: user.id,
+            searchContent: generateSearchContent(post, type, user)
         }
     });
 }

@@ -48,8 +48,8 @@ export function getUser() {
     });
 }
 
-export function getHistory(cursor: string, limit: number) {
-    return fetch(`${baseUrl}/history?cursor=${cursor}&limit=${limit}`, {
+export function getHistory(cursor: string, limit: number, searchTerm = '', historyType = '') {
+    return fetch(`${baseUrl}/history?cursor=${cursor}&limit=${limit}&search=${searchTerm}&type=${historyType}`, {
         method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,

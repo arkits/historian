@@ -26,11 +26,16 @@ export async function getHistory(request, response: Response, next: NextFunction
             limit = 50;
         }
 
+        let search = request.query.search ? request.query.search : '';
+
+        let type = request.query.type ? request.query.type : '';
+
         let skip = request.query.skip ? parseInt(request.query.skip) : 0;
 
         let cursor = request.query.cursor ? request.query.cursor : null;
 
-        const history = await getUserHistory(user, limit, skip, cursor);
+        logger.info({ user: user.username, limit, skip, cursor, search, type }, 'Getting History');
+        const history = await getUserHistory(user, limit, skip, cursor, search, type);
 
         const data = {
             history: history,
