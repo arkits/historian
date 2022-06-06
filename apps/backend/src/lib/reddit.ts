@@ -109,7 +109,7 @@ async function performRedditSyncForUser(user, fetchAll = false) {
     // Sync Saved Posts
     let savedPosts = await r.getMe().getSavedContent();
     if (fetchAll) {
-        savedPosts = savedPosts.fetchAll();
+        savedPosts = await savedPosts.fetchAll();
     }
 
     response.savedPosts.fetched += savedPosts.length;
@@ -123,7 +123,7 @@ async function performRedditSyncForUser(user, fetchAll = false) {
     // Sync Upvoted Posts
     let upvotedPosts = await r.getMe().getUpvotedContent();
     if (fetchAll) {
-        savedPosts = savedPosts.fetchAll();
+        upvotedPosts = await upvotedPosts.fetchAll();
     }
 
     response.savedPosts.fetched += upvotedPosts.length;
@@ -167,10 +167,13 @@ redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
                 return next({ message: 'User not found', code: 400 });
             }
 
+            const fetchAll = req.query.fetchAll === 'true';
+
             let response = null;
 
             try {
-                response = await performRedditSyncForUser(user, false);
+                logger.info({ user, fetchAll }, 'Invoking performRedditSyncForUser');
+                response = await performRedditSyncForUser(user, fetchAll);
             } catch (error) {
                 return next({ message: 'Error Performing Reddit Sync', code: 500, description: error.message });
             }
