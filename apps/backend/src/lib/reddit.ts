@@ -36,6 +36,45 @@ export async function performRedditSync() {
     }
 }
 
+function upsertPostToHistory(post, type, user) {
+    return prisma.history.upsert({
+        where: {
+            contentId: post.id
+        },
+        update: {
+            content: {
+                pk: post.id,
+                subreddit: post.subreddit_name_prefixed,
+                title: post['title'],
+                author: post.author.name,
+                score: post.score,
+                content_url: post['url'],
+                created_utc: post.created_utc,
+                thumbnail: post['thumbnail'],
+                permalink: post['permalink'],
+                media_embed: post['media_embed']
+            }
+        },
+        create: {
+            type: type,
+            contentId: post.id,
+            content: {
+                pk: post.id,
+                subreddit: post.subreddit_name_prefixed,
+                title: post['title'],
+                author: post.author.name,
+                score: post.score,
+                content_url: post['url'],
+                created_utc: post.created_utc,
+                thumbnail: post['thumbnail'],
+                permalink: post['permalink'],
+                media_embed: post['media_embed']
+            },
+            userId: user.id
+        }
+    });
+}
+
 async function performRedditSyncForUser(user, fetchAll = false) {
     if (!user.preferences['reddit']['accessToken']['token']['access_token']) {
         throw new Error('User has no access token');
@@ -57,62 +96,31 @@ async function performRedditSyncForUser(user, fetchAll = false) {
         }
     };
 
+    // Sync Saved Posts
     let savedPosts = await r.getMe().getSavedContent();
-
     if (fetchAll) {
         savedPosts = savedPosts.fetchAll();
     }
 
-    response.savedPosts.fetched = savedPosts.length;
+    response.savedPosts.fetched += savedPosts.length;
 
     for (let post of savedPosts) {
-        // const history = await prisma.history.findFirst({
-        //     where: {
-        //         content: {
-        //             path: ['pk'],
-        //             equals: post.id
-        //         }
-        //     }
-        // });
+        const history = await upsertPostToHistory(post, 'reddit-saved', user);
+        logger.debug({ post, history }, 'Saved to History: Reddit Saved');
+        response.savedPosts.saved++;
+    }
 
-        const history = await prisma.history.upsert({
-            where: {
-                contentId: post.id
-            },
-            update: {
-                content: {
-                    pk: post.id,
-                    subreddit: post.subreddit_name_prefixed,
-                    title: post['title'],
-                    author: post.author.name,
-                    score: post.score,
-                    content_url: post['url'],
-                    created_utc: post.created_utc,
-                    thumbnail: post['thumbnail'],
-                    permalink: post['permalink'],
-                    media_embed: post['media_embed']
-                }
-            },
-            create: {
-                type: 'reddit-saved',
-                contentId: post.id,
-                content: {
-                    pk: post.id,
-                    subreddit: post.subreddit_name_prefixed,
-                    title: post['title'],
-                    author: post.author.name,
-                    score: post.score,
-                    content_url: post['url'],
-                    created_utc: post.created_utc,
-                    thumbnail: post['thumbnail'],
-                    permalink: post['permalink'],
-                    media_embed: post['media_embed']
-                },
-                userId: user.id
-            }
-        });
+    // Sync Upvoted Posts
+    let upvotedPosts = await r.getMe().getUpvotedContent();
+    if (fetchAll) {
+        savedPosts = savedPosts.fetchAll();
+    }
 
-        logger.debug({ post, history }, 'Saved Post');
+    response.savedPosts.fetched += upvotedPosts.length;
+
+    for (let post of upvotedPosts) {
+        const history = await upsertPostToHistory(post, 'reddit-upvoted', user);
+        logger.debug({ post, history }, 'Saved to History: Reddit Upvoted');
         response.savedPosts.saved++;
     }
 
