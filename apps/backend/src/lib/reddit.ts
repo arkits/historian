@@ -22,10 +22,13 @@ const redditOAuth2Client = simpleOAuth2Reddit.create({
 });
 
 export async function performRedditSync() {
+    logger.info('Begin performRedditSync');
+
     try {
         const allUsers = await getAllUsers();
         for (let user of allUsers) {
             try {
+                logger.info({ user }, 'Invoking performRedditSyncForUser');
                 await performRedditSyncForUser(user, true);
             } catch (error) {
                 logger.error(error, user, 'Caught Error in RedditSync for User');
