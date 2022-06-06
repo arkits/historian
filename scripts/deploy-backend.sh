@@ -11,6 +11,7 @@ echo ">>> installing dependencies"
 npm install
 
 echo ">>> prisma migrations"
+cd apps/backend/
 npx prisma generate
 
 pm2 restart "historian-backend"
