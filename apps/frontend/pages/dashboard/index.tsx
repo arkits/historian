@@ -88,6 +88,73 @@ const Dashboard: NextPage = () => {
         );
     }
 
+    const SystemStatsCard = () => {
+        return (
+            <Card sx={{ mb: 4 }}>
+                <CardContent>
+                    <Typography sx={{ fontSize: 14, mb: 2 }} color="text.secondary" gutterBottom>
+                        System Stats
+                    </Typography>
+
+                    <Grid container spacing={2}>
+                        <Grid item xs={3}>
+                            <Typography variant="h5" component="div">
+                                {dashboardDataQuery?.data?.totalSaved}
+                            </Typography>
+
+                            <Typography variant="body1" component="div" color="text.secondary">
+                                Total Saved
+                            </Typography>
+                        </Grid>
+
+                        <Grid item xs={3}>
+                            <Typography variant="h5" component="div">
+                                {dashboardDataQuery?.data?.savedLast24}
+                            </Typography>
+
+                            <Typography variant="body1" component="div" color="text.secondary">
+                                last 24 hours
+                            </Typography>
+                        </Grid>
+
+                        <Grid item xs={3}>
+                            <Typography variant="h5" component="div">
+                                Reddit
+                            </Typography>
+
+                            <Typography variant="body1" component="div" color="text.secondary">
+                                Top Agent
+                            </Typography>
+                        </Grid>
+
+                        <Grid item xs={3}>
+                            <Typography variant="h5" component="div">
+                                {dashboardDataQuery?.data?.version}
+                            </Typography>
+
+                            <Typography variant="body1" component="div" color="text.secondary">
+                                Version
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
+        );
+    };
+
+    const RecentlySavedHistoryCard = () => {
+        return (
+            <Card sx={{ mb: 4 }}>
+                <CardContent>
+                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                        Recently Saved
+                    </Typography>
+                    <RecentHistoryList history={historyQuery.data?.history} />
+                </CardContent>
+            </Card>
+        );
+    };
+
     return (
         <>
             <Container maxWidth="lg">
@@ -100,68 +167,10 @@ const Dashboard: NextPage = () => {
                     }}
                 >
                     <PageTitle>Dashboard</PageTitle>
-                    <Card>
-                        <CardContent>
-                            <Typography sx={{ fontSize: 14, mb: 2 }} color="text.secondary" gutterBottom>
-                                System Stats
-                            </Typography>
 
-                            <Grid container spacing={2}>
-                                <Grid item xs={3}>
-                                    <Typography variant="h5" component="div">
-                                        {dashboardDataQuery?.data?.totalSaved}
-                                    </Typography>
+                    <SystemStatsCard />
 
-                                    <Typography variant="body1" component="div" color="text.secondary">
-                                        Total Saved
-                                    </Typography>
-                                </Grid>
-
-                                <Grid item xs={3}>
-                                    <Typography variant="h5" component="div">
-                                        {dashboardDataQuery?.data?.savedLast24}
-                                    </Typography>
-
-                                    <Typography variant="body1" component="div" color="text.secondary">
-                                        last 24 hours
-                                    </Typography>
-                                </Grid>
-
-                                <Grid item xs={3}>
-                                    <Typography variant="h5" component="div">
-                                        Reddit
-                                    </Typography>
-
-                                    <Typography variant="body1" component="div" color="text.secondary">
-                                        Top Agent
-                                    </Typography>
-                                </Grid>
-
-                                <Grid item xs={3}>
-                                    <Typography variant="h5" component="div">
-                                        {dashboardDataQuery?.data?.version}
-                                    </Typography>
-
-                                    <Typography variant="body1" component="div" color="text.secondary">
-                                        Version
-                                    </Typography>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
-
-                    <br />
-
-                    <Card>
-                        <CardContent>
-                            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                                Recently Saved
-                            </Typography>
-                            <RecentHistoryList history={historyQuery.data?.history} />
-                        </CardContent>
-                    </Card>
-
-                    <br />
+                    <RecentlySavedHistoryCard />
                 </Box>
             </Container>
         </>

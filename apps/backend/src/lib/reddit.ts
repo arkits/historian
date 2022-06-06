@@ -27,7 +27,7 @@ export async function performRedditSync() {
         const allUsers = await getAllUsers();
         for (let user of allUsers) {
             try {
-                await performRedditSyncForUser(user);
+                await performRedditSyncForUser(user, true);
             } catch (error) {
                 logger.error(error, user, 'Caught Error in RedditSync for User');
             }
@@ -37,7 +37,7 @@ export async function performRedditSync() {
     }
 }
 
-async function performRedditSyncForUser(user) {
+async function performRedditSyncForUser(user, fetchAll = false) {
     if (!user.preferences['reddit']['accessToken']['token']['access_token']) {
         throw new Error('User has no access token');
     }
@@ -58,7 +58,11 @@ async function performRedditSyncForUser(user) {
         }
     };
 
-    const savedPosts = await await r.getMe().getSavedContent();
+    let savedPosts = await r.getMe().getSavedContent();
+
+    if (fetchAll) {
+        savedPosts = savedPosts.fetchAll();
+    }
 
     response.savedPosts.fetched = savedPosts.length;
 
@@ -136,7 +140,7 @@ redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
             let response = null;
 
             try {
-                response = await performRedditSyncForUser(user);
+                response = await performRedditSyncForUser(user, false);
             } catch (error) {
                 return next({ message: 'Error Performing Reddit Sync', code: 500, description: error.message });
             }

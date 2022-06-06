@@ -14,6 +14,8 @@ import { useContext, useEffect, useState } from 'react';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 import { Divider } from '@mui/material';
+import { prettyDate } from 'apps/frontend/src/dateFormat';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const RedditAgent = () => {
     // Queries
@@ -30,7 +32,7 @@ const RedditAgent = () => {
                     {formatDistance(new Date(query?.data?.lastSync), new Date(), {
                         addSuffix: true
                     })}{' '}
-                    // {query?.data?.lastSync}
+                    // {prettyDate(new Date(query?.data?.lastSync))}
                     <br />
                     <br />
                     Total Saved: {query?.data?.historyTotal} <br />
@@ -43,6 +45,7 @@ const RedditAgent = () => {
     };
 
     const [isManuallyCollecting, setIsManuallyCollecting] = useState(false);
+    const [connectionTestResult, setConnectionTestResult] = useState({} as any);
 
     const manuallyCollect = () => {
         setIsManuallyCollecting(true);
@@ -50,6 +53,7 @@ const RedditAgent = () => {
             .then((res) => res.json())
             .then((response) => {
                 setIsManuallyCollecting(false);
+                setConnectionTestResult(response);
                 // window.location.reload();
             })
             .catch((err) => {
@@ -58,23 +62,51 @@ const RedditAgent = () => {
             });
     };
 
+    const ConnectionTest = () => {
+        return (
+            <>
+                <LoadingButton
+                    onClick={() => manuallyCollect()}
+                    loading={isManuallyCollecting}
+                    loadingPosition="end"
+                    variant="outlined"
+                >
+                    Test Connection
+                </LoadingButton>
+                <br />
+
+                {connectionTestResult?.message ? (
+                    <>
+                        Connection Test Result: {connectionTestResult?.message} <br />
+                        Fetched: {connectionTestResult?.details?.savedPosts?.fetched} <br />
+                        Saved: {connectionTestResult?.details?.savedPosts?.saved} <br />
+                        Skipped: {connectionTestResult?.details?.savedPosts?.skipped} <br />
+                    </>
+                ) : (
+                    <></>
+                )}
+            </>
+        );
+    };
+
     return (
         <>
             <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                 Reddit
             </Typography>
             <AgentDetails />
-            <Button variant="contained" component={Link} noLinkStyle href={getRedditLoginUrl()} target={'_blank'}>
+            <Button
+                variant="contained"
+                component={Link}
+                noLinkStyle
+                href={getRedditLoginUrl()}
+                target={'_blank'}
+                sx={{ mb: 2 }}
+            >
                 Login with Reddit
             </Button>
-            <br />
-            {isManuallyCollecting ? (
-                'Collecting... Please wait!'
-            ) : (
-                <Button variant="outlined" onClick={() => manuallyCollect()}>
-                    Manually Collect
-                </Button>
-            )}
+
+            <ConnectionTest />
 
             <br />
 
