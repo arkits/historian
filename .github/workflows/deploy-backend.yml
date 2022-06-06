@@ -4,6 +4,7 @@ on:
     push:
         paths:
             - apps/backend/**
+            - scripts
         branches: [master]
     pull_request:
         branches: [master]
