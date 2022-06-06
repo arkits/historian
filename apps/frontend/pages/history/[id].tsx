@@ -30,7 +30,31 @@ const History = () => {
             return <></>;
         }
 
-        return <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.content_url} loading="lazy" />;
+        if (historyQuery?.data?.content?.media_embed?.content) {
+            return (
+                <div
+                    className="content"
+                    dangerouslySetInnerHTML={{ __html: historyQuery?.data?.content?.media_embed?.content }}
+                ></div>
+            );
+        }
+
+        return (
+            <>
+                <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.content_url} loading="lazy" />
+                <Button
+                    fullWidth
+                    variant="contained"
+                    component={Link}
+                    noLinkStyle
+                    href={historyQuery.data?.content?.content_url}
+                    sx={{ mt: 3, mb: 2 }}
+                    target={'_blank'}
+                >
+                    Link
+                </Button>
+            </>
+        );
     };
 
     if (historyQuery.isLoading) {

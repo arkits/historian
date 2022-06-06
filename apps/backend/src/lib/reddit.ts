@@ -66,24 +66,20 @@ async function performRedditSyncForUser(user, fetchAll = false) {
     response.savedPosts.fetched = savedPosts.length;
 
     for (let post of savedPosts) {
-        const history = await prisma.history.findFirst({
+        // const history = await prisma.history.findFirst({
+        //     where: {
+        //         content: {
+        //             path: ['pk'],
+        //             equals: post.id
+        //         }
+        //     }
+        // });
+
+        const history = await prisma.history.upsert({
             where: {
-                content: {
-                    path: ['pk'],
-                    equals: post.id
-                }
-            }
-        });
-
-        if (history) {
-            logger.info({ history }, 'History already exists');
-            response.savedPosts.skipped++;
-            continue;
-        }
-
-        await prisma.history.create({
-            data: {
-                type: 'reddit',
+                contentId: post.id
+            },
+            update: {
                 content: {
                     pk: post.id,
                     subreddit: post.subreddit_name_prefixed,
@@ -93,13 +89,30 @@ async function performRedditSyncForUser(user, fetchAll = false) {
                     content_url: post['url'],
                     created_utc: post.created_utc,
                     thumbnail: post['thumbnail'],
-                    permalink: post['permalink']
+                    permalink: post['permalink'],
+                    media_embed: post['media_embed']
+                }
+            },
+            create: {
+                type: 'reddit-saved',
+                contentId: post.id,
+                content: {
+                    pk: post.id,
+                    subreddit: post.subreddit_name_prefixed,
+                    title: post['title'],
+                    author: post.author.name,
+                    score: post.score,
+                    content_url: post['url'],
+                    created_utc: post.created_utc,
+                    thumbnail: post['thumbnail'],
+                    permalink: post['permalink'],
+                    media_embed: post['media_embed']
                 },
                 userId: user.id
             }
         });
 
-        logger.info({ post }, 'Saved Post');
+        logger.debug({ post, history }, 'Saved Post');
         response.savedPosts.saved++;
     }
 

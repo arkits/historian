@@ -11,7 +11,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Divider } from '@mui/material';
+import { ListItemButton, ListSubheader, Paper } from '@mui/material';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -31,13 +31,14 @@ function RecentHistoryList({ history }) {
             {history
                 .map((item) => (
                     <>
-                        <ListItem alignItems="flex-start">
-                            <ListItemAvatar>
-                                <Avatar>{getPrettyAvatar(item)}</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary={item?.content?.title} secondary={item?.content?.subreddit} />
-                        </ListItem>
-                        <Divider variant="inset" component="li" />
+                        <ListItemButton component="a" href={`/history/${item?.id}`}>
+                            <ListItem alignItems="flex-start">
+                                <ListItemAvatar>
+                                    <Avatar>{getPrettyAvatar(item)}</Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary={item?.content?.title} secondary={item?.content?.subreddit} />
+                            </ListItem>
+                        </ListItemButton>
                     </>
                 ))
                 .slice(0, 10)}
@@ -58,7 +59,7 @@ const Dashboard: NextPage = () => {
     });
 
     const historyQuery = useQuery('dashboardHistory', async () => {
-        return await getHistory('', 10).then((res) => res.json());
+        return await getHistory('', 7).then((res) => res.json());
     });
 
     if (dashboardDataQuery.isLoading) {
@@ -133,7 +134,7 @@ const Dashboard: NextPage = () => {
                             </Typography>
 
                             <Typography variant="body1" component="div" color="text.secondary">
-                                Version
+                                API Version
                             </Typography>
                         </Grid>
                     </Grid>
@@ -144,14 +145,11 @@ const Dashboard: NextPage = () => {
 
     const RecentlySavedHistoryCard = () => {
         return (
-            <Card sx={{ mb: 4 }}>
-                <CardContent>
-                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                        Recently Saved
-                    </Typography>
+            <Paper>
+                <List subheader={<ListSubheader sx={{ backgroundColor: '#0E3541' }}>Recently Saved</ListSubheader>}>
                     <RecentHistoryList history={historyQuery.data?.history} />
-                </CardContent>
-            </Card>
+                </List>
+            </Paper>
         );
     };
 
