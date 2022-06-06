@@ -13,7 +13,7 @@ npm install
 echo ">>> prisma migrations"
 cd apps/backend/
 npx prisma generate
-npx prism migrate deploy
+npx prisma migrate deploy
 
 echo ">>> restarting backend"
 pm2 restart "historian-backend"
