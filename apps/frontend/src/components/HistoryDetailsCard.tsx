@@ -19,9 +19,6 @@ export const HistoryDetailsCard = ({ history }) => {
         return (
             <>
                 <Typography variant="body2">{getSubtitleText(history)}</Typography>
-                <Typography variant="body2">
-                    Posted: {prettyDate(new Date(history?.content?.created_utc * 1000))}
-                </Typography>
             </>
         );
     };
@@ -34,7 +31,7 @@ export const HistoryDetailsCard = ({ history }) => {
                 onMouseLeave={() => setShowActions(false)}
             >
                 <Grid container spacing={0} sx={{ flex: '1', height: '100%' }}>
-                    <Grid item xs={9}>
+                    <Grid item xs={10}>
                         <div
                             style={{
                                 display: 'flex',
@@ -47,85 +44,97 @@ export const HistoryDetailsCard = ({ history }) => {
                                     flexGrow: '1',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    justifyContent: 'space-around'
+                                    height: '100%'
                                 }}
                             >
-                                <Typography variant="body1" color="textPrimary" component="p">
-                                    {getTitleText(history)}
-                                </Typography>
                                 <CardHeader
                                     avatar={
                                         <Avatar sx={{ backgroundColor: '#B9C2C6' }}>{getPrettyAvatar(history)}</Avatar>
                                     }
-                                    subheader={getSubtitle(history)}
+                                    subheader={
+                                        <>
+                                            <Typography variant="body1" color="textPrimary" component="p">
+                                                {getTitleText(history)}
+                                            </Typography>
+                                            <Typography variant="body2" color="inherit" component="p">
+                                                {getSubtitleText(history)}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                Posted: {prettyDate(new Date(history?.content?.created_utc * 1000))} •
+                                                Saved: {prettyDate(new Date(history?.createdAt))}
+                                            </Typography>
+                                        </>
+                                    }
                                     style={{
-                                        paddingLeft: '0',
-                                        paddingBottom: '10px'
+                                        paddingTop: '0',
+                                        paddingLeft: '0'
                                     }}
                                 />
-                            </CardContent>
-                            <CardActions
-                                sx={{
-                                    paddingLeft: '12px',
-                                    // visibility: `${showActions ? 'visible' : 'hidden'}`,
-                                    opacity: `${showActions ? '1' : '0'}`,
-                                    transition: 'opacity 0.1s ease-in-out'
-                                }}
-                            >
-                                <Button
-                                    color="inherit"
-                                    size="small"
-                                    startIcon={<InfoIcon />}
-                                    component={Link}
-                                    noLinkStyle
-                                    href={'/history/' + history?.id}
-                                    sx={{ marginRight: '12px', color: '#B9C2C6' }}
-                                >
-                                    Details
-                                </Button>
-                                <Button
-                                    color="inherit"
-                                    size="small"
-                                    startIcon={<LaunchIcon />}
-                                    component={Link}
-                                    noLinkStyle
-                                    href={'https://reddit.com' + history?.content?.permalink || '#'}
-                                    target={'_blank'}
-                                    sx={{ marginRight: '12px', color: '#B9C2C6' }}
-                                >
-                                    Permalink
-                                </Button>
-                                <Button
-                                    color="inherit"
-                                    size="small"
-                                    sx={{ marginRight: '12px', color: '#B9C2C6' }}
-                                    startIcon={<DeleteIcon />}
-                                    onClick={() => {
-                                        setSnackbarDetails({
-                                            open: true,
-                                            message: 'Deleted History'
-                                        });
-                                        deleteHistoryById(history?.id)
-                                            .then((response) => response.json())
-                                            .then((res) => {
-                                                console.log('deleted', res);
-                                            })
-                                            .catch((err) => {
-                                                console.log(err);
-                                            });
+                                <CardActions
+                                    sx={{
+                                        opacity: `${showActions ? '1' : '0'}`,
+                                        transition: 'opacity 0.1s ease-in-out'
                                     }}
                                 >
-                                    Delete
-                                </Button>
-                            </CardActions>
+                                    <Button
+                                        color="inherit"
+                                        size="small"
+                                        startIcon={<InfoIcon />}
+                                        component={Link}
+                                        noLinkStyle
+                                        href={'/history/' + history?.id}
+                                        sx={{ marginRight: '12px', color: '#B9C2C6' }}
+                                    >
+                                        Details
+                                    </Button>
+                                    <Button
+                                        color="inherit"
+                                        size="small"
+                                        startIcon={<LaunchIcon />}
+                                        component={Link}
+                                        noLinkStyle
+                                        href={'https://reddit.com' + history?.content?.permalink || '#'}
+                                        target={'_blank'}
+                                        sx={{ marginRight: '12px', color: '#B9C2C6' }}
+                                    >
+                                        Permalink
+                                    </Button>
+                                    <Button
+                                        color="inherit"
+                                        size="small"
+                                        sx={{ marginRight: '12px', color: '#B9C2C6' }}
+                                        startIcon={<DeleteIcon />}
+                                        onClick={() => {
+                                            setSnackbarDetails({
+                                                open: true,
+                                                message: 'Deleted History'
+                                            });
+                                            deleteHistoryById(history?.id)
+                                                .then((response) => response.json())
+                                                .then((res) => {
+                                                    console.log('deleted', res);
+                                                })
+                                                .catch((err) => {
+                                                    console.log(err);
+                                                });
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
+                                </CardActions>
+                            </CardContent>
                         </div>
                     </Grid>
-                    <Grid item xs={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <a href={history?.content?.content_url} target={'_blank'}>
                             <Avatar
                                 variant="square"
                                 src={history?.content?.thumbnail}
-                                style={{ width: theme.spacing(25), height: '100%', backgroundColor: '#B9C2C6' }}
+                                style={{
+                                    width: theme.spacing(20),
+                                    height: '100%',
+                                    backgroundColor: '#B9C2C6'
+                                }}
                             ></Avatar>
                         </a>
                     </Grid>
