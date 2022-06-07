@@ -24,6 +24,7 @@ import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 import Link from 'apps/frontend/src/Link';
+import Chart from 'apps/frontend/src/components/Chart';
 
 function RecentHistoryList({ history }) {
     if (!history) {
@@ -169,6 +170,8 @@ const Dashboard: NextPage = () => {
                     }}
                 >
                     <PageTitle>Dashboard</PageTitle>
+
+                    <Chart chartData={dashboardDataQuery?.data?.chartData} />
 
                     <SystemStatsCard />
 

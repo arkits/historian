@@ -80,6 +80,7 @@
         "react-dom": "18.1.0",
         "react-query": "^3.39.0",
         "react-router-dom": "6.3.0",
+        "recharts": "^2.1.10",
         "regenerator-runtime": "0.13.7",
         "simple-oauth2": "^4.3.0",
         "snoowrap": "^1.23.0",

@@ -90,3 +90,15 @@ export function getUserHistoryById(user, id) {
         }
     });
 }
+
+export function getUserHistoryCountForDate(user, dateStart: Date, dateEnd: Date) {
+    return prisma.history.count({
+        where: {
+            userId: user.id,
+            createdAt: {
+                gte: dateStart,
+                lt: dateEnd
+            }
+        }
+    });
+}
