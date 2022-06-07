@@ -1,10 +1,41 @@
 import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
-import { LineChart, Line, XAxis, YAxis, Label, ResponsiveContainer, BarChart, Tooltip, Bar, Legend } from 'recharts';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import { Paper } from '@mui/material';
 
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+export const options = {
+    responsive: true,
+    plugins: {
+        legend: {
+            display: false
+        }
+    }
+};
+
 export default function Chart({ chartData }) {
-    const theme = useTheme();
+    const data = {
+        labels: chartData.labels,
+        datasets: [
+            {
+                label: 'Saved to Historian',
+                data: chartData.datasetSavedCount,
+                borderColor: '#1DE9B6',
+                fill: true
+            }
+        ]
+    };
 
     return (
         <React.Fragment>
@@ -13,38 +44,11 @@ export default function Chart({ chartData }) {
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    height: 300,
-                    paddingTop: '2.5rem',
+                    paddingTop: '2rem',
                     marginBottom: '2rem'
                 }}
             >
-                <ResponsiveContainer>
-                    <LineChart
-                        width={500}
-                        height={500}
-                        data={chartData}
-                        margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5
-                        }}
-                    >
-                        <XAxis dataKey="date" stroke={theme.palette.text.secondary} style={theme.typography.body2} />
-                        <YAxis stroke={theme.palette.text.secondary} style={theme.typography.body2} />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: theme.palette.background.paper
-                            }}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="savedCount"
-                            stroke={theme.palette.secondary.main}
-                            strokeWidth={2}
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
+                <Line options={options} data={data} height={50} />
             </Paper>
         </React.Fragment>
     );
