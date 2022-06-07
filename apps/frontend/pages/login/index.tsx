@@ -52,6 +52,7 @@ const Login: NextPage = () => {
                     setLoginError(result.error);
                 } else {
                     setUser(result);
+                    router.push('/dashboard');
                 }
             })
             .catch((error) => console.log('error', error));

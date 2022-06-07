@@ -26,6 +26,10 @@ import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 import Link from 'apps/frontend/src/Link';
 
 function RecentHistoryList({ history }) {
+    if (!history) {
+        return <></>;
+    }
+
     return (
         <List sx={{ width: '100%' }}>
             {history

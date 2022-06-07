@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import { Button, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import HistorianContext from 'apps/frontend/context/historian';
-import { userRegister } from 'apps/frontend/src/fetch';
+import { getUser, userRegister } from 'apps/frontend/src/fetch';
 import { ErrorBanner } from 'apps/frontend/src/components/ErrorBanner';
 import Link from 'apps/frontend/src/Link';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
@@ -18,10 +18,16 @@ const Register: NextPage = () => {
     const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
-        if (user) {
-            router.push('/dashboard');
-        }
-    }, [user]);
+        getUser()
+            .then((response) => response.json())
+            .then((result) => {
+                if (result?.id) {
+                    setUser(result);
+                    router.push('/dashboard');
+                }
+            })
+            .catch((error) => {});
+    }, [setUser]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -34,6 +40,7 @@ const Register: NextPage = () => {
                     setLoginError(result.error);
                 } else {
                     setUser(result);
+                    router.push('/dashboard');
                 }
             })
             .catch((error) => console.log('error', error));

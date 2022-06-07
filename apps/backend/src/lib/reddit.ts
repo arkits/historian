@@ -142,6 +142,8 @@ async function performRedditSyncForUser(user, fetchAll = false) {
 
     const redditUsername = await r.getMe().name;
 
+    logger.info({ user, response, redditUsername }, 'Completed performRedditSyncForUser');
+
     await prisma.user.update({
         where: {
             id: user.id

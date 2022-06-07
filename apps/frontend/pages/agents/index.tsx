@@ -47,7 +47,7 @@ const RedditAgent = () => {
             } else {
                 return (
                     <Typography variant="body1" component="p" gutterBottom>
-                        Connected, waiting for initial sync
+                        Connected, please wait for initial sync to complete.
                         <br /> <br />
                     </Typography>
                 );
@@ -89,10 +89,14 @@ const RedditAgent = () => {
 
                 {connectionTestResult?.message ? (
                     <>
-                        Connection Test Result: {connectionTestResult?.message} <br />
-                        Fetched: {connectionTestResult?.details?.savedPosts?.fetched} <br />
-                        Saved: {connectionTestResult?.details?.savedPosts?.saved} <br />
-                        Skipped: {connectionTestResult?.details?.savedPosts?.skipped} <br />
+                        Connection Test Result: {connectionTestResult?.message}
+                        <ul>
+                            <li>Fetched: {connectionTestResult?.details?.savedPosts?.fetched}</li>
+                            <li>Saved: {connectionTestResult?.details?.savedPosts?.saved}</li>
+                            <li>Skipped: {connectionTestResult?.details?.savedPosts?.skipped}</li>
+                        </ul>
+                        Please refresh the page to see the latest results.
+                        <br />
                     </>
                 ) : (
                     <></>
