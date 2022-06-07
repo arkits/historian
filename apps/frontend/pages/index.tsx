@@ -16,6 +16,7 @@ const Home: NextPage = () => {
                     paddingBottom: 100,
                     background: 'url(https://i.imgur.com/REXGA7W.jpg) rgba(0, 80, 80, 0.5)',
                     backgroundSize: 'cover',
+                    backgroundPosition: 'top center',
                     backgroundBlendMode: 'multiply'
                 }}
             >
