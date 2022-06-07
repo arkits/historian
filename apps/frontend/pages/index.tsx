@@ -10,7 +10,15 @@ import { FONT_LOGO } from '../src/constants';
 const Home: NextPage = () => {
     return (
         <>
-            <div style={{ paddingBottom: 50, paddingTop: 10, marginBottom: 50 }}>
+            <div
+                style={{
+                    paddingTop: 10,
+                    paddingBottom: 100,
+                    background: 'url(https://i.imgur.com/REXGA7W.jpg) rgba(0, 80, 80, 0.5)',
+                    backgroundSize: 'cover',
+                    backgroundBlendMode: 'multiply'
+                }}
+            >
                 <Container maxWidth="sm">
                     <Box
                         sx={{
@@ -21,7 +29,12 @@ const Home: NextPage = () => {
                             alignItems: 'center'
                         }}
                     >
-                        <div style={{ marginTop: '5rem', textAlign: 'center' }}>
+                        <div
+                            style={{
+                                marginTop: '5rem',
+                                textAlign: 'center'
+                            }}
+                        >
                             <Typography variant="h1" component="h1" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                                 Never Forget
                             </Typography>
