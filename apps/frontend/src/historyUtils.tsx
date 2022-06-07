@@ -28,6 +28,10 @@ export const getPrettyAvatar = (history) => {
     }
 };
 
+export const getTitleText = (history) => {
+    return history?.content?.title ?? '[NO TITLE]';
+};
+
 export const getSubtitleText = (history) => {
     switch (history?.type) {
         case 'reddit-saved':

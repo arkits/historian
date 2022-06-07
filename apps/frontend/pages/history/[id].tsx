@@ -3,6 +3,7 @@ import HistorianContext from 'apps/frontend/context/historian';
 import { Loading } from 'apps/frontend/src/components/Loading';
 import { prettyDate } from 'apps/frontend/src/dateFormat';
 import { deleteHistoryById, getHistoryById } from 'apps/frontend/src/fetch';
+import { getTitleText } from 'apps/frontend/src/historyUtils';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import Link from 'apps/frontend/src/Link';
 import { useRouter } from 'next/router';
@@ -47,7 +48,7 @@ const History = () => {
                     variant="contained"
                     component={Link}
                     noLinkStyle
-                    href={historyQuery.data?.content?.content_url}
+                    href={historyQuery.data?.content?.content_url || '#undefined'}
                     sx={{ mt: 3, mb: 2 }}
                     target={'_blank'}
                 >
@@ -72,7 +73,7 @@ const History = () => {
                     <br />
                     <br />
                     <Typography variant="h6" gutterBottom component="div">
-                        {historyQuery.data?.content?.title}
+                        {getTitleText(historyQuery.data)}
                     </Typography>
                     <Typography variant="body2" gutterBottom component="div">
                         Subreddit: {historyQuery.data?.content?.subreddit} <br />

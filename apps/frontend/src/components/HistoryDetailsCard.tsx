@@ -2,7 +2,7 @@ import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Grid, Typog
 import DeleteIcon from '@mui/icons-material/Delete';
 import LaunchIcon from '@mui/icons-material/Launch';
 import InfoIcon from '@mui/icons-material/Info';
-import { getPrettyAvatar, getSubtitleText } from '../historyUtils';
+import { getPrettyAvatar, getSubtitleText, getTitleText } from '../historyUtils';
 import theme from '../theme';
 import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
@@ -14,10 +14,6 @@ export const HistoryDetailsCard = ({ history }) => {
     const { setSnackbarDetails } = useContext(HistorianContext);
 
     const [showActions, setShowActions] = useState(false);
-
-    const getTitle = (history) => {
-        return history?.content?.title ?? 'NO TITLE';
-    };
 
     const getSubtitle = (history) => {
         return (
@@ -55,7 +51,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                 }}
                             >
                                 <Typography variant="body1" color="textPrimary" component="p">
-                                    {getTitle(history)}
+                                    {getTitleText(history)}
                                 </Typography>
                                 <CardHeader
                                     avatar={

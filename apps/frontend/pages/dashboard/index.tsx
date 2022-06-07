@@ -19,7 +19,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import { getPrettyAvatar, getSubtitleText } from 'apps/frontend/src/historyUtils';
+import { getPrettyAvatar, getSubtitleText, getTitleText } from 'apps/frontend/src/historyUtils';
 import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
@@ -36,7 +36,7 @@ function RecentHistoryList({ history }) {
                                 <ListItemAvatar>
                                     <Avatar>{getPrettyAvatar(item)}</Avatar>
                                 </ListItemAvatar>
-                                <ListItemText primary={item?.content?.title} secondary={getSubtitleText(item)} />
+                                <ListItemText primary={getTitleText(item)} secondary={getSubtitleText(item)} />
                             </ListItem>
                         </ListItemButton>
                     </>
