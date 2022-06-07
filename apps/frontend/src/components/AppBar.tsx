@@ -97,6 +97,10 @@ const HistorianAppBar = () => {
         setAnchorElNav(event.currentTarget);
     };
 
+    const handleCloseNavMenu = () => {
+        setAnchorElNav(null);
+    };
+
     return (
         <AppBar position="static" color="primary" enableColorOnDark>
             <Container maxWidth="xl">
@@ -147,14 +151,20 @@ const HistorianAppBar = () => {
                             }}
                         >
                             {pages.map((page) => (
-                                <MenuItem key={page.name} component={Link} noLinkStyle href={page.href}>
+                                <MenuItem
+                                    key={page.name}
+                                    component={Link}
+                                    noLinkStyle
+                                    href={page.href}
+                                    onClick={handleCloseNavMenu}
+                                >
                                     <Typography textAlign="center">{page.name}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
                     </Box>
                     <Typography
-                        variant="h5"
+                        variant="h4"
                         noWrap
                         component={Link}
                         href="/"
@@ -164,7 +174,8 @@ const HistorianAppBar = () => {
                             flexGrow: 1,
                             fontFamily: FONT_LOGO,
                             color: 'inherit',
-                            textDecoration: 'none'
+                            textDecoration: 'none',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
                         }}
                     >
                         Historian
