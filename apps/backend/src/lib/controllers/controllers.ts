@@ -128,6 +128,6 @@ export async function getUser(request, response: Response, next: NextFunction) {
 
         response.json({ id: user.id, username: user.username });
     } catch (error) {
-        logger.error(error, 'Failed to logout User!');
+        logger.error(error, 'Failed to Get User!');
     }
 }

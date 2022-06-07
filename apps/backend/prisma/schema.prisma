@@ -22,7 +22,7 @@ model History {
   User   User   @relation(fields: [userId], references: [id])
   userId String @db.Uuid
 
-  @@unique([contentId, userId], map: "History_contentId_userId")
+  @@unique([contentId, userId, type], map: "History_contentId_userId_type")
 }
 
 model User {

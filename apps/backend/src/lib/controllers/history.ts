@@ -10,7 +10,7 @@ export async function addHistory(request, response: Response, next: NextFunction
             return next({ message: 'User not found', code: 400 });
         }
     } catch (error) {
-        logger.error(error, 'Failed to logout User!');
+        logger.error(error, 'Failed to Add History!');
     }
 }
 
@@ -105,10 +105,13 @@ export async function getUserHistoryById(request, response: Response, next: Next
         }
 
         const history = await dbGetUserHistoryById(user, id);
+        if (!history) {
+            return next({ message: 'History not found', code: 404 });
+        }
 
         response.status(200);
         response.json(history);
     } catch (error) {
-        logger.error(error, 'Failed to logout User!');
+        logger.error(error, 'Failed to getUserHistoryById!');
     }
 }

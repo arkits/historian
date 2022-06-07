@@ -1,5 +1,6 @@
 import { Button, ButtonGroup, Container, Grid, Typography } from '@mui/material';
 import HistorianContext from 'apps/frontend/context/historian';
+import { ContainerPage } from 'apps/frontend/src/components/ContainerPage';
 import { Loading } from 'apps/frontend/src/components/Loading';
 import { prettyDate } from 'apps/frontend/src/dateFormat';
 import { deleteHistoryById, getHistoryById } from 'apps/frontend/src/fetch';
@@ -60,6 +61,14 @@ const History = () => {
 
     if (historyQuery.isLoading) {
         return <Loading />;
+    }
+
+    if (historyQuery.isError || historyQuery.data.error) {
+        return (
+            <>
+                <ContainerPage>Error: {historyQuery?.data?.error}</ContainerPage>
+            </>
+        );
     }
 
     return (

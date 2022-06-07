@@ -1,16 +1,15 @@
-import { CircularProgress, Container } from '@mui/material';
+import { CircularProgress } from '@mui/material';
+import { ContainerPage } from './ContainerPage';
 
 export function Loading() {
     return (
         <>
-            <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
-                <Container maxWidth="sm">
-                    <CircularProgress size={60} />
-                    <br />
-                    <br />
-                    <h2>Loading...</h2>
-                </Container>
-            </div>
+            <ContainerPage>
+                <CircularProgress size={60} />
+                <br />
+                <br />
+                <h2>Loading...</h2>
+            </ContainerPage>
         </>
     );
 }

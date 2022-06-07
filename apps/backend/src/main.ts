@@ -11,9 +11,10 @@ import logger from './lib/logger';
 import router from './lib/router';
 import logRequest from './lib/controllers/requestLogger';
 import errorHandler from './lib/controllers/errorHandler';
-import redditOAuthRouter, { performRedditSync } from './lib/reddit';
+import redditOAuthRouter from './lib/reddit/router';
 import { timeStart, version } from './lib/version';
 import * as compression from 'compression';
+import { performRedditSync } from './lib/reddit/agent';
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
