@@ -7,7 +7,7 @@ import Link from '../../src/Link';
 import { Alert, Button, Checkbox, FormControlLabel, Grid, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import HistorianContext from 'apps/frontend/context/historian';
-import { userLogin } from 'apps/frontend/src/fetch';
+import { getUser, userLogin } from 'apps/frontend/src/fetch';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
 
 const LoginError = ({ error }) => {
@@ -29,10 +29,16 @@ const Login: NextPage = () => {
     const { user, setUser } = React.useContext(HistorianContext);
 
     React.useEffect(() => {
-        if (user) {
-            router.push('/dashboard');
-        }
-    }, [user]);
+        getUser()
+            .then((response) => response.json())
+            .then((result) => {
+                if (result?.id) {
+                    setUser(result);
+                    router.push('/dashboard');
+                }
+            })
+            .catch((error) => {});
+    }, [setUser]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
