@@ -15,12 +15,14 @@ model History {
   id            String   @id @default(uuid()) @db.Uuid
   createdAt     DateTime @default(now()) @db.Timestamp(6)
   type          String
-  contentId     String   @unique
+  contentId     String
   content       Json     @db.Json
   searchContent String?
 
   User   User   @relation(fields: [userId], references: [id])
   userId String @db.Uuid
+
+  @@unique([contentId, userId], map: "History_contentId_userId")
 }
 
 model User {

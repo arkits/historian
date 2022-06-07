@@ -46,7 +46,10 @@ function generateSearchContent(post, type, user) {
 function upsertPostToHistory(post, type, user) {
     return prisma.history.upsert({
         where: {
-            contentId: post.id
+            contentId_userId: {
+                contentId: post.id,
+                userId: user.id
+            }
         },
         update: {
             content: {
