@@ -12,7 +12,9 @@ export async function performSpotifySyncForUser(user) {
 
     let toReturn = {
         recentlyPlayed: {
-            saved: 0
+            fetched: 0,
+            saved: 0,
+            skipped: 0
         }
     };
 
@@ -20,23 +22,29 @@ export async function performSpotifySyncForUser(user) {
         let response = await callSpotify(`${SPOTIFY_API_BASE}/v1/me/player/recently-played`, user);
         logger.info({ responseData: response.data }, 'Got Spotify Recently Played');
 
+        toReturn.recentlyPlayed.fetched = response.data.items.length;
+
         for (let item of response.data.items) {
-            await prisma.history.create({
-                data: {
-                    userId: user.id,
-                    type: 'spotify/recently-played',
-                    contentId: `${item.track.id}-${item?.played_at}`,
-                    content: {
-                        external_urls: item?.track?.external_urls,
-                        played_at: item?.played_at,
-                        trackName: item?.track?.name,
-                        albumName: item?.track?.album?.name,
-                        artistName: item?.track?.artists?.map((artist) => artist.name).join(', '),
-                        albumArt: item?.track?.album?.images[0]?.url
+            try {
+                await prisma.history.create({
+                    data: {
+                        userId: user.id,
+                        type: 'spotify/recently-played',
+                        contentId: `${item.track.id}-${item?.played_at}`,
+                        content: {
+                            external_urls: item?.track?.external_urls,
+                            played_at: item?.played_at,
+                            trackName: item?.track?.name,
+                            albumName: item?.track?.album?.name,
+                            artistName: item?.track?.artists?.map((artist) => artist.name).join(', '),
+                            albumArt: item?.track?.album?.images[0]?.url
+                        }
                     }
-                }
-            });
-            toReturn.recentlyPlayed.saved++;
+                });
+                toReturn.recentlyPlayed.saved++;
+            } catch (error) {
+                toReturn.recentlyPlayed.skipped++;
+            }
         }
 
         response = await callSpotify(`${SPOTIFY_API_BASE}/v1/me`, user);

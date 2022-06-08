@@ -74,9 +74,21 @@ export const ConnectionTest = ({
                 <>
                     Connection Test Result: {connectionTestResult?.message}
                     <ul>
-                        <li>Fetched: {connectionTestResult?.details?.savedPosts?.fetched}</li>
-                        <li>Saved: {connectionTestResult?.details?.savedPosts?.saved}</li>
-                        <li>Skipped: {connectionTestResult?.details?.savedPosts?.skipped}</li>
+                        <li>
+                            Fetched:{' '}
+                            {connectionTestResult?.details?.savedPosts?.fetched ||
+                                connectionTestResult?.details?.recentlyPlayed?.fetched}
+                        </li>
+                        <li>
+                            Saved:{' '}
+                            {connectionTestResult?.details?.savedPosts?.saved ||
+                                connectionTestResult?.details?.recentlyPlayed?.saved}
+                        </li>
+                        <li>
+                            Skipped:{' '}
+                            {connectionTestResult?.details?.savedPosts?.skipped ||
+                                connectionTestResult?.details?.recentlyPlayed?.skipped}
+                        </li>
                     </ul>
                     Please refresh the page to see the latest results.
                     <br />

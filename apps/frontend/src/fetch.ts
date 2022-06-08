@@ -89,7 +89,7 @@ export function getSpotifyAgentDetails() {
 }
 
 export function getSpotifyAgentCollect() {
-    return fetch(`${baseUrl}/agent/collect`, {
+    return fetch(`${baseUrl}/agent/spotify/collect`, {
         method: 'POST',
         redirect: 'follow',
         headers: defaultHeaders,
