@@ -11,10 +11,12 @@ import logger from './lib/logger';
 import router from './lib/router';
 import logRequest from './lib/controllers/requestLogger';
 import errorHandler from './lib/controllers/errorHandler';
-import redditOAuthRouter from './lib/reddit/router';
+
 import { timeStart, version } from './lib/version';
 import * as compression from 'compression';
 import { performRedditSync } from './lib/reddit/agent';
+import { redditRouter } from './lib/reddit/router';
+import { spotifyRouter } from './lib/spotify/router';
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
@@ -56,7 +58,8 @@ app.use(
 app.use(logRequest);
 
 app.use('/api', router);
-app.use('/', redditOAuthRouter);
+app.use('/', redditRouter);
+app.use('/', spotifyRouter);
 
 app.use(errorHandler);
 

@@ -3,6 +3,14 @@ import { baseUrl, oauthBaseUrl } from './constants';
 export const defaultHeaders = new Headers();
 defaultHeaders.append('Content-Type', 'application/json');
 
+export function getRedditLoginUrl() {
+    return `${oauthBaseUrl}/auth/reddit`;
+}
+
+export function getSpotifyLoginUrl() {
+    return `${oauthBaseUrl}/auth/spotify`;
+}
+
 export function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
         method: 'POST',
@@ -35,10 +43,6 @@ export function userRegister(username: string, password: string) {
     });
 }
 
-export function getRedditLoginUrl() {
-    return `${oauthBaseUrl}/auth/reddit`;
-}
-
 export function getUser() {
     return fetch(`${baseUrl}/user`, {
         method: 'GET',
@@ -68,6 +72,24 @@ export function getRedditAgentDetails() {
 
 export function getRedditAgentCollect() {
     return fetch(`${baseUrl}/agent/reddit/collect`, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function getSpotifyAgentDetails() {
+    return fetch(`${baseUrl}/agent/spotify`, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function getSpotifyAgentCollect() {
+    return fetch(`${baseUrl}/agent/collect`, {
         method: 'POST',
         redirect: 'follow',
         headers: defaultHeaders,

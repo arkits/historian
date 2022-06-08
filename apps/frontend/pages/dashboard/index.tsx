@@ -19,34 +19,56 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import { getPrettyAvatar, getSubtitleText, getTitleText } from 'apps/frontend/src/historyUtils';
+import {
+    getPrettyAvatar,
+    getSubtitleText,
+    getSubtitleText2,
+    getThumbnail,
+    getTitleText
+} from 'apps/frontend/src/historyUtils';
 import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 import Link from 'apps/frontend/src/Link';
 import Chart from 'apps/frontend/src/components/Chart';
+import { formatDistance } from 'date-fns';
 
-function RecentHistoryList({ history }) {
-    if (!history) {
+function RecentHistoryList({ histories }) {
+    if (!histories) {
         return <></>;
     }
 
     return (
         <List sx={{ width: '100%' }}>
-            {history
-                .map((item) => (
+            {histories
+                .map((history) => (
                     <>
-                        <ListItemButton component={Link} href={`/history/${item?.id}`}>
+                        <ListItemButton component={Link} href={`/history/${history?.id}`}>
                             <ListItem alignItems="flex-start">
                                 <ListItemAvatar>
-                                    <Avatar>{getPrettyAvatar(item)}</Avatar>
+                                    <Avatar>{getPrettyAvatar(history)}</Avatar>
                                 </ListItemAvatar>
-                                <ListItemText primary={getTitleText(item)} secondary={getSubtitleText(item)} />
+                                <ListItemText
+                                    primary={getTitleText(history)}
+                                    secondary={
+                                        <>
+                                            {getSubtitleText(history)} <br />
+                                            {getSubtitleText2(history)}
+                                        </>
+                                    }
+                                />
+                                <ListItemAvatar>
+                                    <Avatar
+                                        variant="rounded"
+                                        src={getThumbnail(history)}
+                                        sx={{ width: 92, height: 92 }}
+                                    ></Avatar>
+                                </ListItemAvatar>
                             </ListItem>
                         </ListItemButton>
                     </>
                 ))
-                .slice(0, 10)}
+                .slice(0, 50)}
         </List>
     );
 }
@@ -64,7 +86,7 @@ const Dashboard: NextPage = () => {
     });
 
     const historyQuery = useQuery('dashboardHistory', async () => {
-        return await getHistory('', 7).then((res) => res.json());
+        return await getHistory('', 50).then((res) => res.json());
     });
 
     if (dashboardDataQuery.isLoading) {
@@ -152,7 +174,7 @@ const Dashboard: NextPage = () => {
         return (
             <Paper>
                 <List subheader={<ListSubheader sx={{ backgroundColor: '#0E3541' }}>Recently Saved</ListSubheader>}>
-                    <RecentHistoryList history={historyQuery.data?.history} />
+                    <RecentHistoryList histories={historyQuery.data?.history} />
                 </List>
             </Paper>
         );

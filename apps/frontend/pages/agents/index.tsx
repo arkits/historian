@@ -1,135 +1,13 @@
 import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Link from '../../src/Link';
 import HistorianContext from 'apps/frontend/context/historian';
-import { getRedditAgentCollect, getRedditAgentDetails, getRedditLoginUrl } from '../../src/fetch';
 import { useRouter } from 'next/router';
-import { useQuery } from 'react-query';
-import { formatDistance } from 'date-fns';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
-import { useContext, useEffect, useState } from 'react';
-import { FONT_LOGO } from 'apps/frontend/src/constants';
+import { useContext, useEffect } from 'react';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
-import { Divider } from '@mui/material';
-import { prettyDate } from 'apps/frontend/src/dateFormat';
-import LoadingButton from '@mui/lab/LoadingButton';
-
-const RedditAgent = () => {
-    // Queries
-    const query = useQuery('redditAgentDetails', async () => {
-        return await getRedditAgentDetails().then((res) => res.json());
-    });
-
-    const AgentDetails = () => {
-        if (query?.data?.error) {
-            return <Box sx={{ mb: 4 }}>{query.data.error}</Box>;
-        }
-
-        if (query?.data?.connected) {
-            if (query?.data?.redditUsername) {
-                return (
-                    <Typography variant="body1" component="p" gutterBottom>
-                        Reddit Username: /u/{query?.data?.redditUsername} <br />
-                        Last Refreshed:{' '}
-                        {formatDistance(new Date(query?.data?.lastSync), new Date(), {
-                            addSuffix: true
-                        })}{' '}
-                        // {prettyDate(new Date(query?.data?.lastSync))}
-                        <br />
-                        <br />
-                        Total Saved: {query?.data?.historyTotal} <br />
-                        <br />
-                    </Typography>
-                );
-            } else {
-                return (
-                    <Typography variant="body1" component="p" gutterBottom>
-                        Connected, please wait for initial sync to complete.
-                        <br /> <br />
-                    </Typography>
-                );
-            }
-        } else {
-            return <></>;
-        }
-    };
-
-    const [isManuallyCollecting, setIsManuallyCollecting] = useState(false);
-    const [connectionTestResult, setConnectionTestResult] = useState({} as any);
-
-    const manuallyCollect = () => {
-        setIsManuallyCollecting(true);
-        getRedditAgentCollect()
-            .then((res) => res.json())
-            .then((response) => {
-                setIsManuallyCollecting(false);
-                setConnectionTestResult(response);
-            })
-            .catch((err) => {
-                setIsManuallyCollecting(false);
-                console.log(err);
-            });
-    };
-
-    const ConnectionTest = () => {
-        return (
-            <>
-                <LoadingButton
-                    onClick={() => manuallyCollect()}
-                    loading={isManuallyCollecting}
-                    loadingPosition="end"
-                    variant="outlined"
-                >
-                    Test Connection
-                </LoadingButton>
-                <br />
-
-                {connectionTestResult?.message ? (
-                    <>
-                        Connection Test Result: {connectionTestResult?.message}
-                        <ul>
-                            <li>Fetched: {connectionTestResult?.details?.savedPosts?.fetched}</li>
-                            <li>Saved: {connectionTestResult?.details?.savedPosts?.saved}</li>
-                            <li>Skipped: {connectionTestResult?.details?.savedPosts?.skipped}</li>
-                        </ul>
-                        Please refresh the page to see the latest results.
-                        <br />
-                    </>
-                ) : (
-                    <></>
-                )}
-            </>
-        );
-    };
-
-    return (
-        <>
-            <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
-                Reddit
-            </Typography>
-            <AgentDetails />
-            <Button
-                variant="contained"
-                component={Link}
-                noLinkStyle
-                href={getRedditLoginUrl()}
-                target={'_blank'}
-                sx={{ mb: 2 }}
-            >
-                Login with Reddit
-            </Button>
-
-            <ConnectionTest />
-
-            <br />
-
-            <Divider />
-        </>
-    );
-};
+import { RedditAgent } from 'apps/frontend/src/components/agents/redditAgent';
+import { SpotifyAgent } from 'apps/frontend/src/components/agents/spotifyAgent';
 
 const Agents: NextPage = () => {
     const router = useRouter();
@@ -153,6 +31,11 @@ const Agents: NextPage = () => {
                     <PageTitle>Agents</PageTitle>
 
                     <RedditAgent />
+
+                    <br />
+                    <br />
+
+                    <SpotifyAgent />
                 </Box>
             </Container>
         </>

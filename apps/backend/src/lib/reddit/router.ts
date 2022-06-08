@@ -1,12 +1,14 @@
 import * as simpleOAuth2Reddit from '@jimmycode/simple-oauth2-reddit';
 import { response, Router } from 'express';
 import logger from '../logger';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { performRedditSyncForUser } from './agent';
+import e = require('express');
+import { appendUserPreferences } from '../db';
 
 const prisma = new PrismaClient();
 
-let redditRouter = Router();
+export const redditRouter = Router();
 
 const redditOAuth2Client = simpleOAuth2Reddit.create({
     clientId: process.env.REDDIT_APP_ID,
@@ -38,7 +40,6 @@ redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
             let response = null;
 
             try {
-                logger.info({ user, fetchAll }, 'Invoking performRedditSyncForUser');
                 response = await performRedditSyncForUser(user, fetchAll);
             } catch (error) {
                 return next({ message: 'Error Performing Reddit Sync', code: 500, description: error.message });
@@ -79,13 +80,16 @@ redditRouter.get('/api/agent/reddit', async (req, res, next) => {
 
                 const historyTotal = await prisma.history.count({
                     where: {
-                        userId: user.id
+                        userId: user.id,
+                        type: {
+                            startsWith: 'reddit'
+                        }
                     }
                 });
 
                 let response = {
                     connected: true,
-                    redditUsername: redditPrefs['username'],
+                    username: redditPrefs['username'],
                     lastSync: redditPrefs['lastSync'],
                     historyTotal: historyTotal
                 };
@@ -122,18 +126,13 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
                 return next({ message: 'User not found', code: 400 });
             }
 
-            await prisma.user.update({
-                where: {
-                    id: req['session'].userId
-                },
-                data: {
-                    preferences: {
-                        reddit: {
-                            accessToken: req['token']
-                        }
-                    }
-                }
+            await appendUserPreferences(user, 'reddit', {
+                ...user.preferences['reddit'],
+                accessToken: req['token']
             });
+
+            // Perform initial sync
+            performRedditSyncForUser(user, true);
         } catch (error) {
             return next({ message: 'Failed to save access token', code: 400, description: error.message });
         }
@@ -144,5 +143,3 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
     res.status(200);
     res.send('Reddit OAuth flow completed! Please return to Historian.');
 });
-
-export default redditRouter;

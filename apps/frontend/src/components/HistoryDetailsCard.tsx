@@ -2,13 +2,14 @@ import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Grid, Typog
 import DeleteIcon from '@mui/icons-material/Delete';
 import LaunchIcon from '@mui/icons-material/Launch';
 import InfoIcon from '@mui/icons-material/Info';
-import { getPrettyAvatar, getSubtitleText, getTitleText } from '../historyUtils';
+import { getPrettyAvatar, getSubtitleText, getSubtitleText2, getThumbnail, getTitleText } from '../historyUtils';
 import theme from '../theme';
 import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useContext, useState } from 'react';
 import { prettyDate } from '../dateFormat';
+import { formatDistance } from 'date-fns';
 
 export const HistoryDetailsCard = ({ history }) => {
     const { setSnackbarDetails } = useContext(HistorianContext);
@@ -59,10 +60,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                             <Typography variant="body2" color="inherit" component="p">
                                                 {getSubtitleText(history)}
                                             </Typography>
-                                            <Typography variant="body2">
-                                                Posted: {prettyDate(new Date(history?.content?.created_utc * 1000))} •
-                                                Saved: {prettyDate(new Date(history?.createdAt))}
-                                            </Typography>
+                                            <Typography variant="body2">{getSubtitleText2(history)}</Typography>
                                         </>
                                     }
                                     style={{
@@ -129,7 +127,7 @@ export const HistoryDetailsCard = ({ history }) => {
                         <a href={history?.content?.content_url} target={'_blank'}>
                             <Avatar
                                 variant="square"
-                                src={history?.content?.thumbnail}
+                                src={getThumbnail(history)}
                                 style={{
                                     width: theme.spacing(20),
                                     height: '100%',

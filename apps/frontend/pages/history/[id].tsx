@@ -41,22 +41,37 @@ const History = () => {
             );
         }
 
-        return (
-            <>
-                <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.content_url} loading="lazy" />
-                <Button
-                    fullWidth
-                    variant="contained"
-                    component={Link}
-                    noLinkStyle
-                    href={historyQuery.data?.content?.content_url || '#undefined'}
-                    sx={{ mt: 3, mb: 2 }}
-                    target={'_blank'}
-                >
-                    Link
-                </Button>
-            </>
-        );
+        if (historyQuery.data?.content?.content_url) {
+            return (
+                <>
+                    <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.content_url} loading="lazy" />
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        component={Link}
+                        noLinkStyle
+                        href={historyQuery.data?.content?.content_url || '#undefined'}
+                        sx={{ mt: 3, mb: 2 }}
+                        target={'_blank'}
+                    >
+                        Link
+                    </Button>
+                </>
+            );
+        }
+
+        if (historyQuery.data?.content?.context) {
+            return (
+                <>
+                    <Typography variant="h5" component="div">
+                        Context
+                    </Typography>
+                    <pre>{JSON.stringify(historyQuery?.data?.content?.context, null, 2)}</pre>
+                </>
+            );
+        }
+
+        return <></>;
     };
 
     if (historyQuery.isLoading) {
@@ -71,6 +86,28 @@ const History = () => {
         );
     }
 
+    const HistoryDetails = ({ history }) => {
+        switch (history?.type) {
+            case 'log':
+                return (
+                    <Typography variant="body2" gutterBottom component="div">
+                        Level: {history?.content?.level} <br />
+                    </Typography>
+                );
+            case 'reddit-saved':
+            case 'reddit-upvoted':
+                return (
+                    <Typography variant="body2" gutterBottom component="div">
+                        Subreddit: {historyQuery.data?.content?.subreddit} <br />
+                        Author: {historyQuery.data?.content?.author} <br />
+                        Score: {historyQuery?.data?.content?.score} <br />
+                    </Typography>
+                );
+            default:
+                return <></>;
+        }
+    };
+
     return (
         <Container maxWidth="lg" sx={{ marginTop: 5 }}>
             <Grid container>
@@ -84,14 +121,11 @@ const History = () => {
                     <Typography variant="h6" gutterBottom component="div">
                         {getTitleText(historyQuery.data)}
                     </Typography>
+
+                    <HistoryDetails history={historyQuery.data} />
+
                     <Typography variant="body2" gutterBottom component="div">
-                        Subreddit: {historyQuery.data?.content?.subreddit} <br />
-                        Author: {historyQuery.data?.content?.author} <br />
-                        Score: {historyQuery?.data?.content?.score} <br />
-                    </Typography>
-                    <br />
-                    <Typography variant="body2" gutterBottom component="div">
-                        Posted: {prettyDate(new Date(historyQuery.data?.content?.created_utc * 1000))} <br />
+                        {/* Posted: {prettyDate(new Date(historyQuery.data?.content?.created_utc * 1000))} <br /> */}
                         Saved to Historian: {prettyDate(new Date(historyQuery.data?.createdAt))}
                     </Typography>
                     <ButtonGroup
@@ -100,14 +134,17 @@ const History = () => {
                         sx={{ marginTop: '2rem' }}
                     >
                         <Button onClick={() => setShowDetails(!showDetails)}>Details</Button>
-                        <Button
-                            component={Link}
-                            noLinkStyle
-                            href={'https://www.reddit.com' + historyQuery.data?.content?.permalink || '#'}
-                            target={'_blank'}
-                        >
-                            Permalink
-                        </Button>
+                        {historyQuery.data?.content?.permalink && (
+                            <Button
+                                component={Link}
+                                noLinkStyle
+                                href={'https://www.reddit.com' + historyQuery.data?.content?.permalink || '#'}
+                                target={'_blank'}
+                            >
+                                Permalink
+                            </Button>
+                        )}
+
                         <Button
                             onClick={() => {
                                 setSnackbarDetails({

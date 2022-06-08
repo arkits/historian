@@ -1,4 +1,5 @@
-import { PrismaClient, User } from '@prisma/client';
+import { Prisma, PrismaClient, User } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -99,6 +100,37 @@ export function getUserHistoryCountForDate(user, dateStart: Date, dateEnd: Date)
                 gte: dateStart,
                 lt: dateEnd
             }
+        }
+    });
+}
+
+export function appendUserPreferences(user, key, value) {
+    const updatedPreferences = {
+        ...(user.preferences as Prisma.JsonObject),
+        [key]: value
+    };
+
+    return prisma.user.update({
+        where: {
+            id: user.id
+        },
+        data: {
+            preferences: updatedPreferences
+        }
+    });
+}
+
+export function createLogHistoryForUser(user, level, message, context) {
+    return prisma.history.create({
+        data: {
+            type: 'log',
+            userId: user.id,
+            content: {
+                level: level,
+                message: message,
+                context: context
+            },
+            contentId: uuidv4()
         }
     });
 }

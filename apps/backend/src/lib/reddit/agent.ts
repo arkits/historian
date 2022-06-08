@@ -1,7 +1,7 @@
 import snoowrap = require('snoowrap');
 import logger from '../logger';
 import { PrismaClient } from '@prisma/client';
-import { getAllUsers } from '../db';
+import { createLogHistoryForUser, getAllUsers } from '../db';
 
 const prisma = new PrismaClient();
 
@@ -78,6 +78,8 @@ export async function performRedditSyncForUser(user, fetchAll = false) {
             }
         }
     });
+
+    await createLogHistoryForUser(user, 'info', 'Reddit Sync Successful', {});
 
     return response;
 }
