@@ -51,8 +51,8 @@ const Login: NextPage = () => {
                 if (result?.error) {
                     setLoginError(result.error);
                 } else {
-                    setUser(result);
-                    router.push('/dashboard');
+                    router.reload();
+                    // router.push('/dashboard');
                 }
             })
             .catch((error) => console.log('error', error));
