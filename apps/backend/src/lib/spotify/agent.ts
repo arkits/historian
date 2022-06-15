@@ -1,7 +1,7 @@
 import logger from '../logger';
 import { appendUserPreferences, createLogHistoryForUser } from '../db';
 import { PrismaClient } from '@prisma/client';
-import { getMe, getRecentlyPlayed } from './api';
+import { getMe, getRecentlyPlayed, refreshApiCreds } from './api';
 
 const prisma = new PrismaClient();
 
@@ -35,6 +35,8 @@ export async function performSpotifySyncForUser(user) {
     };
 
     try {
+        user = await refreshApiCreds(user);
+
         let response = await getMe(user);
         logger.info({ responseData: response.data, user: user.username }, 'Got Spotify User');
 

@@ -5,16 +5,11 @@ import * as querystring from 'querystring';
 import axios from 'axios';
 import { performSpotifySyncForUser } from './agent';
 import { appendUserPreferences } from '../db';
+import { SPOTIFY_CALLBACK_URL, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_TOKEN_URL } from './constants';
 
 const prisma = new PrismaClient();
 
 export const spotifyRouter = Router();
-
-const client_id = process.env.SPOTIFY_CLIENT_ID;
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirect_uri = process.env.SPOTIFY_CALLBACK_URL;
-
-const spotifyTokenUrl = 'https://accounts.spotify.com/api/token';
 
 spotifyRouter.get('/api/agent/spotify', async function (req, res, next) {
     if (req['session'].loggedIn) {
@@ -67,9 +62,9 @@ spotifyRouter.get('/auth/spotify', function (req, res, next) {
             'https://accounts.spotify.com/authorize?' +
                 querystring.stringify({
                     response_type: 'code',
-                    client_id: client_id,
+                    client_id: SPOTIFY_CLIENT_ID,
                     scope: 'user-read-recently-played user-read-currently-playing user-read-playback-state user-library-read',
-                    redirect_uri: redirect_uri,
+                    redirect_uri: SPOTIFY_CALLBACK_URL,
                     state: 'random-unique-string'
                 })
         );
@@ -83,15 +78,16 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
         var code = req.query.code || null;
 
         let response = await axios.post(
-            spotifyTokenUrl,
+            SPOTIFY_TOKEN_URL,
             new URLSearchParams({
                 code: code.toString(),
-                redirect_uri: redirect_uri,
+                redirect_uri: SPOTIFY_CALLBACK_URL,
                 grant_type: 'authorization_code'
             }),
             {
                 headers: {
-                    Authorization: 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64')
+                    Authorization:
+                        'Basic ' + Buffer.from(SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).toString('base64')
                 }
             }
         );
@@ -163,26 +159,3 @@ spotifyRouter.post('/api/agent/spotify/collect', async (req, res, next) => {
         return next({ message: 'User not logged in', code: 400 });
     }
 });
-
-// spotifyRouter.get('/refresh_token', function (req, res) {
-//     // requesting access token from refresh token
-//     var refresh_token = req.query.refresh_token;
-//     var authOptions = {
-//         url: 'https://accounts.spotify.com/api/token',
-//         headers: { Authorization: 'Basic ' + new Buffer(client_id + ':' + client_secret).toString('base64') },
-//         form: {
-//             grant_type: 'refresh_token',
-//             refresh_token: refresh_token
-//         },
-//         json: true
-//     };
-
-//     request.post(authOptions, function (error, response, body) {
-//         if (!error && response.statusCode === 200) {
-//             var access_token = body.access_token;
-//             res.send({
-//                 access_token: access_token
-//             });
-//         }
-//     });
-// });
