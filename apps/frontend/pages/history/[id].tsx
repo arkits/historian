@@ -47,14 +47,33 @@ const History = () => {
                     <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.content_url} loading="lazy" />
                     <Button
                         fullWidth
-                        variant="contained"
+                        variant="outlined"
                         component={Link}
                         noLinkStyle
                         href={historyQuery.data?.content?.content_url || '#undefined'}
                         sx={{ mt: 3, mb: 2 }}
                         target={'_blank'}
                     >
-                        Link
+                        Content Link
+                    </Button>
+                </>
+            );
+        }
+
+        if (historyQuery.data?.content?.albumArt) {
+            return (
+                <>
+                    <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.albumArt} loading="lazy" />
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        component={Link}
+                        noLinkStyle
+                        href={historyQuery.data?.content?.albumArt || '#undefined'}
+                        sx={{ mt: 3, mb: 2 }}
+                        target={'_blank'}
+                    >
+                        Content Link
                     </Button>
                 </>
             );
@@ -110,7 +129,7 @@ const History = () => {
 
     return (
         <Container maxWidth="lg" sx={{ marginTop: 5 }}>
-            <Grid container>
+            <Grid container spacing={1}>
                 <Grid item xs={6} md={6}>
                     <Typography variant="overline" display="div" sx={{ lineHeight: '0' }}>
                         ID: {historyQuery.data?.id} <br />
@@ -125,7 +144,6 @@ const History = () => {
                     <HistoryDetails history={historyQuery.data} />
 
                     <Typography variant="body2" gutterBottom component="div">
-                        {/* Posted: {prettyDate(new Date(historyQuery.data?.content?.created_utc * 1000))} <br /> */}
                         Saved to Historian: {prettyDate(new Date(historyQuery.data?.createdAt))}
                     </Typography>
                     <ButtonGroup
