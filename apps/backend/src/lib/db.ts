@@ -11,6 +11,8 @@ export function getUserById(userId: string) {
     });
 }
 
+const TIMELINE_TYPES = ['reddit-saved', 'reddit-upvoted', 'spotify/recently-played'];
+
 export function getUserHistory(
     user: User,
     take: number,
@@ -34,9 +36,15 @@ export function getUserHistory(
     }
 
     if (type !== '' && type !== 'all') {
-        defaults.where['type'] = {
-            equals: type
-        };
+        if (type === 'timeline') {
+            defaults.where['type'] = {
+                in: TIMELINE_TYPES
+            };
+        } else {
+            defaults.where['type'] = {
+                equals: type
+            };
+        }
     }
 
     if (cursor) {

@@ -28,7 +28,7 @@ const TimelinePage: NextPage = () => {
     const [cursor, setCursor] = React.useState('');
 
     const [pageSize, setPageSize] = React.useState(50);
-    const [historyType, setHistoryType] = React.useState('all');
+    const [historyType, setHistoryType] = React.useState('timeline');
     const [searchTerm, setSearchTerm] = React.useState('');
 
     const fetchHistory = ({ pageParam = '' }) => {
@@ -87,10 +87,12 @@ const TimelinePage: NextPage = () => {
                                         label="Type"
                                         onChange={(e) => setHistoryType(e.target.value)}
                                     >
+                                        <MenuItem value={'timeline'}>Timeline</MenuItem>
                                         <MenuItem value={'all'}>All</MenuItem>
-                                        <MenuItem value={'reddit-saved'}>Reddit Saved</MenuItem>
-                                        <MenuItem value={'reddit-upvoted'}>Reddit Upvoted</MenuItem>
-                                        <MenuItem value={'youtube-liked'}>YouTube Liked</MenuItem>
+                                        <MenuItem value={'reddit-saved'}>Reddit - Saved</MenuItem>
+                                        <MenuItem value={'reddit-upvoted'}>Reddit - Upvoted</MenuItem>
+                                        <MenuItem value={'spotify/recently-played'}>Spotify - Recently Played</MenuItem>
+                                        <MenuItem value={'log'}>Log</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
