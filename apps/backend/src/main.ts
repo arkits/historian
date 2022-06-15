@@ -14,9 +14,9 @@ import errorHandler from './lib/controllers/errorHandler';
 
 import { timeStart, version } from './lib/version';
 import * as compression from 'compression';
-import { performRedditSync } from './lib/reddit/agent';
 import { redditRouter } from './lib/reddit/router';
 import { spotifyRouter } from './lib/spotify/router';
+import { performSystemSync } from './lib/cron';
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
@@ -66,7 +66,7 @@ app.use(errorHandler);
 const port = process.env.port || 3333;
 
 cron.schedule('0 * * * *', function () {
-    performRedditSync();
+    performSystemSync();
 });
 
 app.listen(port, () => {

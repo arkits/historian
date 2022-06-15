@@ -143,21 +143,3 @@ function safeString(str) {
         return '';
     }
 }
-
-export async function performRedditSync() {
-    logger.info('Begin performRedditSync');
-
-    try {
-        const allUsers = await getAllUsers();
-        for (let user of allUsers) {
-            try {
-                logger.info({ user }, 'Invoking performRedditSyncForUser');
-                await performRedditSyncForUser(user, true);
-            } catch (error) {
-                logger.error(error, user, 'Caught Error in RedditSync for User');
-            }
-        }
-    } catch (error) {
-        logger.error(error, 'Caught Error in PerformRedditSync');
-    }
-}

@@ -1,14 +1,30 @@
 import logger from '../logger';
-import axios from 'axios';
 import { appendUserPreferences, createLogHistoryForUser } from '../db';
 import { PrismaClient } from '@prisma/client';
+import { getMe, getRecentlyPlayed } from './api';
 
 const prisma = new PrismaClient();
 
-const SPOTIFY_API_BASE = 'https://api.spotify.com';
+function insertToHistory(user, item) {
+    return prisma.history.create({
+        data: {
+            userId: user.id,
+            type: 'spotify/recently-played',
+            contentId: `${item.track.id}-${item?.played_at}`,
+            content: {
+                external_urls: item?.track?.external_urls,
+                played_at: item?.played_at,
+                trackName: item?.track?.name,
+                albumName: item?.track?.album?.name,
+                artistName: item?.track?.artists?.map((artist) => artist.name).join(', '),
+                albumArt: item?.track?.album?.images[0]?.url
+            }
+        }
+    });
+}
 
 export async function performSpotifySyncForUser(user) {
-    logger.info({ user }, 'Performing Spotify Sync for User');
+    logger.info({ user: user.username }, 'Performing Spotify Sync for User');
 
     let toReturn = {
         recentlyPlayed: {
@@ -19,36 +35,32 @@ export async function performSpotifySyncForUser(user) {
     };
 
     try {
-        let response = await callSpotify(`${SPOTIFY_API_BASE}/v1/me/player/recently-played`, user);
-        logger.info({ responseData: response.data }, 'Got Spotify Recently Played');
+        let response = await getMe(user);
+        logger.info({ responseData: response.data, user: user.username }, 'Got Spotify User');
 
-        toReturn.recentlyPlayed.fetched = response.data.items.length;
+        let fetchMore = true;
+        let after = user.preferences['spotify'].lastSync;
 
-        for (let item of response.data.items) {
-            try {
-                await prisma.history.create({
-                    data: {
-                        userId: user.id,
-                        type: 'spotify/recently-played',
-                        contentId: `${item.track.id}-${item?.played_at}`,
-                        content: {
-                            external_urls: item?.track?.external_urls,
-                            played_at: item?.played_at,
-                            trackName: item?.track?.name,
-                            albumName: item?.track?.album?.name,
-                            artistName: item?.track?.artists?.map((artist) => artist.name).join(', '),
-                            albumArt: item?.track?.album?.images[0]?.url
-                        }
-                    }
-                });
-                toReturn.recentlyPlayed.saved++;
-            } catch (error) {
-                toReturn.recentlyPlayed.skipped++;
+        while (fetchMore) {
+            let recentlyPlayed = await getRecentlyPlayed(user, after);
+            logger.info({ responseData: recentlyPlayed.data, user: user.username }, 'Got Recently Played');
+
+            for (let item of recentlyPlayed.data.items) {
+                try {
+                    await insertToHistory(user, item);
+                    await toReturn.recentlyPlayed.saved++;
+                } catch (error) {
+                    logger.error({ error, user }, 'Error in performSpotifySyncForUser');
+                    toReturn.recentlyPlayed.skipped++;
+                }
+            }
+
+            if (recentlyPlayed.data?.cursors?.after) {
+                after = recentlyPlayed.data.cursors.after;
+            } else {
+                fetchMore = false;
             }
         }
-
-        response = await callSpotify(`${SPOTIFY_API_BASE}/v1/me`, user);
-        logger.info({ responseData: response.data, user }, 'Got Spotify User');
 
         await appendUserPreferences(user, 'spotify', {
             ...user.preferences['spotify'],
@@ -62,14 +74,4 @@ export async function performSpotifySyncForUser(user) {
     }
 
     return toReturn;
-}
-
-function callSpotify(url, user) {
-    return axios.get(url, {
-        headers: {
-            Authorization: `Bearer ${user.preferences['spotify'].accessToken}`,
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        }
-    });
 }
