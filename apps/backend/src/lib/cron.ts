@@ -1,4 +1,4 @@
-import { getAllUsers } from './db';
+import { updateUserPreference, getAllUsers } from './db';
 import logger from './logger';
 import { performRedditSyncForUser } from './reddit/agent';
 import { performSpotifySyncForUser } from './spotify/agent';
@@ -10,9 +10,12 @@ export async function performSystemSync() {
         const allUsers = await getAllUsers();
         for (let user of allUsers) {
             performSystemSyncForUser(user)
-                .then(() => {
+                .then(async () => {
                     {
-                        logger.info({ user: user.username }, 'Performed System Sync for User');
+                        await updateUserPreference(user, 'system', {
+                            lastSync: new Date().getTime()
+                        });
+                        logger.info({ user: user.username }, 'Completed System Sync for User');
                     }
                 })
                 .catch((error) => {

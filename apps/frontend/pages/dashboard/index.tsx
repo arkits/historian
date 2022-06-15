@@ -147,7 +147,7 @@ const Dashboard: NextPage = () => {
 
                         <Grid item xs={3}>
                             <Typography variant="h5" component="div">
-                                Reddit
+                                {dashboardDataQuery?.data?.topAgent}
                             </Typography>
 
                             <Typography variant="body1" component="div" color="text.secondary">
@@ -157,11 +157,11 @@ const Dashboard: NextPage = () => {
 
                         <Grid item xs={3}>
                             <Typography variant="h5" component="div">
-                                {dashboardDataQuery?.data?.version}
+                                {dashboardDataQuery?.data?.systemLastSync}
                             </Typography>
 
                             <Typography variant="body1" component="div" color="text.secondary">
-                                API Version
+                                Last Sync
                             </Typography>
                         </Grid>
                     </Grid>

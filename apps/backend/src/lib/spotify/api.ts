@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { appendUserPreferences, getUserById } from '../db';
+import { updateUserPreference, getUserById } from '../db';
 import logger from '../logger';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_TOKEN_URL } from './constants';
 
@@ -31,8 +31,7 @@ export async function refreshApiCreds(user) {
         }
     );
 
-    await appendUserPreferences(user, 'spotify', {
-        ...user.preferences['spotify'],
+    await updateUserPreference(user, 'spotify', {
         accessToken: response.data?.access_token
     });
 

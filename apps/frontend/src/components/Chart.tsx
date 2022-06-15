@@ -19,7 +19,7 @@ export const options = {
     responsive: true,
     plugins: {
         legend: {
-            display: false
+            display: true
         }
     }
 };
@@ -29,9 +29,21 @@ export default function Chart({ chartData }) {
         labels: chartData.labels,
         datasets: [
             {
-                label: 'Saved to Historian',
-                data: chartData.datasetSavedCount,
-                borderColor: '#1DE9B6',
+                label: 'reddit/saved',
+                data: chartData.savedCount['reddit/saved'],
+                borderColor: '#f50057',
+                fill: true
+            },
+            {
+                label: 'reddit/upvoted',
+                data: chartData.savedCount['reddit/upvoted'],
+                borderColor: '#ff3d00',
+                fill: true
+            },
+            {
+                label: 'spotify/recently-played',
+                data: chartData.savedCount['spotify/recently-played'],
+                borderColor: '#00e676',
                 fill: true
             }
         ]
@@ -48,7 +60,7 @@ export default function Chart({ chartData }) {
                     marginBottom: '2rem'
                 }}
             >
-                <Line options={options} data={data} height={50} />
+                <Line options={options} data={data} height={60} />
             </Paper>
         </React.Fragment>
     );

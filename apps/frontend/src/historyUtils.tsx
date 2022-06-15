@@ -8,9 +8,9 @@ export const getPrettyType = (type) => {
     switch (type) {
         case 'log':
             return 'Log';
-        case 'reddit-saved':
+        case 'reddit/saved':
             return 'Saved';
-        case 'reddit-upvoted':
+        case 'reddit/upvoted':
             return 'Upvoted';
         default:
             return type;
@@ -21,8 +21,8 @@ export const getPrettyAvatar = (history) => {
     switch (history?.type) {
         case 'log':
             return <ClearAllIcon />;
-        case 'reddit-saved':
-        case 'reddit-upvoted':
+        case 'reddit/saved':
+        case 'reddit/upvoted':
             return <RedditIcon />;
         case 'spotify/recently-played':
             return <MusicNoteRoundedIcon />;
@@ -37,8 +37,8 @@ export const getTitleText = (history) => {
             return `${history?.content?.level}: ${history?.content?.message}`;
         case 'spotify/recently-played':
             return `${history?.content?.trackName} - ${history?.content?.artistName}`;
-        case 'reddit-saved':
-        case 'reddit-upvoted':
+        case 'reddit/saved':
+        case 'reddit/upvoted':
         default:
             return history?.content?.title ?? '[NO TITLE]';
     }
@@ -48,8 +48,8 @@ export const getSubtitleText = (history) => {
     switch (history?.type) {
         case 'log':
             return `${getPrettyType(history?.type)}`;
-        case 'reddit-saved':
-        case 'reddit-upvoted':
+        case 'reddit/saved':
+        case 'reddit/upvoted':
             return `${getPrettyType(history?.type)} • /${history?.content?.subreddit} • ${history?.content?.author}`;
         case 'spotify/recently-played':
             return `${getPrettyType(history?.type)} • ${history?.content?.albumName}`;
@@ -60,8 +60,8 @@ export const getSubtitleText = (history) => {
 
 export const getSubtitleText2 = (history) => {
     switch (history?.type) {
-        case 'reddit-saved':
-        case 'reddit-upvoted':
+        case 'reddit/saved':
+        case 'reddit/upvoted':
             return `
             Saved ${formatDistance(new Date(history?.createdAt), new Date(), {
                 addSuffix: true
@@ -87,8 +87,8 @@ export const getThumbnail = (history) => {
     switch (history?.type) {
         case 'log':
             return null;
-        case 'reddit-saved':
-        case 'reddit-upvoted':
+        case 'reddit/saved':
+        case 'reddit/upvoted':
             return history?.content?.thumbnail;
         case 'spotify/recently-played':
             return history?.content?.albumArt;

@@ -89,8 +89,8 @@ const TimelinePage: NextPage = () => {
                                     >
                                         <MenuItem value={'timeline'}>Timeline</MenuItem>
                                         <MenuItem value={'all'}>All</MenuItem>
-                                        <MenuItem value={'reddit-saved'}>Reddit - Saved</MenuItem>
-                                        <MenuItem value={'reddit-upvoted'}>Reddit - Upvoted</MenuItem>
+                                        <MenuItem value={'reddit/saved'}>Reddit - Saved</MenuItem>
+                                        <MenuItem value={'reddit/upvoted'}>Reddit - Upvoted</MenuItem>
                                         <MenuItem value={'spotify/recently-played'}>Spotify - Recently Played</MenuItem>
                                         <MenuItem value={'log'}>Log</MenuItem>
                                     </Select>

@@ -1,7 +1,7 @@
 import snoowrap = require('snoowrap');
 import logger from '../logger';
 import { PrismaClient } from '@prisma/client';
-import { appendUserPreferences, createLogHistoryForUser, getAllUsers } from '../db';
+import { createLogHistoryForUser, updateUserPreference } from '../db';
 
 const prisma = new PrismaClient();
 
@@ -41,7 +41,7 @@ export async function performRedditSyncForUser(user, fetchAll = false) {
         response.savedPosts.fetched += savedPosts.length;
 
         for (let post of savedPosts) {
-            const history = await upsertPostToHistory(post, 'reddit-saved', user);
+            const history = await upsertPostToHistory(post, 'reddit/saved', user);
             logger.debug({ post, history }, 'Saved to History: Reddit Saved');
             response.savedPosts.saved++;
         }
@@ -56,7 +56,7 @@ export async function performRedditSyncForUser(user, fetchAll = false) {
         response.savedPosts.fetched += upvotedPosts.length;
 
         for (let post of upvotedPosts) {
-            const history = await upsertPostToHistory(post, 'reddit-upvoted', user);
+            const history = await upsertPostToHistory(post, 'reddit/upvoted', user);
             logger.debug({ post, history }, 'Saved to History: Reddit Upvoted');
             response.savedPosts.saved++;
         }
@@ -65,8 +65,7 @@ export async function performRedditSyncForUser(user, fetchAll = false) {
 
         logger.info({ user, response, redditUsername }, 'Completed performRedditSyncForUser');
 
-        await appendUserPreferences(user, 'reddit', {
-            ...user.preferences['reddit'],
+        await updateUserPreference(user, 'reddit', {
             username: redditUsername,
             lastSync: new Date().getTime()
         });

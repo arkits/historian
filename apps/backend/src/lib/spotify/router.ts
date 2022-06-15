@@ -4,7 +4,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import * as querystring from 'querystring';
 import axios from 'axios';
 import { performSpotifySyncForUser } from './agent';
-import { appendUserPreferences } from '../db';
+import { updateUserPreference } from '../db';
 import { SPOTIFY_CALLBACK_URL, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_TOKEN_URL } from './constants';
 
 const prisma = new PrismaClient();
@@ -105,8 +105,7 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
 
             logger.info({ responseData: response.data, user }, 'Got Spotify Access Token');
 
-            await appendUserPreferences(user, 'spotify', {
-                ...user.preferences['spotify'],
+            await updateUserPreference(user, 'spotify', {
                 accessToken: response.data?.access_token,
                 refreshToken: response.data?.refresh_token
             });

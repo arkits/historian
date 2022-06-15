@@ -30,7 +30,8 @@ export async function userSignUp(request, response: Response, next: NextFunction
         user = await prisma.user.create({
             data: {
                 username,
-                passwordHash
+                passwordHash,
+                preferences: {}
             }
         });
     } catch (error) {

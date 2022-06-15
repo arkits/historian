@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
+import { TIMELINE_TYPES } from './constants';
 
 const prisma = new PrismaClient();
 
@@ -10,8 +11,6 @@ export function getUserById(userId: string) {
         }
     });
 }
-
-const TIMELINE_TYPES = ['reddit-saved', 'reddit-upvoted', 'spotify/recently-played'];
 
 export function getUserHistory(
     user: User,
@@ -100,8 +99,8 @@ export function getUserHistoryById(user, id) {
     });
 }
 
-export function getUserHistoryCountForDate(user, dateStart: Date, dateEnd: Date) {
-    return prisma.history.count({
+export function getUserHistoryCountForDate(user, dateStart: Date, dateEnd: Date, type?: string) {
+    const defaults = {
         where: {
             userId: user.id,
             createdAt: {
@@ -109,6 +108,35 @@ export function getUserHistoryCountForDate(user, dateStart: Date, dateEnd: Date)
                 lt: dateEnd
             }
         }
+    };
+
+    if (type) {
+        defaults.where['type'] = {
+            equals: type
+        };
+    }
+
+    return prisma.history.count({
+        ...defaults
+    });
+}
+
+export function updateUserPreference(user, key, updatedPreferences) {
+    let up = {};
+
+    if (user.preferences.hasOwnProperty(key)) {
+        up = {
+            ...user.preferences[key],
+            ...updatedPreferences
+        };
+    } else {
+        up = {
+            ...updatedPreferences
+        };
+    }
+
+    return appendUserPreferences(user, key, {
+        ...up
     });
 }
 

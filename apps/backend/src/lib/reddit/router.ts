@@ -3,8 +3,7 @@ import { response, Router } from 'express';
 import logger from '../logger';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { performRedditSyncForUser } from './agent';
-import e = require('express');
-import { appendUserPreferences } from '../db';
+import { updateUserPreference } from '../db';
 
 const prisma = new PrismaClient();
 
@@ -116,7 +115,7 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
 
     if (req['session'].loggedIn) {
         try {
-            const user = await prisma.user.findFirst({
+            let user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
                 }
@@ -126,8 +125,7 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
                 return next({ message: 'User not found', code: 400 });
             }
 
-            await appendUserPreferences(user, 'reddit', {
-                ...user.preferences['reddit'],
+            user = await updateUserPreference(user, 'reddit', {
                 accessToken: req['token']
             });
 

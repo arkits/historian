@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextFunction, Response } from 'express';
+import { TIMELINE_TYPES } from '../constants';
 import { getUserHistoryCountForDate } from '../db';
 import logger from '../logger';
 import { version } from '../version';
@@ -11,7 +12,9 @@ const ONE_DAY = 24 * 60 * 60 * 1000;
 
 interface ChartData {
     labels: string[];
-    datasetSavedCount: number[];
+    savedCount: {
+        [key: string]: number[];
+    };
 }
 
 export async function dashboardData(request, response: Response, next: NextFunction) {
@@ -31,25 +34,57 @@ export async function dashboardData(request, response: Response, next: NextFunct
 
         const chartData: ChartData = {
             labels: [],
-            datasetSavedCount: []
+            savedCount: {}
         };
 
-        for (let i = 0; i < 14; i++) {
-            const dateStart = new Date(Date.now() - ONE_DAY * (i + 1));
-            const dateEnd = new Date(Date.now() - ONE_DAY * i);
-            const count = await getUserHistoryCountForDate(user, dateStart, dateEnd);
-            chartData.datasetSavedCount.push(count);
-            chartData.labels.push(`${dateEnd.getMonth()}/${dateEnd.getDate()}`);
+        let topAgent = {
+            name: 'Pending',
+            count: 0
+        };
+
+        for (const timelineType of TIMELINE_TYPES) {
+            for (let i = 0; i < 14; i++) {
+                const dateStart = new Date(Date.now() - ONE_DAY * (i + 1));
+                const dateEnd = new Date(Date.now() - ONE_DAY * i);
+                const count = await getUserHistoryCountForDate(user, dateStart, dateEnd, timelineType);
+
+                if (!chartData.savedCount.hasOwnProperty(timelineType)) {
+                    chartData.savedCount[timelineType] = [];
+                }
+
+                chartData.savedCount[timelineType].push(count);
+
+                if (chartData.labels.length < 14) {
+                    chartData.labels.push(`${dateEnd.getMonth()}/${dateEnd.getDate()}`);
+                }
+            }
+
+            chartData.savedCount[timelineType].reverse();
+
+            let savedCountByType = chartData.savedCount[timelineType].reduce((a, b) => a + b, 0);
+
+            if (topAgent.count < savedCountByType) {
+                topAgent = {
+                    name: timelineType,
+                    count: savedCountByType
+                };
+            }
         }
 
-        chartData.datasetSavedCount.reverse();
         chartData.labels.reverse();
+
+        let systemLastSync = 'Pending';
+        try {
+            systemLastSync = user.preferences['system']['lastSync'];
+        } catch (error) {}
 
         let data = {
             totalSaved: totalSaved,
             savedLast24: savedLast24,
             chartData: chartData,
-            version: version
+            apiVersion: version,
+            systemLastSync: systemLastSync,
+            topAgent: topAgent.name
         };
 
         response.status(200);

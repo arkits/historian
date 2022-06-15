@@ -113,8 +113,8 @@ const History = () => {
                         Level: {history?.content?.level} <br />
                     </Typography>
                 );
-            case 'reddit-saved':
-            case 'reddit-upvoted':
+            case 'reddit/saved':
+            case 'reddit/upvoted':
                 return (
                     <Typography variant="body2" gutterBottom component="div">
                         Subreddit: {historyQuery.data?.content?.subreddit} <br />

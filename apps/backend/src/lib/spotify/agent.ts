@@ -1,5 +1,5 @@
 import logger from '../logger';
-import { appendUserPreferences, createLogHistoryForUser } from '../db';
+import { createLogHistoryForUser, updateUserPreference } from '../db';
 import { PrismaClient } from '@prisma/client';
 import { getMe, getRecentlyPlayed, refreshApiCreds } from './api';
 
@@ -64,8 +64,7 @@ export async function performSpotifySyncForUser(user) {
             }
         }
 
-        await appendUserPreferences(user, 'spotify', {
-            ...user.preferences['spotify'],
+        await updateUserPreference(user, 'spotify', {
             lastSync: new Date().getTime(),
             username: response.data.uri
         });
