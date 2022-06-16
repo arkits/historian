@@ -1,6 +1,6 @@
 import { CircularProgress, Container } from '@mui/material';
 
-export function LoadingSpinner() {
+export default function LoadingSpinner() {
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>

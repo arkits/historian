@@ -11,7 +11,7 @@ import {
     Paper
 } from '@mui/material';
 import HistorianContext from 'apps/frontend/context/historian';
-import { LoadingSpinner } from 'apps/frontend/src/components/LoadingSpinner';
+import LoadingSpinner from 'apps/frontend/src/components/LoadingSpinner';
 import { getHistory } from 'apps/frontend/src/fetch';
 import {
     getPrettyAvatar,
@@ -71,7 +71,7 @@ function RecentHistoryListCard({ title, histories }) {
     );
 }
 
-export function RecentHistory() {
+export default function RecentHistory() {
     const { user, setUser } = useContext(HistorianContext);
 
     const historyQueryReddit = useQuery('dashboardHistory_reddit', async () => {

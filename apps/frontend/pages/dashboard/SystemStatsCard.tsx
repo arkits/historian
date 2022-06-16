@@ -1,7 +1,17 @@
 import { Card, CardContent, Grid, Typography } from '@mui/material';
-import formatDistance from 'date-fns/formatDistance';
+import { formatDistance } from 'date-fns';
 
-export function SystemStatsCard({ dashboardDataQuery }) {
+export default function SystemStatsCard({ dashboardData }) {
+    const PrettyLastSync = () => {
+        if (dashboardData?.systemLastSync) {
+            if (dashboardData?.systemLastSync === 'Pending') {
+                return 'Pending';
+            } else {
+                return formatDistance(new Date(dashboardData?.systemLastSync), new Date(), { addSuffix: true });
+            }
+        }
+        return 'Pending';
+    };
     return (
         <Card sx={{ mb: 4 }}>
             <CardContent>
@@ -12,7 +22,7 @@ export function SystemStatsCard({ dashboardDataQuery }) {
                 <Grid container spacing={2}>
                     <Grid item xs={3}>
                         <Typography variant="h5" component="div">
-                            {dashboardDataQuery?.data?.totalSaved}
+                            {dashboardData?.totalSaved}
                         </Typography>
 
                         <Typography variant="body1" component="div" color="text.secondary">
@@ -22,7 +32,7 @@ export function SystemStatsCard({ dashboardDataQuery }) {
 
                     <Grid item xs={3}>
                         <Typography variant="h5" component="div">
-                            {dashboardDataQuery?.data?.savedLast24}
+                            {dashboardData?.savedLast24}
                         </Typography>
 
                         <Typography variant="body1" component="div" color="text.secondary">
@@ -32,7 +42,7 @@ export function SystemStatsCard({ dashboardDataQuery }) {
 
                     <Grid item xs={3}>
                         <Typography variant="h5" component="div">
-                            {dashboardDataQuery?.data?.topAgent}
+                            {dashboardData?.topAgent}
                         </Typography>
 
                         <Typography variant="body1" component="div" color="text.secondary">
@@ -42,11 +52,7 @@ export function SystemStatsCard({ dashboardDataQuery }) {
 
                     <Grid item xs={3}>
                         <Typography variant="h5" component="div">
-                            {dashboardDataQuery?.data?.systemLastSync !== 'Pending'
-                                ? formatDistance(new Date(dashboardDataQuery?.data?.systemLastSync), new Date(), {
-                                      addSuffix: true
-                                  })
-                                : 'Pending'}
+                            {PrettyLastSync()}
                         </Typography>
 
                         <Typography variant="body1" component="div" color="text.secondary">

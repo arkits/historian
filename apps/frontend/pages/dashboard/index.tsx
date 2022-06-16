@@ -1,25 +1,20 @@
 import * as React from 'react';
 import type { NextPage } from 'next';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
 import { useQuery } from 'react-query';
-import { getDashboardData, getHistory } from 'apps/frontend/src/fetch';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
+import { getDashboardData } from 'apps/frontend/src/fetch';
 
 import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 
 import Chart from 'apps/frontend/src/components/Chart';
-import { RecentHistory } from './RecentHistory';
-import { LoadingSpinner } from 'apps/frontend/src/components/LoadingSpinner';
-import { SystemStatsCard } from './SystemStatsCard';
+import RecentHistory from './RecentHistory';
+import LoadingSpinner from 'apps/frontend/src/components/LoadingSpinner';
+import SystemStatsCard from './SystemStatsCard';
 
 const Dashboard: NextPage = () => {
     const router = useRouter();
@@ -64,7 +59,7 @@ const Dashboard: NextPage = () => {
 
                     <Chart chartData={dashboardDataQuery?.data?.chartData} />
 
-                    <SystemStatsCard dashboardDataQuery={dashboardDataQuery} />
+                    <SystemStatsCard dashboardData={dashboardDataQuery?.data} />
 
                     <RecentHistory />
                 </Box>
