@@ -34,16 +34,18 @@ export function getUserHistory(
         };
     }
 
-    if (type !== '' && type !== 'all') {
-        if (type === 'timeline') {
-            defaults.where['type'] = {
-                in: TIMELINE_TYPES
-            };
-        } else {
-            defaults.where['type'] = {
-                equals: type
-            };
-        }
+    if (type === 'reddit') {
+        defaults.where['type'] = {
+            in: ['reddit/saved', 'reddit/upvoted']
+        };
+    } else if (type === 'timeline') {
+        defaults.where['type'] = {
+            in: TIMELINE_TYPES
+        };
+    } else if (type !== '' && type !== 'all') {
+        defaults.where['type'] = {
+            equals: type
+        };
     }
 
     if (cursor) {
