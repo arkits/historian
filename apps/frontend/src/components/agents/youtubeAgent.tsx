@@ -1,43 +1,40 @@
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Typography, Box, Button, Divider } from '@mui/material';
-import { formatDistance } from 'date-fns';
+import { Button, Divider, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { FONT_LOGO } from '../../constants';
-import { prettyDate } from '../../dateFormat';
-import { getRedditAgentDetails, getRedditAgentCollect, getRedditLoginUrl } from '../../fetch';
+import { getYoutubeAgentCollect, getYoutubeAgentDetails, getYoutubeLoginUrl } from '../../fetch';
 import Link from '../../Link';
 import { AgentDetails, ConnectionTest } from './shared';
 
-export const RedditAgent = () => {
-    // Queries
-    const query = useQuery('redditAgentDetails', async () => {
-        return await getRedditAgentDetails().then((res) => res.json());
-    });
-
+export const YoutubeAgent = () => {
     // State
     const [isManuallyCollecting, setIsManuallyCollecting] = useState(false);
     const [connectionTestResult, setConnectionTestResult] = useState({} as any);
 
+    // Queries
+    const query = useQuery('youtubeAgentDetails', async () => {
+        return await getYoutubeAgentDetails().then((res) => res.json());
+    });
+
     return (
         <>
             <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
-                Reddit
+                YouTube
             </Typography>
             <AgentDetails queryData={query?.data} />
             <Button
                 variant="contained"
                 component={Link}
                 noLinkStyle
-                href={getRedditLoginUrl()}
+                href={getYoutubeLoginUrl()}
                 target={'_blank'}
                 sx={{ mb: 2 }}
             >
-                Connect to Reddit
+                Connect to YouTube
             </Button>
 
             <ConnectionTest
-                getAgentCollect={getRedditAgentCollect}
+                getAgentCollect={getYoutubeAgentCollect}
                 isManuallyCollecting={isManuallyCollecting}
                 setIsManuallyCollecting={setIsManuallyCollecting}
                 connectionTestResult={connectionTestResult}

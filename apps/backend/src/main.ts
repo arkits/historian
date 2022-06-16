@@ -17,6 +17,7 @@ import * as compression from 'compression';
 import { redditRouter } from './lib/reddit/router';
 import { spotifyRouter } from './lib/spotify/router';
 import { performSystemSync } from './lib/cron';
+import { youtubeRouter } from './lib/youtube/router';
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
@@ -60,6 +61,7 @@ app.use(logRequest);
 app.use('/api', router);
 app.use('/', redditRouter);
 app.use('/', spotifyRouter);
+app.use('/', youtubeRouter);
 
 app.use(errorHandler);
 

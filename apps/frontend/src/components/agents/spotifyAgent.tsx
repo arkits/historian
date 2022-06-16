@@ -42,8 +42,6 @@ export const SpotifyAgent = () => {
             />
 
             <br />
-
-            <Divider />
         </>
     );
 };

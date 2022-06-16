@@ -8,6 +8,7 @@ import { useContext, useEffect } from 'react';
 import { PageTitle } from 'apps/frontend/src/components/PageTitle';
 import { RedditAgent } from 'apps/frontend/src/components/agents/redditAgent';
 import { SpotifyAgent } from 'apps/frontend/src/components/agents/spotifyAgent';
+import { YoutubeAgent } from 'apps/frontend/src/components/agents/youtubeAgent';
 
 const Agents: NextPage = () => {
     const router = useRouter();
@@ -36,6 +37,11 @@ const Agents: NextPage = () => {
                     <br />
 
                     <SpotifyAgent />
+
+                    <br />
+                    <br />
+
+                    <YoutubeAgent />
                 </Box>
             </Container>
         </>
