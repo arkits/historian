@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 export const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL);
 
-export async function performYoutubeSyncForUser(user) {
+export async function performYoutubeSyncForUser(user, fetchAll = false) {
     logger.info({ user: user.username }, 'Performing YouTube Sync for User');
 
     let toReturn = {
@@ -27,13 +27,15 @@ export async function performYoutubeSyncForUser(user) {
             auth: oauth2Client
         });
 
+        let pageToken = null;
         let fetchMore = true;
 
         while (fetchMore) {
             let playlistItems = await client.playlistItems.list({
                 playlistId: 'LL',
                 part: ['snippet'],
-                maxResults: 50
+                maxResults: 50,
+                pageToken: pageToken
             });
             logger.info({ playlistItems: playlistItems, user: user.username }, 'Got Youtube Liked Videos');
 
@@ -42,18 +44,22 @@ export async function performYoutubeSyncForUser(user) {
                     await insertToHistory(user, item);
                     await toReturn.recentlyPlayed.saved++;
                 } catch (error) {
-                    logger.error({ error, user }, 'Error in performYoutubeSyncForUser');
+                    logger.error({ error, user }, 'Error in performYoutubeSyncForUser.insertToHistory');
                     toReturn.recentlyPlayed.skipped++;
                 }
             }
 
-            fetchMore = false;
-
-            // if (recentlyPlayed.data?.cursors?.after) {
-            //     after = recentlyPlayed.data.cursors.after;
-            // } else {
-            //     fetchMore = false;
-            // }
+            if (fetchAll) {
+                if (playlistItems?.data?.nextPageToken) {
+                    logger.info(
+                        { pageToken: playlistItems.data.nextPageToken, user: user.username },
+                        'Got Next Page Token'
+                    );
+                    pageToken = playlistItems.data.nextPageToken;
+                } else {
+                    fetchMore = false;
+                }
+            }
         }
 
         await updateUserPreference(user, 'youtube', {
