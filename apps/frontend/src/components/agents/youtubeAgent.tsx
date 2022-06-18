@@ -33,6 +33,8 @@ export const YoutubeAgent = () => {
                 Connect to YouTube
             </Button>
 
+            <br />
+
             <ConnectionTest
                 getAgentCollect={getYoutubeAgentCollect}
                 isManuallyCollecting={isManuallyCollecting}
@@ -40,8 +42,6 @@ export const YoutubeAgent = () => {
                 connectionTestResult={connectionTestResult}
                 setConnectionTestResult={setConnectionTestResult}
             />
-
-            <br />
         </>
     );
 };

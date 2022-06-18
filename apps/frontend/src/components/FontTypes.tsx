@@ -8,3 +8,11 @@ export function PageTitle({ children }: { children: React.ReactNode }) {
         </Typography>
     );
 }
+
+export function PageSubtitle({ children }: { children: React.ReactNode }) {
+    return (
+        <Typography variant="h4" component="h4" gutterBottom sx={{ fontFamily: FONT_LOGO, mb: 4 }}>
+            {children}
+        </Typography>
+    );
+}

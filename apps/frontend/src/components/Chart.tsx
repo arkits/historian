@@ -31,19 +31,25 @@ export default function Chart({ chartData }) {
             {
                 label: 'reddit/saved',
                 data: chartData.savedCount['reddit/saved'],
-                borderColor: '#f50057',
+                borderColor: '#f57c00',
                 fill: true
             },
             {
                 label: 'reddit/upvoted',
                 data: chartData.savedCount['reddit/upvoted'],
-                borderColor: '#ff3d00',
+                borderColor: '#f57c00',
                 fill: true
             },
             {
                 label: 'spotify/recently-played',
                 data: chartData.savedCount['spotify/recently-played'],
                 borderColor: '#00e676',
+                fill: true
+            },
+            {
+                label: 'youtube/liked',
+                data: chartData.savedCount['youtube/liked'],
+                borderColor: '#e53935',
                 fill: true
             }
         ]

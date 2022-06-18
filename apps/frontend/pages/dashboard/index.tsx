@@ -9,12 +9,14 @@ import { getDashboardData } from 'apps/frontend/src/fetch';
 
 import { useEffect } from 'react';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
-import { PageTitle } from 'apps/frontend/src/components/PageTitle';
+import { PageSubtitle, PageTitle } from 'apps/frontend/src/components/FontTypes';
 
 import Chart from 'apps/frontend/src/components/Chart';
 import RecentHistory from './RecentHistory';
 import LoadingSpinner from 'apps/frontend/src/components/LoadingSpinner';
 import SystemStatsCard from './SystemStatsCard';
+import { Typography } from '@mui/material';
+import RecentLogs from './RecentLogs';
 
 const Dashboard: NextPage = () => {
     const router = useRouter();
@@ -56,12 +58,12 @@ const Dashboard: NextPage = () => {
                     }}
                 >
                     <PageTitle>Dashboard</PageTitle>
-
                     <Chart chartData={dashboardDataQuery?.data?.chartData} />
-
                     <SystemStatsCard dashboardData={dashboardDataQuery?.data} />
-
+                    <PageSubtitle>Recently Saved</PageSubtitle>
                     <RecentHistory />
+                    <PageSubtitle>System Logs</PageSubtitle>
+                    <RecentLogs />
                 </Box>
             </Container>
         </>

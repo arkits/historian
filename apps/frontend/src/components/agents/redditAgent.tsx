@@ -25,6 +25,7 @@ export const RedditAgent = () => {
                 Reddit
             </Typography>
             <AgentDetails queryData={query?.data} />
+
             <Button
                 variant="contained"
                 component={Link}
@@ -36,6 +37,8 @@ export const RedditAgent = () => {
                 Connect to Reddit
             </Button>
 
+            <br />
+
             <ConnectionTest
                 getAgentCollect={getRedditAgentCollect}
                 isManuallyCollecting={isManuallyCollecting}
@@ -43,8 +46,6 @@ export const RedditAgent = () => {
                 connectionTestResult={connectionTestResult}
                 setConnectionTestResult={setConnectionTestResult}
             />
-
-            <br />
         </>
     );
 };

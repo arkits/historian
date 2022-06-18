@@ -14,8 +14,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CasinoIcon from '@mui/icons-material/Casino';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { FONT_LOGO } from 'apps/frontend/src/constants';
-import { PageTitle } from 'apps/frontend/src/components/PageTitle';
+import { PageTitle } from 'apps/frontend/src/components/FontTypes';
 
 const TimelinePage: NextPage = () => {
     const router = useRouter();

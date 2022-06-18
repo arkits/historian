@@ -63,7 +63,7 @@ export const ConnectionTest = ({
                 onClick={() => manuallyCollect(getAgentCollect, setIsManuallyCollecting, setConnectionTestResult)}
                 loading={isManuallyCollecting}
                 loadingPosition="end"
-                variant="outlined"
+                variant="contained"
             >
                 Test Connection
             </LoadingButton>
@@ -71,7 +71,7 @@ export const ConnectionTest = ({
 
             {connectionTestResult?.message ? (
                 <>
-                    Connection Test Result: {connectionTestResult?.message}
+                    <br /> Connection Test Result: {connectionTestResult?.message}
                     <ul>
                         <li>
                             Fetched:{' '}

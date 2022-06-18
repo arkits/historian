@@ -33,6 +33,8 @@ export const SpotifyAgent = () => {
                 Connect to Spotify
             </Button>
 
+            <br />
+
             <ConnectionTest
                 getAgentCollect={getSpotifyAgentCollect}
                 isManuallyCollecting={isManuallyCollecting}
@@ -40,8 +42,6 @@ export const SpotifyAgent = () => {
                 connectionTestResult={connectionTestResult}
                 setConnectionTestResult={setConnectionTestResult}
             />
-
-            <br />
         </>
     );
 };

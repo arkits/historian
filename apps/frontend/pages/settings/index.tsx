@@ -7,7 +7,7 @@ import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
-import { PageTitle } from 'apps/frontend/src/components/PageTitle';
+import { PageTitle } from 'apps/frontend/src/components/FontTypes';
 
 const Settings: NextPage = () => {
     const router = useRouter();

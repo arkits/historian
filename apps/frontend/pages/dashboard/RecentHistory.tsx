@@ -82,15 +82,15 @@ export default function RecentHistory() {
         return await getHistory('', 10, '', 'spotify/recently-played').then((res) => res.json());
     });
 
-    const historyQuerySystem = useQuery('dashboardHistory_system', async () => {
-        return await getHistory('', 10, '', 'log').then((res) => res.json());
+    const historyQueryYoutube = useQuery('dashboardHistory_youtube', async () => {
+        return await getHistory('', 10, '', 'youtube/liked').then((res) => res.json());
     });
 
-    if (historyQueryReddit.isLoading || historyQuerySpotify.isLoading || historyQuerySystem.isLoading) {
+    if (historyQueryReddit.isLoading || historyQuerySpotify.isLoading || historyQueryYoutube.isLoading) {
         return <LoadingSpinner />;
     }
 
-    if (historyQueryReddit.isError || historyQuerySpotify.isError || historyQuerySystem.isError) {
+    if (historyQueryReddit.isError || historyQuerySpotify.isError || historyQueryYoutube.isError) {
         return (
             <>
                 <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
@@ -119,8 +119,8 @@ export default function RecentHistory() {
                 </Grid>
                 <Grid item xs={12} sm={12} md={4}>
                     <RecentHistoryListCard
-                        title={'Recently Saved - System'}
-                        histories={historyQuerySystem.data.history}
+                        title={'Recently Saved - YouTube'}
+                        histories={historyQueryYoutube.data.history}
                     />
                 </Grid>
             </Grid>
