@@ -49,16 +49,19 @@ export async function performYoutubeSyncForUser(user, fetchAll = false) {
                 }
             }
 
-            if (fetchAll) {
-                if (playlistItems?.data?.nextPageToken) {
-                    logger.info(
-                        { pageToken: playlistItems.data.nextPageToken, user: user.username },
-                        'Got Next Page Token'
-                    );
-                    pageToken = playlistItems.data.nextPageToken;
-                } else {
-                    fetchMore = false;
-                }
+            if (!fetchAll) {
+                fetchMore = false;
+                continue;
+            }
+
+            if (playlistItems?.data?.nextPageToken) {
+                logger.info(
+                    { pageToken: playlistItems.data.nextPageToken, user: user.username },
+                    'Got Next Page Token'
+                );
+                pageToken = playlistItems.data.nextPageToken;
+            } else {
+                fetchMore = false;
             }
         }
 
