@@ -9,10 +9,9 @@ export const AgentDetails = ({ queryData }) => {
     }
 
     if (queryData?.connected) {
-        if (queryData?.username) {
+        if (queryData?.lastSync) {
             return (
                 <Typography variant="body1" component="p" gutterBottom>
-                    Username: {queryData?.username} <br />
                     Last Refreshed:{' '}
                     {formatDistance(new Date(queryData?.lastSync), new Date(), {
                         addSuffix: true

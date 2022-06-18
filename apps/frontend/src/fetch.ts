@@ -11,6 +11,10 @@ export function getSpotifyLoginUrl() {
     return `${oauthBaseUrl}/auth/spotify`;
 }
 
+export function getYoutubeLoginUrl() {
+    return `${oauthBaseUrl}/auth/youtube`;
+}
+
 export function userLogout() {
     return fetch(`${baseUrl}/user/logout`, {
         method: 'POST',
@@ -91,6 +95,24 @@ export function getSpotifyAgentDetails() {
 export function getSpotifyAgentCollect() {
     return fetch(`${baseUrl}/agent/spotify/collect`, {
         method: 'POST',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function getYoutubeAgentCollect() {
+    return fetch(`${baseUrl}/agent/youtube/collect`, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
+export function getYoutubeAgentDetails() {
+    return fetch(`${baseUrl}/agent/youtube`, {
+        method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,
         credentials: 'include'

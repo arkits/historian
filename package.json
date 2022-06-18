@@ -74,6 +74,7 @@
         "express": "4.17.2",
         "express-session": "^1.17.3",
         "git-repo-info": "^2.1.1",
+        "googleapis": "^103.0.0",
         "next": "12.1.5",
         "node-cron": "^3.0.0",
         "pino": "^7.11.0",
