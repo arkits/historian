@@ -91,6 +91,7 @@ const TimelinePage: NextPage = () => {
                                         <MenuItem value={'reddit/saved'}>Reddit - Saved</MenuItem>
                                         <MenuItem value={'reddit/upvoted'}>Reddit - Upvoted</MenuItem>
                                         <MenuItem value={'spotify/recently-played'}>Spotify - Recently Played</MenuItem>
+                                        <MenuItem value={'youtube/liked'}>YouTube - Liked</MenuItem>
                                         <MenuItem value={'log'}>Log</MenuItem>
                                     </Select>
                                 </FormControl>

@@ -3,6 +3,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { formatDistance } from 'date-fns';
+import { prettyDate } from './dateFormat';
 
 export const getPrettyType = (type) => {
     switch (type) {
@@ -62,17 +63,13 @@ export const getSubtitleText2 = (history) => {
     switch (history?.type) {
         case 'reddit/saved':
         case 'reddit/upvoted':
-            return `
-            Saved ${formatDistance(new Date(history?.createdAt), new Date(), {
-                addSuffix: true
-            })} 
-            • 
-            Posted ${formatDistance(new Date(history?.content?.created_utc * 1000), new Date())}
-            `;
+            return `Posted ${formatDistance(new Date(history?.content?.created_utc * 1000), new Date())}`;
         case 'spotify/recently-played':
-            return `Saved ${formatDistance(new Date(history?.createdAt), new Date(), {
+            return `Played ${formatDistance(new Date(history?.timelineTime), new Date(), {
                 addSuffix: true
-            })}  • Played ${formatDistance(new Date(history?.content?.played_at), new Date(), {
+            })}`;
+        case 'youtube/liked':
+            return `Liked ${formatDistance(new Date(history?.timelineTime), new Date(), {
                 addSuffix: true
             })}`;
         case 'log':
