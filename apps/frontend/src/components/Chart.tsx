@@ -11,7 +11,8 @@ import {
     Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Paper } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
+import { FONT_LOGO } from '../constants';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -62,10 +63,10 @@ export default function Chart({ chartData }) {
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    paddingTop: '2rem',
                     marginBottom: '2rem'
                 }}
             >
+                <Typography variant="body2">Timeline Activity</Typography>
                 <Line options={options} data={data} height={60} />
             </Paper>
         </React.Fragment>

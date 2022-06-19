@@ -123,6 +123,28 @@ export function getUserHistoryCountForDate(user, dateStart: Date, dateEnd: Date,
     });
 }
 
+export function getUserActivityCountForDate(user, dateStart: Date, dateEnd: Date, type?: string) {
+    const defaults = {
+        where: {
+            userId: user.id,
+            timelineTime: {
+                gte: dateStart,
+                lt: dateEnd
+            }
+        }
+    };
+
+    if (type) {
+        defaults.where['type'] = {
+            equals: type
+        };
+    }
+
+    return prisma.history.count({
+        ...defaults
+    });
+}
+
 export function updateUserPreference(user, key, updatedPreferences) {
     let up = {};
 

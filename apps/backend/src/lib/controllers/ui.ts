@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextFunction, Response } from 'express';
 import { TIMELINE_TYPES } from '../constants';
-import { getUserHistoryCountForDate } from '../db';
+import { getUserActivityCountForDate, getUserHistoryCountForDate } from '../db';
 import logger from '../logger';
 import { version } from '../version';
 import { getUserFromSession } from './auth';
@@ -46,7 +46,7 @@ export async function dashboardData(request, response: Response, next: NextFunct
             for (let i = 0; i < 14; i++) {
                 const dateStart = new Date(Date.now() - ONE_DAY * (i + 1));
                 const dateEnd = new Date(Date.now() - ONE_DAY * i);
-                const count = await getUserHistoryCountForDate(user, dateStart, dateEnd, timelineType);
+                const count = await getUserActivityCountForDate(user, dateStart, dateEnd, timelineType);
 
                 if (!chartData.savedCount.hasOwnProperty(timelineType)) {
                     chartData.savedCount[timelineType] = [];
