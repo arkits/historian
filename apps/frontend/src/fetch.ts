@@ -23,6 +23,15 @@ export function userLogout() {
     });
 }
 
+export function getUserDelete() {
+    return fetch(`${baseUrl}/user`, {
+        method: 'DELETE',
+        redirect: 'follow',
+        headers: defaultHeaders,
+        credentials: 'include'
+    });
+}
+
 export function userLogin(username: string, password: string) {
     return fetch(`${baseUrl}/user/login`, {
         method: 'POST',

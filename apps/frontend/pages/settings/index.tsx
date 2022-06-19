@@ -8,6 +8,8 @@ import { useRouter } from 'next/router';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
 import { PageTitle } from 'apps/frontend/src/components/FontTypes';
+import { Button } from '@mui/material';
+import { getUserDelete } from 'apps/frontend/src/fetch';
 
 const Settings: NextPage = () => {
     const router = useRouter();
@@ -31,13 +33,26 @@ const Settings: NextPage = () => {
                 >
                     <PageTitle>Settings</PageTitle>
 
-                    <Typography variant="h5" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
+                    <Typography variant="h4" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
                         General
                     </Typography>
                     <Typography variant="body1" component="p" gutterBottom>
                         ID: {user?.id} <br />
                         Username: {user?.username}
                     </Typography>
+
+                    <br />
+                    <Typography variant="h4" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
+                        Account
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        onClick={() => {
+                            getUserDelete();
+                        }}
+                    >
+                        Delete Account
+                    </Button>
                 </Box>
             </Container>
         </>

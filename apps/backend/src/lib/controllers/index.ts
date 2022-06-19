@@ -132,3 +132,33 @@ export async function getUser(request, response: Response, next: NextFunction) {
         logger.error(error, 'Failed to Get User!');
     }
 }
+
+export async function deleteUser(request, response: Response, next: NextFunction) {
+    try {
+        let user = await prisma.user.findFirst({
+            where: {
+                id: request.session.userId
+            }
+        });
+
+        if (!user) {
+            return next({ message: 'User not found', code: 400 });
+        }
+
+        await prisma.history.deleteMany({
+            where: {
+                userId: user.id
+            }
+        });
+
+        await prisma.user.delete({
+            where: {
+                id: user.id
+            }
+        });
+
+        response.json({ id: user.id, username: user.username });
+    } catch (error) {
+        logger.error(error, 'Failed to Get User!');
+    }
+}

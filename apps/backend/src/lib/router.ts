@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authUserSignedIn } from './controllers/auth';
-import { getUser, getVersion, userLogin, userLogout, userSignUp } from './controllers/controllers';
+import { getUser, getVersion, userLogin, userLogout, userSignUp, deleteUser } from './controllers';
 import { deleteUserHistory, getHistory, getUserHistoryById } from './controllers/history';
 import { dashboardData } from './controllers/ui';
 
@@ -13,6 +13,7 @@ router.get('/user', authUserSignedIn, getUser);
 router.post('/user/signup', userSignUp);
 router.post('/user/login', userLogin);
 router.post('/user/logout', authUserSignedIn, userLogout);
+router.delete('/user', authUserSignedIn, deleteUser);
 
 router.get('/history', authUserSignedIn, getHistory);
 router.get('/history/:id', authUserSignedIn, getUserHistoryById);
