@@ -114,7 +114,8 @@ async function upsertPostToHistory(post, type, user) {
                     media_embed: post['media_embed']
                 },
                 type: type,
-                searchContent: generateSearchContent(post, type, user)
+                searchContent: generateSearchContent(post, type, user),
+                timelineTime: new Date(post.created_utc * 1000)
             }
         });
     } else {
@@ -122,7 +123,7 @@ async function upsertPostToHistory(post, type, user) {
             data: {
                 type: type,
                 contentId: post.id,
-                timelineTime: new Date(),
+                timelineTime: new Date(post.created_utc * 1000),
                 content: {
                     pk: post.id,
                     subreddit: post.subreddit_name_prefixed,
