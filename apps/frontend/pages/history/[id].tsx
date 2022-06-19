@@ -157,7 +157,7 @@ const History = () => {
                             <Button
                                 component={Link}
                                 noLinkStyle
-                                href={'https://www.reddit.com' + historyQuery.data?.content?.permalink || '#'}
+                                href={historyQuery.data?.content?.permalink || '#'}
                                 target={'_blank'}
                             >
                                 Permalink

@@ -91,6 +91,11 @@ youtubeRouter.get('/auth/youtube/callback', async function (req, res, next) {
                 tokens: tokens
             });
 
+            logger.info(
+                { user: user.username },
+                'Completed OAuth flow. Performing initial sync - performYoutubeSyncForUser'
+            );
+
             performYoutubeSyncForUser(user);
         } catch (error) {
             return next({ message: 'Failed to save access token', code: 400, description: error.message });

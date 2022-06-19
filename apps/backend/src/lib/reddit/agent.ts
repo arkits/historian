@@ -110,7 +110,7 @@ async function upsertPostToHistory(post, type, user) {
                     content_url: post['url'],
                     created_utc: post.created_utc,
                     thumbnail: post['thumbnail'],
-                    permalink: post['permalink'],
+                    permalink: 'https://old.reddit.com' + post['permalink'],
                     media_embed: post['media_embed']
                 },
                 type: type,
@@ -133,7 +133,7 @@ async function upsertPostToHistory(post, type, user) {
                     content_url: post['url'],
                     created_utc: post.created_utc,
                     thumbnail: post['thumbnail'],
-                    permalink: post['permalink'],
+                    permalink: 'https://old.reddit.com' + post['permalink'],
                     media_embed: post['media_embed']
                 },
                 userId: user.id,

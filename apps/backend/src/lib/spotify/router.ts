@@ -110,6 +110,11 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
                 refreshToken: response.data?.refresh_token
             });
 
+            logger.info(
+                { user: user.username },
+                'Completed OAuth flow. Performing initial sync - performSpotifySyncForUser'
+            );
+
             performSpotifySyncForUser(user);
         } catch (error) {
             return next({ message: 'Failed to save access token', code: 400, description: error.message });

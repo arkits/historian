@@ -13,7 +13,7 @@ function insertToHistory(user, item) {
             contentId: item.track.id,
             timelineTime: item?.played_at,
             content: {
-                external_urls: item?.track?.external_urls,
+                permalink: item?.track?.external_urls?.spotify,
                 played_at: item?.played_at,
                 trackName: item?.track?.name,
                 albumName: item?.track?.album?.name,

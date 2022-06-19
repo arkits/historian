@@ -90,7 +90,7 @@ function insertToHistory(user, item) {
                 title: item.snippet.title,
                 author: item.snippet.videoOwnerChannelTitle,
                 thumbnail: item.snippet.thumbnails.default.url,
-                url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`
+                permalink: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`
             }
         }
     });

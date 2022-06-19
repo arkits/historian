@@ -129,6 +129,11 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
                 accessToken: req['token']
             });
 
+            logger.info(
+                { user: user.username },
+                'Completed OAuth flow. Performing initial sync - performRedditSyncForUser'
+            );
+
             // Perform initial sync
             performRedditSyncForUser(user, true);
         } catch (error) {

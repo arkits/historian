@@ -157,6 +157,8 @@ export async function deleteUser(request, response: Response, next: NextFunction
             }
         });
 
+        logger.info({ user: user.username }, 'User deleted');
+
         response.json({ id: user.id, username: user.username });
     } catch (error) {
         logger.error(error, 'Failed to Get User!');
