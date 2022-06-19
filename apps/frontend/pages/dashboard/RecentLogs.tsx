@@ -11,9 +11,10 @@ import {
     ListSubheader,
     Paper
 } from '@mui/material';
-import { green, grey } from '@mui/material/colors';
+import { grey, orange, red } from '@mui/material/colors';
 import HistorianContext from 'apps/frontend/context/historian';
 import LoadingSpinner from 'apps/frontend/src/components/LoadingSpinner';
+import { prettyDate } from 'apps/frontend/src/dateFormat';
 import { getHistory } from 'apps/frontend/src/fetch';
 import Link from 'apps/frontend/src/Link';
 import { useContext } from 'react';
@@ -24,6 +25,19 @@ function RecentHistoryList({ histories }) {
         return <></>;
     }
 
+    const getLogLevelColor = (logLevel) => {
+        switch (logLevel) {
+            case 'info':
+                return grey[500];
+            case 'warning':
+                return orange[600];
+            case 'error':
+                return red[600];
+            default:
+                return grey[500];
+        }
+    };
+
     return (
         <List sx={{ width: '100%' }}>
             {histories
@@ -31,13 +45,19 @@ function RecentHistoryList({ histories }) {
                     <>
                         <ListItemButton component={Link} href={`/history/${history?.id}`}>
                             <ListItem>
-                                <Box sx={{ marginRight: '2rem', color: grey['A400'] }}>{`${history?.createdAt.substr(
-                                    0,
-                                    10
-                                )} ${history?.createdAt.substr(11, 8)}`}</Box>
+                                <Box sx={{ marginRight: '2rem', color: grey['A400'] }}>{`${prettyDate(
+                                    new Date(history?.createdAt)
+                                )}`}</Box>
                                 <ListItemText primary={history?.content?.message} />
                                 <ListItemAvatar>
-                                    <Avatar variant="rounded" sx={{ width: 92, height: 92, bgcolor: green[500] }}>
+                                    <Avatar
+                                        variant="rounded"
+                                        sx={{
+                                            width: 92,
+                                            height: 92,
+                                            bgcolor: `${getLogLevelColor(history?.content?.level)}`
+                                        }}
+                                    >
                                         {history?.content?.level.toUpperCase()}
                                     </Avatar>
                                 </ListItemAvatar>
