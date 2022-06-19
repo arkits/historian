@@ -8,13 +8,13 @@ import {
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { Paper, Typography } from '@mui/material';
-import { FONT_LOGO } from '../constants';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export const options = {
     responsive: true,
@@ -32,26 +32,34 @@ export default function Chart({ chartData }) {
             {
                 label: 'reddit/saved',
                 data: chartData.savedCount['reddit/saved'],
-                borderColor: '#f57c00',
-                fill: true
+                borderColor: 'rgb(245, 124, 0)',
+                backgroundColor: 'rgba(245, 124, 0, 0.2)',
+                fill: true,
+                lineTension: 0.1
             },
             {
                 label: 'reddit/upvoted',
                 data: chartData.savedCount['reddit/upvoted'],
-                borderColor: '#f57c00',
-                fill: true
+                borderColor: 'rgb(245, 124, 0)',
+                backgroundColor: 'rgba(245, 124, 0, 0.2)',
+                fill: true,
+                lineTension: 0.1
             },
             {
                 label: 'spotify/recently-played',
                 data: chartData.savedCount['spotify/recently-played'],
-                borderColor: '#00e676',
-                fill: true
+                borderColor: 'rgb(0, 230, 118)',
+                backgroundColor: 'rgba(0, 230, 118, 0.2)',
+                fill: true,
+                lineTension: 0.1
             },
             {
                 label: 'youtube/liked',
                 data: chartData.savedCount['youtube/liked'],
-                borderColor: '#e53935',
-                fill: true
+                borderColor: 'rgb(229, 57, 53)',
+                backgroundColor: 'rgba(229, 57, 53, 0.2)',
+                fill: true,
+                lineTension: 0.1
             }
         ]
     };
