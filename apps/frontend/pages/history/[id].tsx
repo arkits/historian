@@ -47,7 +47,7 @@ const History = () => {
                     <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.content_url} loading="lazy" />
                     <Button
                         fullWidth
-                        variant="outlined"
+                        variant="contained"
                         component={Link}
                         noLinkStyle
                         href={historyQuery.data?.content?.content_url || '#undefined'}
@@ -66,7 +66,7 @@ const History = () => {
                     <img style={{ maxWidth: '100%' }} src={historyQuery.data?.content?.albumArt} loading="lazy" />
                     <Button
                         fullWidth
-                        variant="outlined"
+                        variant="contained"
                         component={Link}
                         noLinkStyle
                         href={historyQuery.data?.content?.albumArt || '#undefined'}
@@ -168,7 +168,7 @@ const History = () => {
                             onClick={() => {
                                 setSnackbarDetails({
                                     open: true,
-                                    message: 'Deleted History'
+                                    message: `Deleted History - ${historyQuery.data?.id}`
                                 });
                                 deleteHistoryById(historyQuery.data?.id)
                                     .then((response) => response.json())

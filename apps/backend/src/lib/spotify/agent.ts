@@ -46,7 +46,10 @@ export async function performSpotifySyncForUser(user) {
 
         while (fetchMore) {
             let recentlyPlayed = await getRecentlyPlayed(user, after);
-            logger.info({ responseData: recentlyPlayed.data, user: user.username }, 'Got Recently Played');
+            logger.debug(
+                { responseData: recentlyPlayed.data.items.length, user: user.username },
+                'Got Recently Played'
+            );
 
             for (let item of recentlyPlayed.data.items) {
                 try {

@@ -80,7 +80,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                         startIcon={<LaunchIcon />}
                                         component={Link}
                                         noLinkStyle
-                                        href={'https://reddit.com' + history?.content?.permalink || '#'}
+                                        href={history?.content?.permalink || '#'}
                                         target={'_blank'}
                                         sx={{ marginRight: '12px', color: '#B9C2C6' }}
                                     >
@@ -94,7 +94,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                         onClick={() => {
                                             setSnackbarDetails({
                                                 open: true,
-                                                message: 'Deleted History'
+                                                message: `Deleted History - ${history?.id}`
                                             });
                                             deleteHistoryById(history?.id)
                                                 .then((response) => response.json())
