@@ -36,12 +36,30 @@ export async function getHistory(request, response: Response, next: NextFunction
 
         let cursor = request.query.cursor ? request.query.cursor : null;
 
+        let details = request.query.details ? request.query.details : false;
+
         try {
             logger.info({ user: user.username, limit, skip, cursor, search, type }, 'Getting History');
-            const history = await getUserHistory(user, limit, skip, cursor, search, type);
+            let history = await getUserHistory(user, limit, skip, cursor, search, type);
+            let filteredHistory = [];
+
+            if (!details) {
+                filteredHistory = history.map((h) => {
+                    return {
+                        id: h.id,
+                        type: h.type,
+                        createdAt: h.createdAt,
+                        contentId: h.contentId,
+                        content: h.content,
+                        timelineTime: h.timelineTime
+                    };
+                });
+            } else {
+                filteredHistory = history.map((h) => h);
+            }
 
             const data = {
-                history: history,
+                history: filteredHistory,
                 limit: limit,
                 skip: skip,
                 nextCursor: history.length === limit ? history[history.length - 1].id : null
