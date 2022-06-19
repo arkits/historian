@@ -28,13 +28,13 @@ function RecentHistoryList({ histories }) {
     const getLogLevelColor = (logLevel) => {
         switch (logLevel) {
             case 'info':
-                return grey[500];
+                return grey[200];
             case 'warning':
                 return orange[600];
             case 'error':
                 return red[600];
             default:
-                return grey[500];
+                return grey[200];
         }
     };
 
@@ -53,8 +53,8 @@ function RecentHistoryList({ histories }) {
                                     <Avatar
                                         variant="rounded"
                                         sx={{
-                                            width: 92,
-                                            height: 92,
+                                            width: 64,
+                                            height: 64,
                                             bgcolor: `${getLogLevelColor(history?.content?.level)}`
                                         }}
                                     >
@@ -106,7 +106,7 @@ export default function RecentLogs() {
     return (
         <>
             <Grid item xs={12} sm={12} md={4}>
-                <RecentHistoryListCard title={'Recently Saved - YouTube'} histories={historyQuerySystem.data.history} />
+                <RecentHistoryListCard title={''} histories={historyQuerySystem.data.history} />
             </Grid>
         </>
     );
