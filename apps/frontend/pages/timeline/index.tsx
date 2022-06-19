@@ -33,7 +33,7 @@ const TimelinePage: NextPage = () => {
     const [searchTerm, setSearchTerm] = React.useState('');
 
     const fetchHistory = ({ pageParam = '' }) => {
-        console.log('pageParam', pageParam);
+        console.log('getHistory', pageParam, pageSize, searchTerm, historyType);
         return getHistory(pageParam, pageSize, searchTerm, historyType).then((res) => res.json());
     };
 
@@ -47,6 +47,10 @@ const TimelinePage: NextPage = () => {
     const handleSearchClick = () => {
         refetch();
     };
+
+    React.useEffect(() => {
+        refetch();
+    }, [historyType]);
 
     return (
         <>
@@ -104,16 +108,18 @@ const TimelinePage: NextPage = () => {
                                 md={4}
                                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                                <Fab
+                                <LoadingButton
+                                    size="large"
                                     color="secondary"
-                                    variant="extended"
-                                    aria-label="add"
-                                    sx={{ marginRight: '12px' }}
                                     onClick={handleSearchClick}
+                                    endIcon={<SearchIcon />}
+                                    loading={isLoading || isFetching || isFetchingNextPage}
+                                    loadingPosition="end"
+                                    variant="contained"
+                                    sx={{ marginRight: '12px' }}
                                 >
-                                    <SearchIcon />
                                     Search
-                                </Fab>
+                                </LoadingButton>
                                 <Fab variant="extended" aria-label="randomize">
                                     <CasinoIcon />
                                     Randomize
@@ -128,7 +134,7 @@ const TimelinePage: NextPage = () => {
                         size="large"
                         onClick={() => fetchNextPage()}
                         endIcon={<RefreshIcon />}
-                        loading={isLoading || isFetching}
+                        loading={isLoading || isFetching || isFetchingNextPage}
                         loadingPosition="end"
                         variant="contained"
                         sx={{ marginTop: '2rem' }}
