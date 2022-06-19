@@ -2,7 +2,7 @@ import logger from '../logger';
 import { google } from 'googleapis';
 import { PrismaClient } from '@prisma/client';
 import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from './constants';
-import { updateUserPreference } from '../db';
+import { createLogHistoryForUser, updateUserPreference } from '../db';
 
 const prisma = new PrismaClient();
 
@@ -68,9 +68,12 @@ export async function performYoutubeSyncForUser(user, fetchAll = false) {
         await updateUserPreference(user, 'youtube', {
             lastSync: new Date().getTime()
         });
+
+        await createLogHistoryForUser(user, 'info', 'YouTube Sync Successful', {});
     } catch (error) {
-        // console.log(error);
         logger.error({ error, user }, 'Caught Error in performYoutubeSyncForUser');
+        await createLogHistoryForUser(user, 'error', 'Youtube Sync Failed', { error: error.message });
+        throw error;
     }
 
     return toReturn;
@@ -81,7 +84,8 @@ function insertToHistory(user, item) {
         data: {
             userId: user.id,
             type: 'youtube/liked',
-            contentId: `${item.id}-${item?.snippet.publishedAt}`,
+            timelineTime: item.snippet.publishedAt,
+            contentId: item.id,
             content: {
                 title: item.snippet.title,
                 author: item.snippet.videoOwnerChannelTitle,

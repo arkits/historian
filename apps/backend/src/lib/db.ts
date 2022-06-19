@@ -56,7 +56,7 @@ export function getUserHistory(
             },
             orderBy: [
                 {
-                    createdAt: 'desc'
+                    timelineTime: 'desc'
                 }
             ]
         });
@@ -65,7 +65,7 @@ export function getUserHistory(
             ...defaults,
             orderBy: [
                 {
-                    createdAt: 'desc'
+                    timelineTime: 'desc'
                 }
             ]
         });
@@ -168,7 +168,8 @@ export function createLogHistoryForUser(user, level, message, context) {
                 message: message,
                 context: context
             },
-            contentId: uuidv4()
+            contentId: uuidv4(),
+            timelineTime: new Date()
         }
     });
 }

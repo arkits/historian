@@ -14,6 +14,7 @@ datasource db {
 model History {
   id            String   @id @default(uuid()) @db.Uuid
   createdAt     DateTime @default(now()) @db.Timestamp(6)
+  timelineTime  DateTime @db.Timestamp(6)
   type          String
   contentId     String
   content       Json     @db.Json
@@ -22,7 +23,7 @@ model History {
   User   User   @relation(fields: [userId], references: [id])
   userId String @db.Uuid
 
-  @@unique([contentId, userId, type], map: "History_contentId_userId_type")
+  @@unique([contentId, userId, type, timelineTime], map: "History_hash")
 }
 
 model User {

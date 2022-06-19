@@ -10,7 +10,8 @@ function insertToHistory(user, item) {
         data: {
             userId: user.id,
             type: 'spotify/recently-played',
-            contentId: `${item.track.id}-${item?.played_at}`,
+            contentId: item.track.id,
+            timelineTime: item?.played_at,
             content: {
                 external_urls: item?.track?.external_urls,
                 played_at: item?.played_at,

@@ -62,6 +62,7 @@ const Dashboard: NextPage = () => {
                     <SystemStatsCard dashboardData={dashboardDataQuery?.data} />
                     <PageSubtitle>Recently Saved</PageSubtitle>
                     <RecentHistory />
+                    <br />
                     <PageSubtitle>System Logs</PageSubtitle>
                     <RecentLogs />
                 </Box>

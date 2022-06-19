@@ -144,6 +144,7 @@ const History = () => {
                     <HistoryDetails history={historyQuery.data} />
 
                     <Typography variant="body2" gutterBottom component="div">
+                        Timeline Time: {prettyDate(new Date(historyQuery.data?.timelineTime))} <br />
                         Saved to Historian: {prettyDate(new Date(historyQuery.data?.createdAt))}
                     </Typography>
                     <ButtonGroup

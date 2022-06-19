@@ -80,50 +80,66 @@ export async function performRedditSyncForUser(user, fetchAll = false) {
     }
 }
 
-function upsertPostToHistory(post, type, user) {
-    return prisma.history.upsert({
+async function upsertPostToHistory(post, type, user) {
+    let previous = await prisma.history.findFirst({
         where: {
-            contentId_userId_type: {
-                contentId: post.id,
-                userId: user.id,
-                type: type
-            }
-        },
-        update: {
-            content: {
-                pk: post.id,
-                subreddit: post.subreddit_name_prefixed,
-                title: post['title'],
-                author: post.author.name,
-                score: post.score,
-                content_url: post['url'],
-                created_utc: post.created_utc,
-                thumbnail: post['thumbnail'],
-                permalink: post['permalink'],
-                media_embed: post['media_embed']
-            },
-            type: type,
-            searchContent: generateSearchContent(post, type, user)
-        },
-        create: {
-            type: type,
-            contentId: post.id,
-            content: {
-                pk: post.id,
-                subreddit: post.subreddit_name_prefixed,
-                title: post['title'],
-                author: post.author.name,
-                score: post.score,
-                content_url: post['url'],
-                created_utc: post.created_utc,
-                thumbnail: post['thumbnail'],
-                permalink: post['permalink'],
-                media_embed: post['media_embed']
-            },
             userId: user.id,
-            searchContent: generateSearchContent(post, type, user)
+            type: type,
+            contentId: post.id
         }
     });
+
+    if (previous) {
+        logger.debug({ id: previous.id }, 'Post already exists in History, updating');
+        return prisma.history.update({
+            where: {
+                contentId_userId_type_timelineTime: {
+                    contentId: previous.contentId,
+                    userId: previous.userId,
+                    type: previous.type,
+                    timelineTime: previous.timelineTime
+                }
+            },
+            data: {
+                content: {
+                    pk: post.id,
+                    subreddit: post.subreddit_name_prefixed,
+                    title: post['title'],
+                    author: post.author.name,
+                    score: post.score,
+                    content_url: post['url'],
+                    created_utc: post.created_utc,
+                    thumbnail: post['thumbnail'],
+                    permalink: post['permalink'],
+                    media_embed: post['media_embed']
+                },
+                type: type,
+                searchContent: generateSearchContent(post, type, user)
+            }
+        });
+    } else {
+        return prisma.history.create({
+            data: {
+                type: type,
+                contentId: post.id,
+                timelineTime: new Date(),
+                content: {
+                    pk: post.id,
+                    subreddit: post.subreddit_name_prefixed,
+                    title: post['title'],
+                    author: post.author.name,
+                    score: post.score,
+                    content_url: post['url'],
+                    created_utc: post.created_utc,
+                    thumbnail: post['thumbnail'],
+                    permalink: post['permalink'],
+                    media_embed: post['media_embed']
+                },
+                userId: user.id,
+                searchContent: generateSearchContent(post, type, user)
+            }
+        });
+    }
 }
 
 function generateSearchContent(post, type, user) {
