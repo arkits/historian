@@ -21,9 +21,11 @@ export async function getHistory(request, response: Response, next: NextFunction
             return next({ message: 'User not found', code: 400 });
         }
 
-        let limit = request.query.limit ? parseInt(request.query.limit) : 50;
-        if (limit > 50) {
-            limit = 50;
+        const DEFAULT_MAX_RESULTS = 100;
+
+        let limit = request.query.limit ? parseInt(request.query.limit) : DEFAULT_MAX_RESULTS;
+        if (limit > DEFAULT_MAX_RESULTS) {
+            limit = DEFAULT_MAX_RESULTS;
         }
 
         let search = request.query.search ? request.query.search : '';

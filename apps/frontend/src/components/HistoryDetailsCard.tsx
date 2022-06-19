@@ -1,4 +1,4 @@
-import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Grid, Typography } from '@mui/material';
+import { Avatar, Box, Button, Card, CardActions, CardHeader, Grid, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LaunchIcon from '@mui/icons-material/Launch';
 import InfoIcon from '@mui/icons-material/Info';
@@ -8,21 +8,11 @@ import Link from '../Link';
 import { deleteHistoryById } from '../fetch';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useContext, useState } from 'react';
-import { prettyDate } from '../dateFormat';
-import { formatDistance } from 'date-fns';
 
 export const HistoryDetailsCard = ({ history }) => {
     const { setSnackbarDetails } = useContext(HistorianContext);
 
     const [showActions, setShowActions] = useState(false);
-
-    const getSubtitle = (history) => {
-        return (
-            <>
-                <Typography variant="body2">{getSubtitleText(history)}</Typography>
-            </>
-        );
-    };
 
     return (
         <div style={{ marginTop: '1rem' }}>
@@ -40,7 +30,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                 height: '100%'
                             }}
                         >
-                            <CardContent
+                            <Box
                                 sx={{
                                     flexGrow: '1',
                                     display: 'flex',
@@ -64,8 +54,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                         </>
                                     }
                                     style={{
-                                        paddingTop: '0',
-                                        paddingLeft: '0'
+                                        paddingBottom: '0'
                                     }}
                                 />
                                 <CardActions
@@ -120,7 +109,7 @@ export const HistoryDetailsCard = ({ history }) => {
                                         Delete
                                     </Button>
                                 </CardActions>
-                            </CardContent>
+                            </Box>
                         </div>
                     </Grid>
                     <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>

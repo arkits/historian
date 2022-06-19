@@ -15,6 +15,8 @@ import CasinoIcon from '@mui/icons-material/Casino';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { PageTitle } from 'apps/frontend/src/components/FontTypes';
+import formatDistance from 'date-fns/formatDistance';
+import { FONT_LOGO } from 'apps/frontend/src/constants';
 
 const TimelinePage: NextPage = () => {
     const router = useRouter();
@@ -26,7 +28,7 @@ const TimelinePage: NextPage = () => {
     // Queries
     const [cursor, setCursor] = React.useState('');
 
-    const [pageSize, setPageSize] = React.useState(50);
+    const [pageSize, setPageSize] = React.useState(100);
     const [historyType, setHistoryType] = React.useState('timeline');
     const [searchTerm, setSearchTerm] = React.useState('');
 
@@ -149,13 +151,51 @@ const HistoryTimeline = ({ data }) => {
             </div>
         );
     } else {
-        return (
-            <>
-                {data.pages?.map((group, i) =>
-                    group.history.map((history) => <HistoryDetailsCard key={history.id} history={history} />)
-                )}
-            </>
-        );
+        const generateSessions = (history) => {
+            const sessions = [];
+
+            for (let h of history) {
+                if (sessions.length === 0) {
+                    sessions.push([h]);
+                } else {
+                    const lastSession = sessions[sessions.length - 1];
+
+                    const timeDiff =
+                        new Date(lastSession[lastSession.length - 1].timelineTime).getTime() -
+                        new Date(h.timelineTime).getTime();
+
+                    if (timeDiff < 1000 * 60 * 60) {
+                        lastSession.push(h);
+                    } else {
+                        sessions.push([h]);
+                    }
+                }
+            }
+
+            return sessions;
+        };
+
+        const generateTimelineCards = () => {
+            const history = data.pages.map((page) => page.history).flat();
+            const sessions = generateSessions(history);
+
+            return sessions.map((session) => (
+                <Box sx={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                    <Typography variant="h4" component="h4" sx={{ fontFamily: FONT_LOGO }}>
+                        {`${formatDistance(new Date(session[0].timelineTime), new Date(), {
+                            addSuffix: true
+                        })}`}
+                    </Typography>
+                    <div>
+                        {session.map((history) => (
+                            <HistoryDetailsCard key={history.id} history={history} />
+                        ))}
+                    </div>
+                </Box>
+            ));
+        };
+
+        return <>{generateTimelineCards()}</>;
     }
 };
 
