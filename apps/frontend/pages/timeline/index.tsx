@@ -17,6 +17,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { PageTitle } from 'apps/frontend/src/components/FontTypes';
 import formatDistance from 'date-fns/formatDistance';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 const TimelinePage: NextPage = () => {
     const router = useRouter();
@@ -128,26 +129,14 @@ const TimelinePage: NextPage = () => {
                         </Grid>
                     </Card>
 
-                    <HistoryTimeline data={data} />
-
-                    <LoadingButton
-                        size="large"
-                        onClick={() => fetchNextPage()}
-                        endIcon={<RefreshIcon />}
-                        loading={isLoading || isFetching || isFetchingNextPage}
-                        loadingPosition="end"
-                        variant="contained"
-                        sx={{ marginTop: '2rem' }}
-                    >
-                        Load More
-                    </LoadingButton>
+                    <HistoryTimeline data={data} fetchNextPage={fetchNextPage} />
                 </Box>
             </Container>
         </>
     );
 };
 
-const HistoryTimeline = ({ data }) => {
+const HistoryTimeline = ({ data, fetchNextPage }) => {
     if (!data?.pages || data?.pages.length === 0) {
         return (
             <div style={{ textAlign: 'center' }}>
@@ -157,6 +146,8 @@ const HistoryTimeline = ({ data }) => {
             </div>
         );
     } else {
+        const history = data.pages.map((page) => page.history).flat();
+
         const generateSessions = (history) => {
             const sessions = [];
 
@@ -182,9 +173,7 @@ const HistoryTimeline = ({ data }) => {
         };
 
         const generateTimelineCards = () => {
-            const history = data.pages.map((page) => page.history).flat();
             const sessions = generateSessions(history);
-
             return sessions.map((session) => (
                 <Box sx={{ marginTop: '1rem', marginBottom: '1rem' }}>
                     <Typography variant="h4" component="h4" sx={{ fontFamily: FONT_LOGO }}>
@@ -201,7 +190,22 @@ const HistoryTimeline = ({ data }) => {
             ));
         };
 
-        return <>{generateTimelineCards()}</>;
+        return (
+            <>
+                <InfiniteScroll
+                    dataLength={history.length}
+                    next={fetchNextPage}
+                    hasMore={true}
+                    loader={
+                        <Fab variant="extended" color="primary" size="large" sx={{ width: '100%' }}>
+                            Loading <RefreshIcon />
+                        </Fab>
+                    }
+                >
+                    {generateTimelineCards()}
+                </InfiniteScroll>
+            </>
+        );
     }
 };
 
