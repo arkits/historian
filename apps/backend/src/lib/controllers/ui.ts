@@ -5,10 +5,12 @@ import { getUserActivityCountForDate, getUserHistoryCountForDate } from '../db';
 import logger from '../logger';
 import { version } from '../version';
 import { getUserFromSession } from './auth';
+import { format } from 'date-fns';
 
 const prisma = new PrismaClient();
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
 
 interface ChartData {
     labels: string[];
@@ -42,10 +44,12 @@ export async function dashboardData(request, response: Response, next: NextFunct
             count: 0
         };
 
+        const CHART_DURATION = 24 * 10; // last 7 days
+
         for (const timelineType of TIMELINE_TYPES) {
-            for (let i = 0; i < 14; i++) {
-                const dateStart = new Date(Date.now() - ONE_DAY * (i + 1));
-                const dateEnd = new Date(Date.now() - ONE_DAY * i);
+            for (let i = 0; i < CHART_DURATION; i++) {
+                const dateStart = new Date(Date.now() - ONE_HOUR * (i + 1));
+                const dateEnd = new Date(Date.now() - ONE_HOUR * i);
                 const count = await getUserActivityCountForDate(user, dateStart, dateEnd, timelineType);
 
                 if (!chartData.savedCount.hasOwnProperty(timelineType)) {
@@ -54,8 +58,8 @@ export async function dashboardData(request, response: Response, next: NextFunct
 
                 chartData.savedCount[timelineType].push(count);
 
-                if (chartData.labels.length < 14) {
-                    chartData.labels.push(`${dateEnd.getMonth()}/${dateEnd.getDate()}`);
+                if (chartData.labels.length < CHART_DURATION) {
+                    chartData.labels.push(`${format(dateEnd, 'MM/dd hhaaaaa')}`);
                 }
             }
 
