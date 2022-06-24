@@ -20,7 +20,9 @@ export async function performYoutubeSyncForUser(user, fetchAll = false) {
     };
 
     try {
-        oauth2Client.setCredentials(user.preferences['youtube']['tokens']);
+        oauth2Client.setCredentials({
+            refresh_token: user.preferences['youtube']['tokens']['refresh_token']
+        });
 
         const client = google.youtube({
             version: 'v3',
