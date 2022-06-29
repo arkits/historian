@@ -1,8 +1,11 @@
 <h1 align="center">🕵️  Historian</h1>
 <div align="center">
-<em>#NeverForget</em> <br>
-<br> <br>
+<em>#NeverForget</em> 
+<br>
+<br>
 </div>
+
+![Historian Dashboard](./docs/img/dashboard.png)
 
 ## About
 
@@ -40,3 +43,9 @@ The Frontend is a Next.js web app that makes calls to the Backend.
 ~/Dev/historian ❯ npm run backend:dev
 ~/Dev/historian ❯ npm run frontend:dev
 ```
+
+## Cool Screenshots
+
+![Historian Timeline](./docs/img/timeline.png)
+
+![Historian Agents](./docs/img/agents.png)
