@@ -22,8 +22,17 @@ export const options = {
         legend: {
             display: true
         }
+    },
+    scales: {
+        xAxes: {
+            ticks: {
+                autoSkip: true
+            }
+        }
     }
 };
+
+const LINE_TENSION = 0.2;
 
 export default function Chart({ chartData }) {
     const data = {
@@ -35,7 +44,7 @@ export default function Chart({ chartData }) {
                 borderColor: 'rgb(245, 124, 0)',
                 backgroundColor: 'rgba(245, 124, 0, 0.2)',
                 fill: true,
-                lineTension: 0.1
+                lineTension: LINE_TENSION
             },
             {
                 label: 'reddit/upvoted',
@@ -43,7 +52,7 @@ export default function Chart({ chartData }) {
                 borderColor: 'rgb(245, 124, 0)',
                 backgroundColor: 'rgba(245, 124, 0, 0.2)',
                 fill: true,
-                lineTension: 0.1
+                lineTension: LINE_TENSION
             },
             {
                 label: 'spotify/recently-played',
@@ -51,7 +60,7 @@ export default function Chart({ chartData }) {
                 borderColor: 'rgb(0, 230, 118)',
                 backgroundColor: 'rgba(0, 230, 118, 0.2)',
                 fill: true,
-                lineTension: 0.1
+                lineTension: LINE_TENSION
             },
             {
                 label: 'youtube/liked',
@@ -59,7 +68,7 @@ export default function Chart({ chartData }) {
                 borderColor: 'rgb(229, 57, 53)',
                 backgroundColor: 'rgba(229, 57, 53, 0.2)',
                 fill: true,
-                lineTension: 0.1
+                lineTension: LINE_TENSION
             }
         ]
     };
