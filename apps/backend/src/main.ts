@@ -39,7 +39,7 @@ app.use(
         secret: process.env.EXPRESS_SESSION_SECRET,
         saveUninitialized: false,
         resave: true,
-        cookie: { path: '/', httpOnly: true, secure: false, maxAge: ONE_DAY },
+        cookie: { path: '/', httpOnly: true, secure: false, maxAge: ONE_DAY * 30 },
         store: new PrismaSessionStore(prisma, {
             checkPeriod: 2 * 60 * 1000, //ms
             dbRecordIdIsSessionId: true,
