@@ -71,7 +71,7 @@
         "cors": "^2.8.5",
         "date-fns": "^2.28.0",
         "dotenv": "^16.0.1",
-        "express": "4.17.2",
+        "express": "4.17.3",
         "express-session": "^1.17.3",
         "git-repo-info": "^2.1.1",
         "googleapis": "^103.0.0",
