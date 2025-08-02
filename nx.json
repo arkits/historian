@@ -1,55 +1,25 @@
 {
     "npmScope": "historian",
-    "affected": {
-        "defaultBase": "main"
-    },
-    "cli": {
-        "defaultCollection": "@nrwl/react"
-    },
-    "implicitDependencies": {
-        "package.json": {
-            "dependencies": "*",
-            "devDependencies": "*"
-        },
-        ".eslintrc.json": "*"
-    },
+    "affected": { "defaultBase": "main" },
+    "cli": { "defaultCollection": "@nrwl/react" },
+    "implicitDependencies": { "package.json": { "dependencies": "*", "devDependencies": "*" }, ".eslintrc.json": "*" },
     "tasksRunnerOptions": {
         "default": {
             "runner": "nx/tasks-runners/default",
             "options": {
-                "cacheableOperations": ["build", "lint", "test", "e2e"]
+                "cacheableOperations": ["build", "lint", "test", "e2e"],
+                "accessToken": "Y2ViYWZiOTYtNTMxYS00YWE4LTkxMzAtZjdmYTdjZWFkNzJjfHJlYWQtd3JpdGU="
             }
         }
     },
-    "targetDependencies": {
-        "build": [
-            {
-                "target": "build",
-                "projects": "dependencies"
-            }
-        ]
-    },
+    "targetDependencies": { "build": [{ "target": "build", "projects": "dependencies" }] },
     "generators": {
         "@nrwl/react": {
-            "application": {
-                "style": "@emotion/styled",
-                "linter": "eslint",
-                "babel": true
-            },
-            "component": {
-                "style": "@emotion/styled"
-            },
-            "library": {
-                "style": "@emotion/styled",
-                "linter": "eslint"
-            }
+            "application": { "style": "@emotion/styled", "linter": "eslint", "babel": true },
+            "component": { "style": "@emotion/styled" },
+            "library": { "style": "@emotion/styled", "linter": "eslint" }
         },
-        "@nrwl/next": {
-            "application": {
-                "style": "css",
-                "linter": "eslint"
-            }
-        }
+        "@nrwl/next": { "application": { "style": "css", "linter": "eslint" } }
     },
     "defaultProject": "frontend"
 }
