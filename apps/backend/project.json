@@ -1,15 +1,22 @@
 {
+    "name": "backend",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "apps/backend/src",
     "projectType": "application",
+    "tags": [],
     "targets": {
         "build": {
-            "executor": "@nrwl/node:webpack",
+            "executor": "@nx/webpack:webpack",
             "outputs": ["{options.outputPath}"],
             "options": {
+                "target": "node",
+                "compiler": "tsc",
                 "outputPath": "dist/apps/backend",
                 "main": "apps/backend/src/main.ts",
                 "tsConfig": "apps/backend/tsconfig.app.json",
-                "assets": ["apps/backend/src/assets"]
+                "assets": ["apps/backend/src/assets"],
+                "generatePackageJson": true,
+                "webpackConfig": "apps/backend/webpack.config.js"
             },
             "configurations": {
                 "production": {
@@ -20,27 +27,40 @@
             }
         },
         "serve": {
-            "executor": "@nrwl/node:node",
+            "executor": "@nx/webpack:webpack",
+            "defaultConfiguration": "development",
             "options": {
-                "buildTarget": "backend:build",
+                "target": "node",
+                "compiler": "tsc",
+                "outputPath": "dist/apps/backend",
+                "main": "apps/backend/src/main.ts",
+                "tsConfig": "apps/backend/tsconfig.app.json",
+                "assets": ["apps/backend/src/assets"],
+                "webpackConfig": "apps/backend/webpack.config.js",
                 "watch": true
+            },
+            "configurations": {
+                "development": {},
+                "production": {
+                    "optimization": true,
+                    "extractLicenses": true
+                }
             }
         },
         "lint": {
-            "executor": "@nrwl/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": ["apps/backend/**/*.ts"]
             }
         },
         "test": {
-            "executor": "@nrwl/jest:jest",
-            "outputs": ["coverage/apps/backend"],
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/apps/backend"],
             "options": {
                 "jestConfig": "apps/backend/jest.config.ts",
                 "passWithNoTests": true
             }
         }
-    },
-    "tags": []
+    }
 }

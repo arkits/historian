@@ -22,7 +22,7 @@ export const HistoryDetailsCard = ({ history }) => {
                 onMouseLeave={() => setShowActions(false)}
             >
                 <Grid container spacing={0} sx={{ flex: '1', height: '100%' }}>
-                    <Grid item xs={10}>
+                    <Grid size={{ xs: 10 }}>
                         <div
                             style={{
                                 display: 'flex',
@@ -112,7 +112,7 @@ export const HistoryDetailsCard = ({ history }) => {
                             </Box>
                         </div>
                     </Grid>
-                    <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Grid size={{ xs: 2 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <a href={history?.content?.content_url} target={'_blank'}>
                             <Avatar
                                 variant="square"

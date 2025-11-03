@@ -1,4 +1,4 @@
-import * as getRepoInfo from 'git-repo-info';
+import getRepoInfo from 'git-repo-info';
 import logger from './logger';
 
 const info = getRepoInfo();

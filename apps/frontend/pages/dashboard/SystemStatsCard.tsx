@@ -20,7 +20,7 @@ export default function SystemStatsCard({ dashboardData }) {
                 </Typography>
 
                 <Grid container spacing={2}>
-                    <Grid item xs={3}>
+                    <Grid size={{ xs: 3 }}>
                         <Typography variant="h5" component="div">
                             {dashboardData?.totalSaved}
                         </Typography>
@@ -30,7 +30,7 @@ export default function SystemStatsCard({ dashboardData }) {
                         </Typography>
                     </Grid>
 
-                    <Grid item xs={3}>
+                    <Grid size={{ xs: 3 }}>
                         <Typography variant="h5" component="div">
                             {dashboardData?.savedLast24}
                         </Typography>
@@ -40,7 +40,7 @@ export default function SystemStatsCard({ dashboardData }) {
                         </Typography>
                     </Grid>
 
-                    <Grid item xs={3}>
+                    <Grid size={{ xs: 3 }}>
                         <Typography variant="h5" component="div">
                             {dashboardData?.topAgent}
                         </Typography>
@@ -50,7 +50,7 @@ export default function SystemStatsCard({ dashboardData }) {
                         </Typography>
                     </Grid>
 
-                    <Grid item xs={3}>
+                    <Grid size={{ xs: 3 }}>
                         <Typography variant="h5" component="div">
                             {PrettyLastSync()}
                         </Typography>

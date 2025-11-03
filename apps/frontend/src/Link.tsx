@@ -29,11 +29,10 @@ export const NextLinkComposed = React.forwardRef<HTMLAnchorElement, NextLinkComp
             replace={replace}
             scroll={scroll}
             shallow={shallow}
-            passHref
             locale={locale}
-        >
-            <Anchor ref={ref} {...other} />
-        </NextLink>
+            ref={ref}
+            {...other}
+        />
     );
 });
 
