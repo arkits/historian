@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
-import { useInfiniteQuery, useQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getHistory } from 'apps/frontend/src/fetch';
 import { HistoryDetailsCard } from 'apps/frontend/src/components/HistoryDetailsCard';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
@@ -15,7 +15,7 @@ import CasinoIcon from '@mui/icons-material/Casino';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { PageTitle } from 'apps/frontend/src/components/FontTypes';
-import formatDistance from 'date-fns/formatDistance';
+import { formatDistance } from 'date-fns';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
@@ -39,10 +39,13 @@ const TimelinePage: NextPage = () => {
     };
 
     const { isLoading, isError, error, data, fetchNextPage, isFetching, isFetchingNextPage, refetch } =
-        useInfiniteQuery(['history'], fetchHistory, {
+        useInfiniteQuery({
+            queryKey: ['history'],
+            queryFn: fetchHistory,
             getNextPageParam: (lastPage, pages) => {
                 return lastPage?.nextCursor;
-            }
+            },
+            initialPageParam: undefined
         });
 
     const handleSearchClick = () => {
@@ -73,7 +76,7 @@ const TimelinePage: NextPage = () => {
                         }}
                     >
                         <Grid container spacing={2}>
-                            <Grid item xs={6} md={6}>
+                            <Grid size={{ xs: 6, md: 6 }}>
                                 <TextField
                                     id="outlined-basic"
                                     label="Search History"
@@ -83,7 +86,7 @@ const TimelinePage: NextPage = () => {
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </Grid>
-                            <Grid item xs={6} md={2}>
+                            <Grid size={{ xs: 6, md: 2 }}>
                                 <FormControl fullWidth>
                                     <InputLabel id="history-type-select-label">Type</InputLabel>
                                     <Select
@@ -104,9 +107,7 @@ const TimelinePage: NextPage = () => {
                                 </FormControl>
                             </Grid>
                             <Grid
-                                item
-                                xs={6}
-                                md={4}
+                                size={{ xs: 6, md: 4 }}
                                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                                 <LoadingButton

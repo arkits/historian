@@ -9,7 +9,7 @@ import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import Link from 'apps/frontend/src/Link';
 import { useRouter } from 'next/router';
 import { useEffect, useContext, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 const History = () => {
     const router = useRouter();
@@ -19,8 +19,11 @@ const History = () => {
         isUserLoggedIn(router, setUser);
     }, []);
 
-    const historyQuery = useQuery(['history', id], async () => {
-        return await getHistoryById(id).then((res) => res.json());
+    const historyQuery = useQuery({
+        queryKey: ['history', id],
+        queryFn: async () => {
+            return await getHistoryById(id).then((res) => res.json());
+        }
     });
 
     const [showDetails, setShowDetails] = useState(false);
@@ -130,7 +133,7 @@ const History = () => {
     return (
         <Container maxWidth="lg" sx={{ marginTop: 5 }}>
             <Grid container spacing={1}>
-                <Grid item xs={6} md={6}>
+                <Grid size={{ xs: 6, md: 6 }}>
                     <Typography variant="overline" display="div" sx={{ lineHeight: '0' }}>
                         ID: {historyQuery.data?.id} <br />
                         Type: {historyQuery.data?.type}
@@ -184,7 +187,7 @@ const History = () => {
                         </Button>
                     </ButtonGroup>
                 </Grid>
-                <Grid item xs={6} md={6}>
+                <Grid size={{ xs: 6, md: 6 }}>
                     <ContentImage />
                 </Grid>
             </Grid>

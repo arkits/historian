@@ -4,7 +4,7 @@ import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getDashboardData } from 'apps/frontend/src/fetch';
 
 import { useEffect } from 'react';
@@ -26,8 +26,11 @@ const Dashboard: NextPage = () => {
     }, []);
 
     // Queries
-    const dashboardDataQuery = useQuery('dashboardData', async () => {
-        return await getDashboardData().then((res) => res.json());
+    const dashboardDataQuery = useQuery({
+        queryKey: ['dashboardData'],
+        queryFn: async () => {
+            return await getDashboardData().then((res) => res.json());
+        }
     });
 
     if (dashboardDataQuery.isLoading) {

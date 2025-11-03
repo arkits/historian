@@ -2,7 +2,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Typography, Box, Button, Divider } from '@mui/material';
 import { formatDistance } from 'date-fns';
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FONT_LOGO } from '../../constants';
 import { prettyDate } from '../../dateFormat';
 import { getRedditAgentDetails, getRedditAgentCollect, getRedditLoginUrl } from '../../fetch';
@@ -11,8 +11,11 @@ import { AgentDetails, ConnectionTest } from './shared';
 
 export const RedditAgent = () => {
     // Queries
-    const query = useQuery('redditAgentDetails', async () => {
-        return await getRedditAgentDetails().then((res) => res.json());
+    const query = useQuery({
+        queryKey: ['redditAgentDetails'],
+        queryFn: async () => {
+            return await getRedditAgentDetails().then((res) => res.json());
+        }
     });
 
     // State

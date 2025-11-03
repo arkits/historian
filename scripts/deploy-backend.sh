@@ -8,12 +8,12 @@ echo ">>> pulling latest"
 git pull
 
 echo ">>> installing dependencies"
-npm install
+npm install --legacy-peer-deps
 
 echo ">>> prisma migrations"
 cd apps/backend/
-npx prisma generate
-npx prisma migrate deploy
+npx prisma generate --schema=prisma/schema.prisma
+npx prisma migrate deploy --schema=prisma/schema.prisma
 cd ../../
 
 echo ">>> building backend"

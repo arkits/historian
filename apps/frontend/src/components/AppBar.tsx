@@ -167,6 +167,7 @@ const HistorianAppBar = () => {
                         variant="h4"
                         noWrap
                         component={Link}
+                        noLinkStyle
                         href="/"
                         sx={{
                             mr: 2,

@@ -4,7 +4,6 @@ import {
     Container,
     Grid,
     List,
-    ListItem,
     ListItemAvatar,
     ListItemButton,
     ListItemText,
@@ -18,7 +17,7 @@ import { prettyDate } from 'apps/frontend/src/dateFormat';
 import { getHistory } from 'apps/frontend/src/fetch';
 import Link from 'apps/frontend/src/Link';
 import { useContext } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 function RecentHistoryList({ histories }) {
     if (!histories) {
@@ -42,28 +41,24 @@ function RecentHistoryList({ histories }) {
         <List sx={{ width: '100%' }}>
             {histories
                 .map((history) => (
-                    <>
-                        <ListItemButton component={Link} href={`/history/${history?.id}`}>
-                            <ListItem>
-                                <Box sx={{ marginRight: '2rem', color: grey['A400'] }}>{`${prettyDate(
-                                    new Date(history?.createdAt)
-                                )}`}</Box>
-                                <ListItemText primary={history?.content?.message} />
-                                <ListItemAvatar>
-                                    <Avatar
-                                        variant="rounded"
-                                        sx={{
-                                            width: 64,
-                                            height: 64,
-                                            bgcolor: `${getLogLevelColor(history?.content?.level)}`
-                                        }}
-                                    >
-                                        {history?.content?.level.toUpperCase()}
-                                    </Avatar>
-                                </ListItemAvatar>
-                            </ListItem>
-                        </ListItemButton>
-                    </>
+                    <ListItemButton key={history?.id} component={Link} href={`/history/${history?.id}`}>
+                        <Box sx={{ marginRight: '2rem', color: grey['A400'] }}>{`${prettyDate(
+                            new Date(history?.createdAt)
+                        )}`}</Box>
+                        <ListItemText primary={history?.content?.message} />
+                        <ListItemAvatar>
+                            <Avatar
+                                variant="rounded"
+                                sx={{
+                                    width: 64,
+                                    height: 64,
+                                    bgcolor: `${getLogLevelColor(history?.content?.level)}`
+                                }}
+                            >
+                                {history?.content?.level.toUpperCase()}
+                            </Avatar>
+                        </ListItemAvatar>
+                    </ListItemButton>
                 ))
                 .slice(0, 50)}
         </List>
@@ -83,8 +78,11 @@ function RecentHistoryListCard({ title, histories }) {
 export default function RecentLogs() {
     const { user, setUser } = useContext(HistorianContext);
 
-    const historyQuerySystem = useQuery('dashboardHistory_system', async () => {
-        return await getHistory('', 10, '', 'log').then((res) => res.json());
+    const historyQuerySystem = useQuery({
+        queryKey: ['dashboardHistory_system'],
+        queryFn: async () => {
+            return await getHistory('', 10, '', 'log').then((res) => res.json());
+        }
     });
 
     if (historyQuerySystem.isLoading) {
@@ -105,7 +103,7 @@ export default function RecentLogs() {
 
     return (
         <>
-            <Grid item xs={12} sm={12} md={4}>
+            <Grid size={{ xs: 12, sm: 12, md: 4 }}>
                 <RecentHistoryListCard title={''} histories={historyQuerySystem.data.history} />
             </Grid>
         </>

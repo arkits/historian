@@ -1,6 +1,6 @@
 import { Button, Divider, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FONT_LOGO } from '../../constants';
 import { getSpotifyAgentCollect, getSpotifyAgentDetails, getSpotifyLoginUrl } from '../../fetch';
 import Link from '../../Link';
@@ -12,8 +12,11 @@ export const SpotifyAgent = () => {
     const [connectionTestResult, setConnectionTestResult] = useState({} as any);
 
     // Queries
-    const query = useQuery('spotifyAgentDetails', async () => {
-        return await getSpotifyAgentDetails().then((res) => res.json());
+    const query = useQuery({
+        queryKey: ['spotifyAgentDetails'],
+        queryFn: async () => {
+            return await getSpotifyAgentDetails().then((res) => res.json());
+        }
     });
 
     return (

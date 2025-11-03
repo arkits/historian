@@ -1,11 +1,11 @@
 import 'dotenv/config';
-import * as express from 'express';
-import * as cors from 'cors';
-import * as cookieParser from 'cookie-parser';
-import * as sessions from 'express-session';
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import sessions from 'express-session';
 import { PrismaClient } from '@prisma/client';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-import * as cron from 'node-cron';
+import cron from 'node-cron';
 
 import logger from './lib/logger';
 import router from './lib/router';
@@ -13,7 +13,7 @@ import logRequest from './lib/controllers/requestLogger';
 import errorHandler from './lib/controllers/errorHandler';
 
 import { timeStart, version } from './lib/version';
-import * as compression from 'compression';
+import compression from 'compression';
 import { redditRouter } from './lib/reddit/router';
 import { spotifyRouter } from './lib/spotify/router';
 import { performSystemSync } from './lib/cron';

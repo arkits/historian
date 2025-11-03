@@ -9,7 +9,7 @@ import createEmotionCache from '../src/createEmotionCache';
 import { HistorianContextProvider } from '../context/historian';
 import HistorianAppBar from '../src/components/AppBar';
 import HistorianSnackbar from '../src/components/HistorianSnackbar';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './app.css';
 
