@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { deleteHistory, getHistoryById, getUserHistory, getUserHistoryById as dbGetUserHistoryById } from '../db';
 import logger from '../logger';
-import { getUserFromSession } from './auth';
 
 export async function addHistory(request, response: Response, next: NextFunction) {
     try {
-        const user = getUserFromSession(request.session);
-        if (!user) {
-            return next({ message: 'User not found', code: 400 });
+        const session = request['betterAuthSession'];
+        if (!session?.user) {
+            return next({ message: 'User not found', code: 401 });
         }
     } catch (error) {
         logger.error(error, 'Failed to Add History!');
@@ -16,10 +15,12 @@ export async function addHistory(request, response: Response, next: NextFunction
 
 export async function getHistory(request, response: Response, next: NextFunction) {
     try {
-        const user = await getUserFromSession(request.session);
-        if (!user) {
-            return next({ message: 'User not found', code: 400 });
+        const session = request['betterAuthSession'];
+        if (!session?.user) {
+            return next({ message: 'User not found', code: 401 });
         }
+
+        const user = session.user;
 
         const DEFAULT_MAX_RESULTS = 100;
 
@@ -39,7 +40,7 @@ export async function getHistory(request, response: Response, next: NextFunction
         let details = request.query.details ? request.query.details : false;
 
         try {
-            logger.info({ user: user.username, limit, skip, cursor, search, type }, 'Getting History');
+            logger.info({ user: user.email, limit, skip, cursor, search, type }, 'Getting History');
             let history = await getUserHistory(user, limit, skip, cursor, search, type);
             let filteredHistory = [];
 
@@ -83,10 +84,12 @@ export async function getHistory(request, response: Response, next: NextFunction
 
 export async function deleteUserHistory(request, response, next) {
     try {
-        const user = await getUserFromSession(request.session);
-        if (!user) {
-            return next({ message: 'User not found', code: 400 });
+        const session = request['betterAuthSession'];
+        if (!session?.user) {
+            return next({ message: 'User not found', code: 401 });
         }
+
+        const user = session.user;
 
         const id = request.params.id;
         if (!id) {
@@ -114,10 +117,12 @@ export async function deleteUserHistory(request, response, next) {
 
 export async function getUserHistoryById(request, response: Response, next: NextFunction) {
     try {
-        const user = await getUserFromSession(request.session);
-        if (!user) {
-            return next({ message: 'User not found', code: 400 });
+        const session = request['betterAuthSession'];
+        if (!session?.user) {
+            return next({ message: 'User not found', code: 401 });
         }
+
+        const user = session.user;
 
         const id = request.params.id;
         if (!id) {

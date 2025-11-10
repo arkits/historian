@@ -15,50 +15,12 @@ export function getYoutubeLoginUrl() {
     return `${oauthBaseUrl}/auth/youtube`;
 }
 
-export function userLogout() {
-    return fetch(`${baseUrl}/user/logout`, {
-        method: 'POST',
-        headers: defaultHeaders,
-        credentials: 'include'
-    });
-}
+// Legacy auth functions - replaced by Better Auth
+// Keeping for backward compatibility during migration
 
 export function getUserDelete() {
     return fetch(`${baseUrl}/user`, {
         method: 'DELETE',
-        redirect: 'follow',
-        headers: defaultHeaders,
-        credentials: 'include'
-    });
-}
-
-export function userLogin(username: string, password: string) {
-    return fetch(`${baseUrl}/user/login`, {
-        method: 'POST',
-        headers: defaultHeaders,
-        credentials: 'include',
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
-    });
-}
-
-export function userRegister(username: string, password: string) {
-    return fetch(`${baseUrl}/user/signup`, {
-        method: 'POST',
-        headers: defaultHeaders,
-        credentials: 'include',
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
-    });
-}
-
-export function getUser() {
-    return fetch(`${baseUrl}/user`, {
-        method: 'GET',
         redirect: 'follow',
         headers: defaultHeaders,
         credentials: 'include'

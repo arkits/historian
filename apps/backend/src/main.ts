@@ -2,10 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import sessions from 'express-session';
-import { PrismaClient } from '@prisma/client';
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import cron from 'node-cron';
+import { toNodeHandler } from 'better-auth/node';
 
 import logger from './lib/logger';
 import router from './lib/router';
@@ -18,43 +16,29 @@ import { redditRouter } from './lib/reddit/router';
 import { spotifyRouter } from './lib/spotify/router';
 import { performSystemSync } from './lib/cron';
 import { youtubeRouter } from './lib/youtube/router';
-
-const ONE_DAY = 1000 * 60 * 60 * 24;
-
-const prisma = new PrismaClient();
+import { auth } from './lib/auth';
 
 const app = express();
 
 app.disable('x-powered-by');
 
-app.use(express.json());
-
 app.use(compression());
 
 app.use(cookieParser());
 
-app.use(
-    sessions({
-        name: 'HISTORIAN_SESSION',
-        secret: process.env.EXPRESS_SESSION_SECRET,
-        saveUninitialized: false,
-        resave: true,
-        cookie: { path: '/', httpOnly: true, secure: false, maxAge: ONE_DAY * 30 },
-        store: new PrismaSessionStore(prisma, {
-            checkPeriod: 2 * 60 * 1000, //ms
-            dbRecordIdIsSessionId: true,
-            dbRecordIdFunction: undefined
-        })
-    })
-);
-
-// allow cors
+// allow cors - must be before Better Auth handler
 app.use(
     cors({
         origin: true,
         credentials: true
     })
 );
+
+// Better Auth handler - must be before express.json()
+app.all('/api/auth/*', toNodeHandler(auth));
+
+// express.json() must come after Better Auth handler
+app.use(express.json());
 
 app.use(logRequest);
 

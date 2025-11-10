@@ -1,31 +1,33 @@
 import { NextFunction, Request, Response } from 'express';
-import { getUserById } from '../db';
+import { auth } from '../auth';
+import { fromNodeHeaders } from 'better-auth/node';
 
-export function authUserSignedIn(request: Request, response: Response, next: NextFunction) {
-    if (!request['session'].loggedIn) {
-        return next({ message: 'User not logged in', code: 400 });
-    } else {
+export async function authUserSignedIn(request: Request, response: Response, next: NextFunction) {
+    try {
+        const session = await auth.api.getSession({
+            headers: fromNodeHeaders(request.headers)
+        });
+
+        if (!session) {
+            return next({ message: 'User not logged in', code: 401 });
+        }
+
+        // Attach session to request for later use
+        request['betterAuthSession'] = session;
         next();
+    } catch (error) {
+        return next({ message: 'Authentication failed', code: 401 });
     }
 }
 
-export function getUserFromSession(session) {
-    if (!session) {
+export async function getUserFromRequest(request: Request) {
+    try {
+        const session = await auth.api.getSession({
+            headers: fromNodeHeaders(request.headers)
+        });
+
+        return session?.user || null;
+    } catch (error) {
         return null;
     }
-
-    if (!session.loggedIn) {
-        return null;
-    }
-
-    if (session.userId) {
-        const user = getUserById(session.userId);
-        if (user) {
-            return user;
-        } else {
-            return null;
-        }
-    }
-
-    return null;
 }
