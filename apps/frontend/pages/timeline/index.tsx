@@ -9,7 +9,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getHistory } from 'apps/frontend/src/fetch';
 import { HistoryDetailsCard } from 'apps/frontend/src/components/HistoryDetailsCard';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
-import { Card, Fab, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Card, Fab, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CasinoIcon from '@mui/icons-material/Casino';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -130,14 +130,35 @@ const TimelinePage: NextPage = () => {
                         </Grid>
                     </Card>
 
-                    <HistoryTimeline data={data} fetchNextPage={fetchNextPage} />
+                    <HistoryTimeline data={data} fetchNextPage={fetchNextPage} isLoading={isLoading} />
                 </Box>
             </Container>
         </>
     );
 };
 
-const HistoryTimeline = ({ data, fetchNextPage }) => {
+import { HistoryDetailsCardSkeleton } from 'apps/frontend/src/components/HistoryDetailsCardSkeleton';
+
+const HistoryTimeline = ({ data, fetchNextPage, isLoading }) => {
+    // Show skeleton placeholders while initial history data is loading
+    if (isLoading && (!data || !data.pages || data.pages.length === 0)) {
+        // Render a few skeleton sessions with a couple of skeleton cards each
+        return (
+            <>
+                {Array.from({ length: 3 }).map((_, si) => (
+                    <Box key={`skeleton-session-${si}`} sx={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                        <Skeleton variant="text" width="40%" height={36} sx={{ mb: 1 }} />
+                        <div>
+                            {Array.from({ length: 2 }).map((__, idx) => (
+                                <HistoryDetailsCardSkeleton key={`skeleton-${si}-${idx}`} />
+                            ))}
+                        </div>
+                    </Box>
+                ))}
+            </>
+        );
+    }
+
     if (!data?.pages || data?.pages.length === 0) {
         return (
             <div style={{ textAlign: 'center' }}>
