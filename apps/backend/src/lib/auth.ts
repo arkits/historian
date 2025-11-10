@@ -34,10 +34,11 @@ export const auth = betterAuth({
     cookieOptions: {
         path: '/',
         sameSite: 'none',
-        httpOnly: true,
+        httpOnly: false,
         secure: isProduction
     },
     advanced: {
+        disableOriginCheck: true,
         database: {
             generateId: () => randomUUID()
         }
