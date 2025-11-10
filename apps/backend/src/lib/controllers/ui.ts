@@ -77,7 +77,56 @@ export async function dashboardData(request, response: Response, next: NextFunct
 
         chartData.labels.reverse();
 
-        let systemLastSync = 'Pending';
+        // If we didn't find a top agent in the recent chart window but the user has saved items,
+        // fall back to calculating the top agent across all history for the user.
+        if (topAgent.name === 'Pending' && totalSaved > 0) {
+            try {
+                for (const timelineType of TIMELINE_TYPES) {
+                    const totalByType = await prisma.history.count({
+                        where: {
+                            userId: user.id,
+                            type: timelineType
+                        }
+                    });
+
+                    if (totalByType > topAgent.count) {
+                        topAgent = { name: timelineType, count: totalByType };
+                    }
+                }
+            } catch (err) {
+                // ignore and keep Pending if something goes wrong
+            }
+        }
+
+        // Determine the most recent lastSync timestamp from any of the user's accounts.
+        // The cron and agents store a `lastSync` value in account.metadata (milliseconds since epoch).
+        let systemLastSync: string | number = 'Pending';
+
+        try {
+            const accounts = await prisma.account.findMany({ where: { userId: user.id } });
+            let newest: number | null = null;
+
+            for (const acct of accounts) {
+                try {
+                    const metadata: any = acct.metadata || {};
+                    const maybe = metadata && metadata.lastSync ? Number(metadata.lastSync) : null;
+                    if (maybe && !isNaN(maybe)) {
+                        if (newest === null || maybe > newest) {
+                            newest = maybe;
+                        }
+                    }
+                } catch (err) {
+                    // ignore malformed metadata for a single account
+                }
+            }
+
+            if (newest !== null) {
+                // Keep as number (ms since epoch). Frontend will format it with date-fns.
+                systemLastSync = newest;
+            }
+        } catch (err) {
+            // If anything goes wrong querying accounts, fall back to 'Pending'
+        }
 
         let data = {
             totalSaved: totalSaved,

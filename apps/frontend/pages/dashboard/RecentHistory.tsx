@@ -138,8 +138,9 @@ export default function RecentHistory() {
     const filteredHistories = useMemo(() => {
         if (!historyQuery.data?.history) return [];
 
+        // When viewing "All Services" filter out internal 'log' entries
         if (filterType === 'all') {
-            return historyQuery.data.history;
+            return historyQuery.data.history.filter((h) => h.type !== 'log');
         }
 
         return historyQuery.data.history.filter((h) => {

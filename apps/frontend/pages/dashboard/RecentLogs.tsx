@@ -39,24 +39,46 @@ function RecentHistoryList({ histories }) {
     };
 
     return (
-        <List sx={{ width: '100%' }}>
+        // Use dense list to reduce default paddings
+        <List dense sx={{ width: '100%' }}>
             {histories
                 .map((history) => (
-                    <ListItemButton key={history?.id} component={Link} href={`/history/${history?.id}`}>
-                        <Box sx={{ marginRight: '2rem', color: grey['A400'] }}>{`${prettyDate(
-                            new Date(history?.createdAt)
-                        )}`}</Box>
-                        <ListItemText primary={history?.content?.message} />
+                    <ListItemButton
+                        key={history?.id}
+                        component={Link}
+                        href={`/history/${history?.id}`}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            py: 0.5,
+                            px: 1
+                        }}
+                    >
+                        <Box sx={{ marginRight: '1rem', color: grey['A400'], fontSize: '0.75rem', minWidth: 96 }}>
+                            {`${prettyDate(new Date(history?.createdAt))}`}
+                        </Box>
+
+                        <ListItemText
+                            primary={history?.content?.message}
+                            primaryTypographyProps={{
+                                variant: 'body2',
+                                noWrap: true
+                            }}
+                            sx={{ mr: 1 }}
+                        />
+
                         <ListItemAvatar>
                             <Avatar
                                 variant="rounded"
                                 sx={{
-                                    width: 64,
-                                    height: 64,
+                                    width: 40,
+                                    height: 40,
+                                    fontSize: '0.7rem',
                                     bgcolor: `${getLogLevelColor(history?.content?.level)}`
                                 }}
                             >
-                                {history?.content?.level.toUpperCase()}
+                                {history?.content?.level?.toUpperCase?.()}
                             </Avatar>
                         </ListItemAvatar>
                     </ListItemButton>
