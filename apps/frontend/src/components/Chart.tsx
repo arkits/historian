@@ -35,12 +35,17 @@ export const options = {
 const LINE_TENSION = 0.2;
 
 export default function Chart({ chartData }) {
+    // Return null if chartData is not available
+    if (!chartData || !chartData.labels || !chartData.savedCount) {
+        return null;
+    }
+
     const data = {
         labels: chartData.labels,
         datasets: [
             {
                 label: 'reddit/saved',
-                data: chartData.savedCount['reddit/saved'],
+                data: chartData.savedCount['reddit/saved'] || [],
                 borderColor: 'rgb(245, 124, 0)',
                 backgroundColor: 'rgba(245, 124, 0, 0.2)',
                 fill: true,
@@ -48,7 +53,7 @@ export default function Chart({ chartData }) {
             },
             {
                 label: 'reddit/upvoted',
-                data: chartData.savedCount['reddit/upvoted'],
+                data: chartData.savedCount['reddit/upvoted'] || [],
                 borderColor: 'rgb(245, 124, 0)',
                 backgroundColor: 'rgba(245, 124, 0, 0.2)',
                 fill: true,
@@ -56,7 +61,7 @@ export default function Chart({ chartData }) {
             },
             {
                 label: 'spotify/recently-played',
-                data: chartData.savedCount['spotify/recently-played'],
+                data: chartData.savedCount['spotify/recently-played'] || [],
                 borderColor: 'rgb(0, 230, 118)',
                 backgroundColor: 'rgba(0, 230, 118, 0.2)',
                 fill: true,
@@ -64,7 +69,7 @@ export default function Chart({ chartData }) {
             },
             {
                 label: 'youtube/liked',
-                data: chartData.savedCount['youtube/liked'],
+                data: chartData.savedCount['youtube/liked'] || [],
                 borderColor: 'rgb(229, 57, 53)',
                 backgroundColor: 'rgba(229, 57, 53, 0.2)',
                 fill: true,
