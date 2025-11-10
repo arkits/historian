@@ -1,4 +1,4 @@
-import * as simpleOAuth2Reddit from '@jimmycode/simple-oauth2-reddit';
+import { AuthorizationCode } from 'simple-oauth2';
 import { response, Router } from 'express';
 import logger from '../logger';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -9,20 +9,34 @@ const prisma = new PrismaClient();
 
 export const redditRouter = Router();
 
-const redditOAuth2Client = simpleOAuth2Reddit.create({
-    clientId: process.env.REDDIT_APP_ID,
-    clientSecret: process.env.REDDIT_APP_SECRET,
-    callbackURL: process.env.REDDIT_APP_CALLBACK_URL,
-    state: 'random-unique-string',
-    scope: ['identity', 'save', 'history', 'read'],
-    authorizeOptions: {
-        grant_type: 'refresh_token',
-        duration: 'permanent'
+// Create OAuth2 client directly with proper User-Agent header
+const oauth2Client = new AuthorizationCode({
+    client: {
+        id: process.env.REDDIT_APP_ID,
+        secret: process.env.REDDIT_APP_SECRET
+    },
+    auth: {
+        authorizeHost: 'https://www.reddit.com',
+        authorizePath: '/api/v1/authorize',
+        tokenHost: 'https://www.reddit.com',
+        tokenPath: '/api/v1/access_token'
+    },
+    http: {
+        headers: {
+            'User-Agent': '@arkits/historian'
+        }
     }
 });
 
+const redditOAuthConfig = {
+    redirect_uri: process.env.REDDIT_APP_CALLBACK_URL,
+    state: 'random-unique-string',
+    scope: 'identity save history read',
+    duration: 'permanent'
+};
+
 redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
-    if (req['session'].loggedIn) {
+    if (req['session']?.loggedIn) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
@@ -61,7 +75,7 @@ redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
 });
 
 redditRouter.get('/api/agent/reddit', async (req, res, next) => {
-    if (req['session'].loggedIn) {
+    if (req['session']?.loggedIn) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
@@ -113,13 +127,36 @@ redditRouter.get('/api/agent/reddit', async (req, res, next) => {
 });
 
 // Ask the user to authorize.
-redditRouter.get('/auth/reddit', redditOAuth2Client.authorize);
+redditRouter.get('/auth/reddit', (req, res) => {
+    const authorizationUri = oauth2Client.authorizeURL(redditOAuthConfig);
+    res.redirect(authorizationUri);
+});
 
 // Exchange the token for the access token.
-redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async (req, res, next) => {
+redditRouter.get('/auth/reddit/callback', async (req, res, next) => {
+    const code = req.query.code;
+
+    if (!code) {
+        return next({ message: 'No authorization code provided', code: 400 });
+    }
+
+    try {
+        const tokenParams = {
+            code: code as string,
+            redirect_uri: redditOAuthConfig.redirect_uri
+        };
+
+        const accessToken = await oauth2Client.getToken(tokenParams);
+        req['token'] = oauth2Client.createToken(accessToken.token);
+    } catch (error) {
+        logger.error({ error }, 'Error exchanging code for token');
+        return next({ message: 'Failed to exchange authorization code', code: 400, description: error.message });
+    }
+
+    // Continue with existing logic
     logger.info({ token: req['token'], session: req['session'] }, 'Completed Reddit OAuth flow');
 
-    if (req['session'].loggedIn) {
+    if (req['session']?.loggedIn) {
         try {
             let user = await prisma.user.findFirst({
                 where: {
