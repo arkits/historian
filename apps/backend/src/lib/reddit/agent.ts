@@ -1,13 +1,14 @@
 import snoowrap = require('snoowrap');
 import logger from '../logger';
 import { PrismaClient } from '@prisma/client';
-import { createLogHistoryForUser, updateUserPreference } from '../db';
+import { createLogHistoryForUser, updateUserPreference, getUserPreferences, UserWithAccounts } from '../db';
 
 const prisma = new PrismaClient();
 
-export async function performRedditSyncForUser(user, fetchAll = false) {
+export async function performRedditSyncForUser(user: UserWithAccounts, fetchAll = false) {
     try {
-        if (!user.preferences['reddit']['accessToken']['token']['access_token']) {
+        const prefs = getUserPreferences(user, 'reddit');
+        if (!prefs || !prefs.accessToken || !prefs.accessToken.token || !prefs.accessToken.token.access_token) {
             throw new Error('User has no access token');
         }
 
@@ -15,8 +16,8 @@ export async function performRedditSyncForUser(user, fetchAll = false) {
             userAgent: '@arkits/historian',
             clientId: process.env.REDDIT_APP_ID,
             clientSecret: process.env.REDDIT_APP_SECRET,
-            accessToken: user.preferences['reddit']['accessToken']['token']['access_token'],
-            refreshToken: user.preferences['reddit']['accessToken']['token']['refresh_token']
+            accessToken: prefs.accessToken.token.access_token,
+            refreshToken: prefs.accessToken.token.refresh_token
         });
 
         r.config({

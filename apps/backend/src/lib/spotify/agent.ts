@@ -1,5 +1,5 @@
 import logger from '../logger';
-import { createLogHistoryForUser, updateUserPreference } from '../db';
+import { createLogHistoryForUser, updateUserPreference, getUserPreferences, UserWithAccounts } from '../db';
 import { PrismaClient } from '@prisma/client';
 import { getMe, getRecentlyPlayed, refreshApiCreds } from './api';
 
@@ -24,8 +24,8 @@ function insertToHistory(user, item) {
     });
 }
 
-export async function performSpotifySyncForUser(user) {
-    logger.info({ user: user.username }, 'Performing Spotify Sync for User');
+export async function performSpotifySyncForUser(user: UserWithAccounts) {
+    logger.info({ user: user.email }, 'Performing Spotify Sync for User');
 
     let toReturn = {
         recentlyPlayed: {
@@ -39,15 +39,16 @@ export async function performSpotifySyncForUser(user) {
         user = await refreshApiCreds(user);
 
         let response = await getMe(user);
-        logger.info({ responseData: response.data, user: user.username }, 'Got Spotify User');
+        logger.info({ responseData: response.data, user: user.email }, 'Got Spotify User');
 
         let fetchMore = true;
-        let after = user.preferences['spotify'].lastSync;
+        const prefs = getUserPreferences(user, 'spotify');
+        let after = prefs?.lastSync;
 
         while (fetchMore) {
             let recentlyPlayed = await getRecentlyPlayed(user, after);
             logger.debug(
-                { responseData: recentlyPlayed.data.items.length, user: user.username },
+                { responseData: recentlyPlayed.data.items.length, user: user.email },
                 'Got Recently Played'
             );
 

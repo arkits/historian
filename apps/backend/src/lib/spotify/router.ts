@@ -4,7 +4,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import * as querystring from 'querystring';
 import axios from 'axios';
 import { performSpotifySyncForUser } from './agent';
-import { updateUserPreference } from '../db';
+import { updateUserPreference, getUserPreferences } from '../db';
 import { SPOTIFY_CALLBACK_URL, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_TOKEN_URL } from './constants';
 
 const prisma = new PrismaClient();
@@ -16,6 +16,9 @@ spotifyRouter.get('/api/agent/spotify', async function (req, res, next) {
         const user = await prisma.user.findFirst({
             where: {
                 id: req['session'].userId
+            },
+            include: {
+                accounts: true
             }
         });
 
@@ -24,7 +27,7 @@ spotifyRouter.get('/api/agent/spotify', async function (req, res, next) {
         }
 
         try {
-            const prefs = user.preferences['spotify'];
+            const prefs = getUserPreferences(user, 'spotify');
 
             if (!prefs) {
                 return next({ message: 'No Spotify preferences found. Please setup Agent.', code: 400 });
@@ -96,6 +99,9 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
             const user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 
@@ -111,7 +117,7 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
             });
 
             logger.info(
-                { user: user.username },
+                { user: user.email },
                 'Completed OAuth flow. Performing initial sync - performSpotifySyncForUser'
             );
 
@@ -133,6 +139,9 @@ spotifyRouter.post('/api/agent/spotify/collect', async (req, res, next) => {
             const user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 

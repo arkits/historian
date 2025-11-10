@@ -4,10 +4,57 @@ import { TIMELINE_TYPES } from './constants';
 
 const prisma = new PrismaClient();
 
+// Helper type for User with accounts included
+export type UserWithAccounts = User & {
+    accounts: Array<{
+        id: string;
+        userId: string;
+        accountId: string;
+        providerId: string;
+        accessToken: string | null;
+        refreshToken: string | null;
+        accessTokenExpiresAt: Date | null;
+        refreshTokenExpiresAt: Date | null;
+        scope: string | null;
+        idToken: string | null;
+        password: string | null;
+        metadata: Prisma.JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+};
+
+// Helper function to get account preferences for a service
+export function getUserPreferences(user: UserWithAccounts, providerId: string): any {
+    const account = user.accounts.find(acc => acc.providerId === providerId);
+    if (!account) {
+        return null;
+    }
+
+    const metadata = (account.metadata as Prisma.JsonObject) || {};
+    return {
+        accessToken: account.accessToken,
+        refreshToken: account.refreshToken,
+        ...metadata
+    };
+}
+
 export function getUserById(userId: string) {
     return prisma.user.findFirst({
         where: {
             id: userId
+        },
+        include: {
+            accounts: true
+        }
+    });
+}
+
+export function getUserAccount(userId: string, providerId: string) {
+    return prisma.account.findFirst({
+        where: {
+            userId: userId,
+            providerId: providerId
         }
     });
 }
@@ -73,7 +120,11 @@ export function getUserHistory(
 }
 
 export function getAllUsers() {
-    return prisma.user.findMany();
+    return prisma.user.findMany({
+        include: {
+            accounts: true
+        }
+    });
 }
 
 export function getHistoryById(historyId: string) {
@@ -145,39 +196,61 @@ export function getUserActivityCountForDate(user, dateStart: Date, dateEnd: Date
     });
 }
 
-export function updateUserPreference(user, key, updatedPreferences) {
-    let up = {};
+export async function getOrCreateUserAccount(userId: string, providerId: string) {
+    let account = await prisma.account.findFirst({
+        where: {
+            userId: userId,
+            providerId: providerId
+        }
+    });
 
-    if (user.preferences.hasOwnProperty(key)) {
-        up = {
-            ...user.preferences[key],
-            ...updatedPreferences
-        };
-    } else {
-        up = {
-            ...updatedPreferences
-        };
+    if (!account) {
+        account = await prisma.account.create({
+            data: {
+                userId: userId,
+                providerId: providerId,
+                accountId: userId,
+                metadata: {}
+            }
+        });
     }
 
-    return appendUserPreferences(user, key, {
-        ...up
+    return account;
+}
+
+export async function updateUserPreference(user, key, updatedPreferences) {
+    const account = await getOrCreateUserAccount(user.id, key);
+
+    const currentMetadata = (account.metadata as Prisma.JsonObject) || {};
+    const updatedMetadata = {
+        ...currentMetadata,
+        ...updatedPreferences
+    };
+
+    const updates: any = {
+        metadata: updatedMetadata
+    };
+
+    // Update OAuth tokens if provided
+    if (updatedPreferences.accessToken) {
+        updates.accessToken = updatedPreferences.accessToken;
+    }
+    if (updatedPreferences.refreshToken) {
+        updates.refreshToken = updatedPreferences.refreshToken;
+    }
+
+    await prisma.account.update({
+        where: {
+            id: account.id
+        },
+        data: updates
     });
+
+    return getUserById(user.id);
 }
 
 export function appendUserPreferences(user, key, value) {
-    const updatedPreferences = {
-        ...(user.preferences as Prisma.JsonObject),
-        [key]: value
-    };
-
-    return prisma.user.update({
-        where: {
-            id: user.id
-        },
-        data: {
-            preferences: updatedPreferences
-        }
-    });
+    return updateUserPreference(user, key, value);
 }
 
 export function createLogHistoryForUser(user, level, message, context) {

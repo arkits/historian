@@ -1,4 +1,4 @@
-import { updateUserPreference, getAllUsers } from './db';
+import { updateUserPreference, getAllUsers, UserWithAccounts } from './db';
 import logger from './logger';
 import { performRedditSyncForUser } from './reddit/agent';
 import { performSpotifySyncForUser } from './spotify/agent';
@@ -16,12 +16,12 @@ export async function performSystemSync() {
                         await updateUserPreference(user, 'system', {
                             lastSync: new Date().getTime()
                         });
-                        logger.info({ user: user.username }, 'Completed System Sync for User');
+                        logger.info({ user: user.email }, 'Completed System Sync for User');
                     }
                 })
                 .catch((error) => {
                     {
-                        logger.error({ error, user: user.username }, 'Uncaught error in performSystemSyncForUser');
+                        logger.error({ error, user: user.email }, 'Uncaught error in performSystemSyncForUser');
                     }
                 });
         }
@@ -30,25 +30,25 @@ export async function performSystemSync() {
     }
 }
 
-export async function performSystemSyncForUser(user) {
+export async function performSystemSyncForUser(user: UserWithAccounts) {
     try {
         logger.info({ user }, 'Invoking performRedditSyncForUser');
         await performRedditSyncForUser(user, true);
     } catch (error) {
-        logger.error(error, user, 'Caught Error in performRedditSyncForUser');
+        logger.error({ error, user }, 'Caught Error in performRedditSyncForUser');
     }
 
     try {
         logger.info({ user }, 'Invoking performSpotifySyncForUser');
         await performSpotifySyncForUser(user);
     } catch (error) {
-        logger.error(error, user, 'Caught Error in performSpotifySyncForUser');
+        logger.error({ error, user }, 'Caught Error in performSpotifySyncForUser');
     }
 
     try {
         logger.info({ user }, 'Invoking performYoutubeSyncForUser');
         await performYoutubeSyncForUser(user);
     } catch (error) {
-        logger.error(error, user, 'Caught Error in performYoutubeSyncForUser');
+        logger.error({ error, user }, 'Caught Error in performYoutubeSyncForUser');
     }
 }

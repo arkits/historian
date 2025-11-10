@@ -2,14 +2,14 @@ import logger from '../logger';
 import { google } from 'googleapis';
 import { PrismaClient } from '@prisma/client';
 import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from './constants';
-import { createLogHistoryForUser, updateUserPreference } from '../db';
+import { createLogHistoryForUser, updateUserPreference, getUserPreferences, UserWithAccounts } from '../db';
 
 const prisma = new PrismaClient();
 
 export const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL);
 
-export async function performYoutubeSyncForUser(user, fetchAll = false) {
-    logger.info({ user: user.username }, 'Performing YouTube Sync for User');
+export async function performYoutubeSyncForUser(user: UserWithAccounts, fetchAll = false) {
+    logger.info({ user: user.email }, 'Performing YouTube Sync for User');
 
     let toReturn = {
         recentlyPlayed: {
@@ -20,8 +20,13 @@ export async function performYoutubeSyncForUser(user, fetchAll = false) {
     };
 
     try {
+        const prefs = getUserPreferences(user, 'youtube');
+        if (!prefs || !prefs.tokens || !prefs.tokens.refresh_token) {
+            throw new Error('No YouTube refresh token found');
+        }
+
         oauth2Client.setCredentials({
-            refresh_token: user.preferences['youtube']['tokens']['refresh_token']
+            refresh_token: prefs.tokens.refresh_token
         });
 
         const client = google.youtube({
@@ -39,7 +44,7 @@ export async function performYoutubeSyncForUser(user, fetchAll = false) {
                 maxResults: 50,
                 pageToken: pageToken
             });
-            logger.info({ playlistItems: playlistItems, user: user.username }, 'Got Youtube Liked Videos');
+            logger.info({ playlistItems: playlistItems, user: user.email }, 'Got Youtube Liked Videos');
 
             for (let item of playlistItems.data.items) {
                 try {
@@ -58,7 +63,7 @@ export async function performYoutubeSyncForUser(user, fetchAll = false) {
 
             if (playlistItems?.data?.nextPageToken) {
                 logger.info(
-                    { pageToken: playlistItems.data.nextPageToken, user: user.username },
+                    { pageToken: playlistItems.data.nextPageToken, user: user.email },
                     'Got Next Page Token'
                 );
                 pageToken = playlistItems.data.nextPageToken;
