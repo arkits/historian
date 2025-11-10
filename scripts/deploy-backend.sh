@@ -1,8 +1,12 @@
+#!/bin/bash
+
 set -e
 
 echo ">>> inside deploy-backend.sh"
 
 cd /opt/software/historian/
+
+source ~/.bashrc
 
 nvm use
 
