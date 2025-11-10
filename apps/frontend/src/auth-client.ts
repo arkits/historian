@@ -14,7 +14,10 @@ const isLocalhost = typeof window !== 'undefined' && (() => {
 const apiBaseUrl = isLocalhost ? 'http://localhost:3333/api/auth' : 'https://historian-api.archit.xyz/api/auth';
 
 export const authClient = createAuthClient({
-    baseURL: apiBaseUrl
+    baseURL: apiBaseUrl,
+    fetchOptions: {
+        credentials: 'include'
+    }
 });
 
 export const {
