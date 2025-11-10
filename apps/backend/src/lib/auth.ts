@@ -5,6 +5,9 @@ import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
+// Determine if we're in production based on the BETTER_AUTH_URL
+const isProduction = process.env.BETTER_AUTH_URL?.includes('https://');
+
 export const auth = betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3333',
     basePath: '/api/auth',
@@ -34,9 +37,9 @@ export const auth = betterAuth({
     },
     cookieOptions: {
         path: '/',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
+        secure: isProduction
     },
     advanced: {
         database: {
