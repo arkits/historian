@@ -222,22 +222,46 @@ export async function updateUserPreference(user, key, updatedPreferences) {
     const account = await getOrCreateUserAccount(user.id, key);
 
     const currentMetadata = (account.metadata as Prisma.JsonObject) || {};
-    const updatedMetadata = {
-        ...currentMetadata,
-        ...updatedPreferences
-    };
 
-    const updates: any = {
-        metadata: updatedMetadata
-    };
+    // Create a copy of updatedPreferences for metadata, excluding fields that go in dedicated columns
+    const metadataUpdates = { ...updatedPreferences };
+
+    const updates: any = {};
 
     // Update OAuth tokens if provided
+    // Handle both token objects and plain strings
     if (updatedPreferences.accessToken) {
-        updates.accessToken = updatedPreferences.accessToken;
+        // Check if it's a token object (from simple-oauth2 or similar)
+        if (typeof updatedPreferences.accessToken === 'object' && updatedPreferences.accessToken.token) {
+            // Extract the actual access token string
+            updates.accessToken = updatedPreferences.accessToken.token.access_token;
+            // Store refresh token if available
+            if (updatedPreferences.accessToken.token.refresh_token) {
+                updates.refreshToken = updatedPreferences.accessToken.token.refresh_token;
+            }
+            // Store expiration if available
+            if (updatedPreferences.accessToken.token.expires_at) {
+                updates.accessTokenExpiresAt = new Date(updatedPreferences.accessToken.token.expires_at);
+            }
+        } else {
+            // Plain string token
+            updates.accessToken = updatedPreferences.accessToken;
+        }
+        // Don't store accessToken in metadata since it's in a dedicated column
+        delete metadataUpdates.accessToken;
     }
-    if (updatedPreferences.refreshToken) {
+    if (updatedPreferences.refreshToken && typeof updatedPreferences.refreshToken === 'string') {
         updates.refreshToken = updatedPreferences.refreshToken;
+        // Don't store refreshToken in metadata since it's in a dedicated column
+        delete metadataUpdates.refreshToken;
     }
+
+    // Update metadata with remaining preferences
+    const updatedMetadata = {
+        ...currentMetadata,
+        ...metadataUpdates
+    };
+    updates.metadata = updatedMetadata;
 
     await prisma.account.update({
         where: {

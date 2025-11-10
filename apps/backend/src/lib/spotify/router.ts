@@ -6,16 +6,22 @@ import axios from 'axios';
 import { performSpotifySyncForUser } from './agent';
 import { updateUserPreference, getUserPreferences } from '../db';
 import { SPOTIFY_CALLBACK_URL, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_TOKEN_URL } from './constants';
+import { auth } from '../auth';
+import { fromNodeHeaders } from 'better-auth/node';
 
 const prisma = new PrismaClient();
 
 export const spotifyRouter = Router();
 
 spotifyRouter.get('/api/agent/spotify', async function (req, res, next) {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         const user = await prisma.user.findFirst({
             where: {
-                id: req['session'].userId
+                id: session.user.id
             },
             include: {
                 accounts: true
@@ -59,8 +65,12 @@ spotifyRouter.get('/api/agent/spotify', async function (req, res, next) {
     }
 });
 
-spotifyRouter.get('/auth/spotify', function (req, res, next) {
-    if (req['session']?.loggedIn) {
+spotifyRouter.get('/auth/spotify', async function (req, res, next) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         res.redirect(
             'https://accounts.spotify.com/authorize?' +
                 querystring.stringify({
@@ -77,7 +87,11 @@ spotifyRouter.get('/auth/spotify', function (req, res, next) {
 });
 
 spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         var code = req.query.code || null;
 
         let response = await axios.post(
@@ -98,7 +112,7 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true
@@ -134,11 +148,15 @@ spotifyRouter.get('/auth/spotify/callback', async function (req, res, next) {
 });
 
 spotifyRouter.post('/api/agent/spotify/collect', async (req, res, next) => {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true

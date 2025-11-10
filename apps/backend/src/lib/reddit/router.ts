@@ -4,6 +4,8 @@ import logger from '../logger';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { performRedditSyncForUser } from './agent';
 import { updateUserPreference, getUserPreferences } from '../db';
+import { auth } from '../auth';
+import { fromNodeHeaders } from 'better-auth/node';
 
 const prisma = new PrismaClient();
 
@@ -36,11 +38,15 @@ const redditOAuthConfig = {
 };
 
 redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true
@@ -75,11 +81,15 @@ redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
 });
 
 redditRouter.get('/api/agent/reddit', async (req, res, next) => {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true
@@ -154,13 +164,18 @@ redditRouter.get('/auth/reddit/callback', async (req, res, next) => {
     }
 
     // Continue with existing logic
-    logger.info({ token: req['token'], session: req['session'] }, 'Completed Reddit OAuth flow');
+    // Get session using Better Auth
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
 
-    if (req['session']?.loggedIn) {
+    logger.info({ token: req['token'], session: session }, 'Completed Reddit OAuth flow');
+
+    if (session?.user) {
         try {
             let user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true

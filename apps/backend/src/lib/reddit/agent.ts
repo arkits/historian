@@ -8,7 +8,31 @@ const prisma = new PrismaClient();
 export async function performRedditSyncForUser(user: UserWithAccounts, fetchAll = false) {
     try {
         const prefs = getUserPreferences(user, 'reddit');
-        if (!prefs || !prefs.accessToken || !prefs.accessToken.token || !prefs.accessToken.token.access_token) {
+        if (!prefs || !prefs.accessToken) {
+            throw new Error('User has no access token');
+        }
+
+        // Handle both new format (string) and legacy format (object)
+        let accessToken: string;
+        let refreshToken: string;
+
+        if (typeof prefs.accessToken === 'string') {
+            // New format: token stored as string in dedicated column
+            accessToken = prefs.accessToken;
+            refreshToken = prefs.refreshToken;
+        } else if (prefs.accessToken.token?.access_token) {
+            // Legacy format: token object from simple-oauth2
+            accessToken = prefs.accessToken.token.access_token;
+            refreshToken = prefs.accessToken.token.refresh_token;
+        } else if (prefs.accessToken.access_token) {
+            // Legacy format: token object without .token wrapper
+            accessToken = prefs.accessToken.access_token;
+            refreshToken = prefs.accessToken.refresh_token;
+        } else {
+            throw new Error('Invalid access token format');
+        }
+
+        if (!accessToken) {
             throw new Error('User has no access token');
         }
 
@@ -16,8 +40,8 @@ export async function performRedditSyncForUser(user: UserWithAccounts, fetchAll 
             userAgent: '@arkits/historian',
             clientId: process.env.REDDIT_APP_ID,
             clientSecret: process.env.REDDIT_APP_SECRET,
-            accessToken: prefs.accessToken.token.access_token,
-            refreshToken: prefs.accessToken.token.refresh_token
+            accessToken: accessToken,
+            refreshToken: refreshToken
         });
 
         r.config({

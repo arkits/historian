@@ -5,16 +5,22 @@ import { updateUserPreference, getUserPreferences } from '../db';
 import logger from '../logger';
 import { oauth2Client, performYoutubeSyncForUser } from './agent';
 import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_OAUTH_SCOPES } from './constants';
+import { auth } from '../auth';
+import { fromNodeHeaders } from 'better-auth/node';
 
 const prisma = new PrismaClient();
 
 export const youtubeRouter = Router();
 
 youtubeRouter.get('/api/agent/youtube', async function (req, res, next) {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         const user = await prisma.user.findFirst({
             where: {
-                id: req['session'].userId
+                id: session.user.id
             },
             include: {
                 accounts: true
@@ -57,8 +63,12 @@ youtubeRouter.get('/api/agent/youtube', async function (req, res, next) {
     }
 });
 
-youtubeRouter.get('/auth/youtube', function (req, res, next) {
-    if (req['session']?.loggedIn) {
+youtubeRouter.get('/auth/youtube', async function (req, res, next) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         const url = oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: GOOGLE_OAUTH_SCOPES
@@ -70,7 +80,11 @@ youtubeRouter.get('/auth/youtube', function (req, res, next) {
 });
 
 youtubeRouter.get('/auth/youtube/callback', async function (req, res, next) {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         let code = req.query.code as string;
         if (!code) {
             throw new Error('No code provided');
@@ -80,7 +94,7 @@ youtubeRouter.get('/auth/youtube/callback', async function (req, res, next) {
         try {
             let user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true
@@ -114,11 +128,15 @@ youtubeRouter.get('/auth/youtube/callback', async function (req, res, next) {
 });
 
 youtubeRouter.post('/api/agent/youtube/collect', async (req, res, next) => {
-    if (req['session']?.loggedIn) {
+    const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers)
+    });
+
+    if (session?.user) {
         try {
             const user = await prisma.user.findFirst({
                 where: {
-                    id: req['session'].userId
+                    id: session.user.id
                 },
                 include: {
                     accounts: true
