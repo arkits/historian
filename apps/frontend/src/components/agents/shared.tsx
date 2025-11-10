@@ -8,32 +8,49 @@ export const AgentDetails = ({ queryData }) => {
         return <Box sx={{ mb: 4 }}>{queryData.error}</Box>;
     }
 
-    if (queryData?.connected) {
-        if (queryData?.lastSync) {
-            return (
-                <Typography variant="body1" component="p" gutterBottom>
-                    Last Refreshed:{' '}
-                    {formatDistance(new Date(queryData?.lastSync), new Date(), {
-                        addSuffix: true
-                    })}{' '}
-                    // {prettyDate(new Date(queryData?.lastSync))}
-                    <br />
-                    <br />
-                    Total Saved: {queryData?.historyTotal} <br />
-                    <br />
+    const connected = Boolean(queryData?.connected);
+    const statusColor = connected ? 'success.main' : 'error.main';
+    const statusText = connected ? 'Connected' : 'Disconnected';
+
+    if (!queryData) return null;
+
+    return (
+        <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <Box
+                    component="span"
+                    sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: statusColor,
+                        display: 'inline-block'
+                    }}
+                    aria-hidden
+                />
+                <Typography variant="subtitle2" component="span">
+                    {statusText}
                 </Typography>
-            );
-        } else {
-            return (
-                <Typography variant="body1" component="p" gutterBottom>
-                    Connected, please wait for initial sync to complete.
-                    <br /> <br />
+                {queryData?.lastSync && (
+                    <Typography variant="caption" color="text.secondary" component="span" sx={{ ml: 1 }}>
+                        • Last refreshed {formatDistance(new Date(queryData?.lastSync), new Date(), { addSuffix: true })}
+                    </Typography>
+                )}
+            </Box>
+
+            {connected ? (
+                <>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Total saved: <strong>{queryData?.historyTotal ?? 0}</strong>
+                    </Typography>
+                </>
+            ) : (
+                <Typography variant="body2" color="text.secondary">
+                    Not connected. Click Connect to authenticate the agent.
                 </Typography>
-            );
-        }
-    } else {
-        return <></>;
-    }
+            )}
+        </Box>
+    );
 };
 
 const manuallyCollect = (getAgentCollect, setIsManuallyCollecting, setConnectionTestResult) => {

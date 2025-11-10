@@ -23,32 +23,36 @@ export const RedditAgent = () => {
     const [connectionTestResult, setConnectionTestResult] = useState({} as any);
 
     return (
-        <>
-            <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
-                Reddit
-            </Typography>
-            <AgentDetails queryData={query?.data} />
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            <Box sx={{ flex: 1 }}>
+                <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
+                    Reddit
+                </Typography>
+                <AgentDetails queryData={query?.data} />
+                <Divider sx={{ my: 1 }} />
+            </Box>
 
-            <Button
-                variant="contained"
-                component={Link}
-                noLinkStyle
-                href={getRedditLoginUrl()}
-                target={'_blank'}
-                sx={{ mb: 2 }}
-            >
-                Connect to Reddit
-            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' }}>
+                <Button
+                    variant="contained"
+                    component={Link}
+                    noLinkStyle
+                    href={getRedditLoginUrl()}
+                    target={'_blank'}
+                    sx={{ mb: 0 }}
+                    aria-label="Connect to Reddit"
+                >
+                    Connect to Reddit
+                </Button>
 
-            <br />
-
-            <ConnectionTest
-                getAgentCollect={getRedditAgentCollect}
-                isManuallyCollecting={isManuallyCollecting}
-                setIsManuallyCollecting={setIsManuallyCollecting}
-                connectionTestResult={connectionTestResult}
-                setConnectionTestResult={setConnectionTestResult}
-            />
-        </>
+                <ConnectionTest
+                    getAgentCollect={getRedditAgentCollect}
+                    isManuallyCollecting={isManuallyCollecting}
+                    setIsManuallyCollecting={setIsManuallyCollecting}
+                    connectionTestResult={connectionTestResult}
+                    setConnectionTestResult={setConnectionTestResult}
+                />
+            </Box>
+        </Box>
     );
 };

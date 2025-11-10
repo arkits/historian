@@ -9,10 +9,20 @@ import { PageTitle } from 'apps/frontend/src/components/FontTypes';
 import { RedditAgent } from 'apps/frontend/src/components/agents/redditAgent';
 import { SpotifyAgent } from 'apps/frontend/src/components/agents/spotifyAgent';
 import { YoutubeAgent } from 'apps/frontend/src/components/agents/youtubeAgent';
-import { Paper, Grid } from '@mui/material';
+import { Paper } from '@mui/material';
 
 function AgentCard({ children }: { children: React.ReactNode }) {
-    return <Paper sx={{ paddingTop: '1rem', paddingLeft: '1.2rem', paddingBottom: '2rem' }}>{children}</Paper>;
+    return (
+        <Paper
+            sx={{
+                p: 2,
+                width: '100%',
+                boxSizing: 'border-box'
+            }}
+        >
+            {children}
+        </Paper>
+    );
 }
 
 const Agents: NextPage = () => {
@@ -35,23 +45,19 @@ const Agents: NextPage = () => {
                 >
                     <PageTitle>Agents</PageTitle>
                 </Box>
-                <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <AgentCard>
-                            <RedditAgent />
-                        </AgentCard>
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <AgentCard>
-                            <SpotifyAgent />
-                        </AgentCard>
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <AgentCard>
-                            <YoutubeAgent />
-                        </AgentCard>
-                    </Grid>
-                </Grid>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <AgentCard>
+                        <RedditAgent />
+                    </AgentCard>
+
+                    <AgentCard>
+                        <SpotifyAgent />
+                    </AgentCard>
+
+                    <AgentCard>
+                        <YoutubeAgent />
+                    </AgentCard>
+                </Box>
             </Container>
         </>
     );

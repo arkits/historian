@@ -1,4 +1,4 @@
-import { Button, Divider, Typography } from '@mui/material';
+import { Button, Divider, Typography, Box } from '@mui/material';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FONT_LOGO } from '../../constants';
@@ -20,31 +20,35 @@ export const SpotifyAgent = () => {
     });
 
     return (
-        <>
-            <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
-                Spotify
-            </Typography>
-            <AgentDetails queryData={query?.data} />
-            <Button
-                variant="contained"
-                component={Link}
-                noLinkStyle
-                href={getSpotifyLoginUrl()}
-                target={'_blank'}
-                sx={{ mb: 2 }}
-            >
-                Connect to Spotify
-            </Button>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            <Box sx={{ flex: 1 }}>
+                <Typography variant="h2" component="h2" gutterBottom sx={{ fontFamily: FONT_LOGO }}>
+                    Spotify
+                </Typography>
+                <AgentDetails queryData={query?.data} />
+                <Divider sx={{ my: 1 }} />
+            </Box>
 
-            <br />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' }}>
+                <Button
+                    variant="contained"
+                    component={Link}
+                    noLinkStyle
+                    href={getSpotifyLoginUrl()}
+                    target={'_blank'}
+                    aria-label="Connect to Spotify"
+                >
+                    Connect to Spotify
+                </Button>
 
-            <ConnectionTest
-                getAgentCollect={getSpotifyAgentCollect}
-                isManuallyCollecting={isManuallyCollecting}
-                setIsManuallyCollecting={setIsManuallyCollecting}
-                connectionTestResult={connectionTestResult}
-                setConnectionTestResult={setConnectionTestResult}
-            />
-        </>
+                <ConnectionTest
+                    getAgentCollect={getSpotifyAgentCollect}
+                    isManuallyCollecting={isManuallyCollecting}
+                    setIsManuallyCollecting={setIsManuallyCollecting}
+                    connectionTestResult={connectionTestResult}
+                    setConnectionTestResult={setConnectionTestResult}
+                />
+            </Box>
+        </Box>
     );
 };
