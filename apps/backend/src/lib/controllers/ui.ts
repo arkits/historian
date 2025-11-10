@@ -4,7 +4,7 @@ import { TIMELINE_TYPES } from '../constants';
 import { getUserActivityCountForDate, getUserHistoryCountForDate } from '../db';
 import logger from '../logger';
 import { version } from '../version';
-import { getUserFromSession } from './auth';
+import { getUserFromRequest } from './auth';
 import { format } from 'date-fns';
 
 const prisma = new PrismaClient();
@@ -21,7 +21,7 @@ interface ChartData {
 
 export async function dashboardData(request, response: Response, next: NextFunction) {
     try {
-        const user = await getUserFromSession(request.session);
+        const user = await getUserFromRequest(request);
         if (!user) {
             return next({ message: 'User not found', code: 400 });
         }
@@ -78,9 +78,6 @@ export async function dashboardData(request, response: Response, next: NextFunct
         chartData.labels.reverse();
 
         let systemLastSync = 'Pending';
-        try {
-            systemLastSync = user.preferences['system']['lastSync'];
-        } catch (error) {}
 
         let data = {
             totalSaved: totalSaved,
