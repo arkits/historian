@@ -1,9 +1,10 @@
-// for local testing...
-// export const baseUrl = process.env.BASE_URL || '/api';
-// export const oauthBaseUrl = process.env.OAUTH_BASE_URL || 'http://localhost:3333';
+// Dynamically set API URL based on environment
+const isLocalhost = typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-// for production...
-export const baseUrl = 'https://historian-api.archit.xyz/api';
-export const oauthBaseUrl = 'https://historian-api.archit.xyz';
+const apiBaseUrl = isLocalhost ? 'http://localhost:3333' : 'https://historian-api.archit.xyz';
+
+export const baseUrl = `${apiBaseUrl}/api`;
+export const oauthBaseUrl = apiBaseUrl;
 
 export const FONT_LOGO = 'Pirata One, cursive';
