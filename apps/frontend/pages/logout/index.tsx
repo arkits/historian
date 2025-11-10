@@ -4,15 +4,14 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useRouter } from 'next/router';
-import { userLogout } from 'apps/frontend/src/fetch';
+import { signOut } from 'apps/frontend/src/auth-client';
 
 const About: NextPage = () => {
     const router = useRouter();
 
     React.useEffect(() => {
-        userLogout()
-            .then((response) => response.json())
-            .then((result) => {
+        signOut()
+            .then(() => {
                 window.location.assign('/');
             })
             .catch((error) => console.log('error', error));

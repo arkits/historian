@@ -39,12 +39,6 @@
                 }
             }
         },
-        "export": {
-            "executor": "@nx/next:export",
-            "options": {
-                "buildTarget": "frontend:build:production"
-            }
-        },
         "test": {
             "executor": "@nx/jest:jest",
             "outputs": ["{workspaceRoot}/coverage/apps/frontend"],

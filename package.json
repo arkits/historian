@@ -11,7 +11,7 @@
         "build": "nx build",
         "test": "nx test",
         "dev": "nx run-many --target=serve --projects=frontend,backend",
-        "build:frontend": "nx export frontend",
+        "build:frontend": "nx build frontend --configuration=production",
         "frontend:dev": "nx serve --project frontend",
         "backend:dev": "concurrently \"nx serve --project backend\" \"nodemon --watch dist/apps/backend dist/apps/backend/main.js | pino-pretty\" --kill-others --names \"webpack,node\"",
         "backend:build:prod": "nx build backend --configuration=production",
