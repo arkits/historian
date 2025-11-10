@@ -35,12 +35,6 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
 
-  // Legacy fields - kept during migration period
-  // TODO: Remove these after running Phase 2 cleanup migration
-  username      String?   @unique @db.VarChar(255)
-  passwordHash  String?   @db.VarChar(255)
-  preferences   Json?     @db.Json
-
   // Relations
   History       History[]
   sessions      Session[]
@@ -72,6 +66,7 @@ model Account {
   scope                   String?
   idToken                 String?
   password                String?
+  metadata                Json?     @db.Json
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 

@@ -3,7 +3,7 @@ import { response, Router } from 'express';
 import logger from '../logger';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { performRedditSyncForUser } from './agent';
-import { updateUserPreference } from '../db';
+import { updateUserPreference, getUserPreferences } from '../db';
 
 const prisma = new PrismaClient();
 
@@ -27,6 +27,9 @@ redditRouter.post('/api/agent/reddit/collect', async (req, res, next) => {
             const user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 
@@ -63,6 +66,9 @@ redditRouter.get('/api/agent/reddit', async (req, res, next) => {
             const user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 
@@ -71,7 +77,7 @@ redditRouter.get('/api/agent/reddit', async (req, res, next) => {
             }
 
             try {
-                const redditPrefs = user.preferences['reddit'];
+                const redditPrefs = getUserPreferences(user, 'reddit');
 
                 if (!redditPrefs) {
                     return next({ message: 'No Reddit preferences found. Please setup Agent.', code: 400 });
@@ -118,6 +124,9 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
             let user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 
@@ -130,7 +139,7 @@ redditRouter.get('/auth/reddit/callback', redditOAuth2Client.accessToken, async 
             });
 
             logger.info(
-                { user: user.username },
+                { user: user.email },
                 'Completed OAuth flow. Performing initial sync - performRedditSyncForUser'
             );
 

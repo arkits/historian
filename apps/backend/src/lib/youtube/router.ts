@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
 import { google } from 'googleapis';
-import { updateUserPreference } from '../db';
+import { updateUserPreference, getUserPreferences } from '../db';
 import logger from '../logger';
 import { oauth2Client, performYoutubeSyncForUser } from './agent';
 import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_OAUTH_SCOPES } from './constants';
@@ -15,6 +15,9 @@ youtubeRouter.get('/api/agent/youtube', async function (req, res, next) {
         const user = await prisma.user.findFirst({
             where: {
                 id: req['session'].userId
+            },
+            include: {
+                accounts: true
             }
         });
 
@@ -23,7 +26,7 @@ youtubeRouter.get('/api/agent/youtube', async function (req, res, next) {
         }
 
         try {
-            const prefs = user.preferences['youtube'];
+            const prefs = getUserPreferences(user, 'youtube');
 
             if (!prefs) {
                 return next({ message: 'No YouTube preferences found. Please setup Agent.', code: 400 });
@@ -78,6 +81,9 @@ youtubeRouter.get('/auth/youtube/callback', async function (req, res, next) {
             let user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 
@@ -92,7 +98,7 @@ youtubeRouter.get('/auth/youtube/callback', async function (req, res, next) {
             });
 
             logger.info(
-                { user: user.username },
+                { user: user.email },
                 'Completed OAuth flow. Performing initial sync - performYoutubeSyncForUser'
             );
 
@@ -113,6 +119,9 @@ youtubeRouter.post('/api/agent/youtube/collect', async (req, res, next) => {
             const user = await prisma.user.findFirst({
                 where: {
                     id: req['session'].userId
+                },
+                include: {
+                    accounts: true
                 }
             });
 

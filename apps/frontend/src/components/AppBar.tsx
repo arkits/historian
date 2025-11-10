@@ -50,7 +50,7 @@ const UserOptions = ({ user }) => {
             <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
-                        alt={user?.username.toUpperCase()}
+                        alt={user?.username?.toUpperCase() || 'User'}
                         sx={{ backgroundColor: teal.A400 }}
                         src="/static/images/avatar/2.jpg"
                     />
