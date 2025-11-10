@@ -10,9 +10,15 @@ export const getPrettyType = (type) => {
         case 'log':
             return 'Log';
         case 'reddit/saved':
-            return 'Saved';
+            return 'Reddit Saved';
         case 'reddit/upvoted':
-            return 'Upvoted';
+            return 'Reddit Upvoted';
+        case 'spotify/recently-played':
+            return 'Spotify';
+        case 'youtube/liked':
+            return 'YouTube Liked';
+        case 'instagram/saved':
+            return 'Instagram Saved';
         default:
             return type;
     }
@@ -38,6 +44,8 @@ export const getTitleText = (history) => {
             return `${history?.content?.level}: ${history?.content?.message}`;
         case 'spotify/recently-played':
             return `${history?.content?.trackName} - ${history?.content?.artistName}`;
+        case 'youtube/liked':
+            return history?.content?.title ?? history?.content?.videoTitle ?? '[NO TITLE]';
         case 'reddit/saved':
         case 'reddit/upvoted':
         default:
@@ -51,11 +59,13 @@ export const getSubtitleText = (history) => {
             return `${getPrettyType(history?.type)}`;
         case 'reddit/saved':
         case 'reddit/upvoted':
-            return `${getPrettyType(history?.type)} • /${history?.content?.subreddit} • ${history?.content?.author}`;
+            return `/r/${history?.content?.subreddit} • u/${history?.content?.author}`;
         case 'spotify/recently-played':
-            return `${getPrettyType(history?.type)} • ${history?.content?.albumName}`;
+            return `${history?.content?.albumName}`;
+        case 'youtube/liked':
+            return `${history?.content?.channelTitle || history?.content?.channelName || 'Unknown Channel'}`;
         default:
-            return `${getPrettyType(history?.type)} • ${history?.content?.author}`;
+            return history?.content?.author ? `By ${history?.content?.author}` : '';
     }
 };
 
@@ -89,6 +99,8 @@ export const getThumbnail = (history) => {
             return history?.content?.thumbnail;
         case 'spotify/recently-played':
             return history?.content?.albumArt;
+        case 'youtube/liked':
+            return history?.content?.thumbnail || history?.content?.thumbnailUrl;
         default:
             return history?.content?.thumbnail;
     }

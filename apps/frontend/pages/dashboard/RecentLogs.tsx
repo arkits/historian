@@ -8,11 +8,12 @@ import {
     ListItemButton,
     ListItemText,
     ListSubheader,
-    Paper
+    Paper,
+    Typography
 } from '@mui/material';
 import { grey, orange, red } from '@mui/material/colors';
 import HistorianContext from 'apps/frontend/context/historian';
-import LoadingSpinner from 'apps/frontend/src/components/LoadingSpinner';
+import { RecentLogsSkeleton } from 'apps/frontend/src/components/SkeletonLoaders';
 import { prettyDate } from 'apps/frontend/src/dateFormat';
 import { getHistory } from 'apps/frontend/src/fetch';
 import Link from 'apps/frontend/src/Link';
@@ -86,26 +87,18 @@ export default function RecentLogs() {
     });
 
     if (historyQuerySystem.isLoading) {
-        return <LoadingSpinner />;
+        return <RecentLogsSkeleton count={10} />;
     }
 
     if (historyQuerySystem.isError) {
         return (
-            <>
-                <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', marginTop: '10rem' }}>
-                    <Container maxWidth="sm">
-                        <h3>Error</h3>
-                    </Container>
-                </div>
-            </>
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <Typography variant="h6" color="error">
+                    Error loading system logs
+                </Typography>
+            </Paper>
         );
     }
 
-    return (
-        <>
-            <Grid size={{ xs: 12, sm: 12, md: 4 }}>
-                <RecentHistoryListCard title={''} histories={historyQuerySystem.data.history} />
-            </Grid>
-        </>
-    );
+    return <RecentHistoryListCard title={''} histories={historyQuerySystem.data.history} />;
 }

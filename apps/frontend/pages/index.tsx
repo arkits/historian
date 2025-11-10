@@ -6,8 +6,39 @@ import Box from '@mui/material/Box';
 import Link from '../src/Link';
 import { Button, Divider } from '@mui/material';
 import { FONT_LOGO } from '../src/constants';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { authClient } from '../src/auth-client';
+import LoadingSpinner from '../src/components/LoadingSpinner';
 
 const Home: NextPage = () => {
+    const router = useRouter();
+    const [isChecking, setIsChecking] = useState(true);
+
+    useEffect(() => {
+        // Check if user is already logged in
+        authClient.getSession()
+            .then((session) => {
+                if (session?.data?.user) {
+                    // User is logged in, redirect to dashboard
+                    router.push('/dashboard');
+                } else {
+                    // User is not logged in, show landing page
+                    setIsChecking(false);
+                }
+            })
+            .catch((error) => {
+                console.error('Session check failed:', error);
+                // On error, show landing page
+                setIsChecking(false);
+            });
+    }, [router]);
+
+    // Show loading spinner while checking authentication
+    if (isChecking) {
+        return <LoadingSpinner />;
+    }
+
     return (
         <>
             <div
