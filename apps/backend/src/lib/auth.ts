@@ -5,9 +5,6 @@ import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
-// Determine if we're in production based on the BETTER_AUTH_URL
-const isProduction = process.env.BETTER_AUTH_URL?.includes('https://');
-
 export const auth = betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3333',
     basePath: '/api/auth',
@@ -19,12 +16,8 @@ export const auth = betterAuth({
         requireEmailVerification: false
     },
     trustedOrigins: [
-        'http://localhost:4200',  // Alternative development port
-        'http://localhost:3000',  // Next.js default port
-        'http://127.0.0.1:4200',
-        'http://127.0.0.1:3000',
-        'http://10.0.0.93:4200',  // Local network IP
-        'http://10.0.0.93:3000',
+        'http://localhost:4200', // Alternative development port
+        'http://10.0.0.93:4200', // Local network IP
         'https://ai.historian.pages.dev',
         'https://*.historian.pages.dev',
         'https://historian.archit.xyz'
@@ -37,9 +30,9 @@ export const auth = betterAuth({
     },
     cookieOptions: {
         path: '/',
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: 'none',
         httpOnly: true,
-        secure: isProduction
+        secure: false
     },
     advanced: {
         database: {
