@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["filterJson", "fullTextSearch"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -27,16 +27,62 @@ model History {
 }
 
 model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  username     String    @unique @db.VarChar(255)
-  passwordHash String    @db.VarChar(255)
-  History      History[]
-  preferences  Json?     @db.Json
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String    @default("")
+  email         String    @unique @default("")
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  // Legacy fields - kept during migration period
+  // TODO: Remove these after running Phase 2 cleanup migration
+  username      String?   @unique @db.VarChar(255)
+  passwordHash  String?   @db.VarChar(255)
+  preferences   Json?     @db.Json
+
+  // Relations
+  History       History[]
+  sessions      Session[]
+  accounts      Account[]
 }
 
 model Session {
-  id        String   @id
-  sid       String   @unique
-  data      String
+  id        String   @id @default(uuid())
+  userId    String   @db.Uuid
+  token     String   @unique
   expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                      String    @id @default(uuid())
+  userId                  String    @db.Uuid
+  accountId               String
+  providerId              String
+  accessToken             String?
+  refreshToken            String?
+  accessTokenExpiresAt    DateTime?
+  refreshTokenExpiresAt   DateTime?
+  scope                   String?
+  idToken                 String?
+  password                String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

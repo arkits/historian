@@ -7,7 +7,7 @@ import Link from '../../src/Link';
 import { Alert, Button, Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
 import HistorianContext from 'apps/frontend/context/historian';
-import { getUser, userLogin } from 'apps/frontend/src/fetch';
+import { signIn, useSession } from 'apps/frontend/src/auth-client';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
 
 const LoginError = ({ error }) => {
@@ -27,35 +27,32 @@ const Login: NextPage = () => {
 
     const [loginError, setLoginError] = React.useState<string | null>(null);
     const { user, setUser } = React.useContext(HistorianContext);
+    const { data: session } = useSession();
 
     React.useEffect(() => {
-        getUser()
-            .then((response) => response.json())
-            .then((result) => {
-                if (result?.id) {
-                    setUser(result);
-                    router.push('/dashboard');
-                }
-            })
-            .catch((error) => {});
-    }, [setUser]);
+        if (session?.user) {
+            setUser(session.user);
+            router.push('/dashboard');
+        }
+    }, [session, setUser, router]);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
 
-        // @ts-ignore
-        userLogin(data.get('username'), data.get('password'))
-            .then((response) => response.json())
-            .then((result) => {
-                if (result?.error) {
-                    setLoginError(result.error);
-                } else {
-                    router.reload();
-                    // router.push('/dashboard');
-                }
-            })
-            .catch((error) => console.log('error', error));
+        const email = data.get('email') as string;
+        const password = data.get('password') as string;
+
+        const result = await signIn.email({
+            email,
+            password
+        });
+
+        if (result.error) {
+            setLoginError(result.error.message || 'Login failed');
+        } else {
+            router.push('/dashboard');
+        }
     };
 
     return (
@@ -78,11 +75,12 @@ const Login: NextPage = () => {
                         margin="normal"
                         required
                         fullWidth
-                        id="username"
-                        label="Username"
-                        name="username"
-                        autoComplete="username"
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
                         autoFocus
+                        type="email"
                     />
                     <TextField
                         margin="normal"
