@@ -6,6 +6,8 @@ import { randomUUID } from 'crypto';
 const prisma = new PrismaClient();
 
 export const auth = betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3333',
+    basePath: '/api/auth',
     database: prismaAdapter(prisma, {
         provider: 'postgresql'
     }),
@@ -16,6 +18,7 @@ export const auth = betterAuth({
     trustedOrigins: [
         'http://localhost:4200',  // Alternative development port
         'http://10.0.0.93:4200',
+        'https://ai.historian.pages.dev',
         'https://*.historian.pages.dev',
         'https://historian.archit.xyz'
     ],
@@ -24,6 +27,12 @@ export const auth = betterAuth({
             enabled: true,
             maxAge: 5 * 60 // 5 minutes
         }
+    },
+    cookieOptions: {
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production'
     },
     advanced: {
         database: {
