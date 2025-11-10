@@ -21,7 +21,9 @@ export const auth = betterAuth({
         }
     },
     advanced: {
-        generateId: () => randomUUID()
+        database: {
+            generateId: () => randomUUID()
+        }
     }
 });
 
