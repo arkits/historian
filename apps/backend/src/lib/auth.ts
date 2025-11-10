@@ -17,7 +17,11 @@ export const auth = betterAuth({
     },
     trustedOrigins: [
         'http://localhost:4200',  // Alternative development port
-        'http://10.0.0.93:4200',
+        'http://localhost:3000',  // Next.js default port
+        'http://127.0.0.1:4200',
+        'http://127.0.0.1:3000',
+        'http://10.0.0.93:4200',  // Local network IP
+        'http://10.0.0.93:3000',
         'https://ai.historian.pages.dev',
         'https://*.historian.pages.dev',
         'https://historian.archit.xyz'
@@ -30,7 +34,7 @@ export const auth = betterAuth({
     },
     cookieOptions: {
         path: '/',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production'
     },

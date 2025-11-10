@@ -19,7 +19,5 @@ cd ../../
 echo ">>> building backend"
 npm run backend:build:prod
 
-echo ">>> restarting backend"
-pm2 restart "historian-backend"
-
-# pm2 start --name "historian-backend" npm -- run backend:run:prod
+echo ">>> restarting backend with ecosystem config"
+pm2 startOrReload ecosystem.config.js --update-env
