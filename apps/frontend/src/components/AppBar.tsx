@@ -13,6 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Link from '../Link';
 import HistorianContext from '../../context/historian';
+import getDisplayName from '../utils/getDisplayName';
 import { teal } from '@mui/material/colors';
 import { FONT_LOGO } from '../constants';
 
@@ -50,7 +51,7 @@ const UserOptions = ({ user }) => {
             <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
-                        alt={user?.username?.toUpperCase() || 'User'}
+                        alt={(getDisplayName(user) || 'User').toUpperCase()}
                         sx={{ backgroundColor: teal.A400 }}
                         src="/static/images/avatar/2.jpg"
                     />

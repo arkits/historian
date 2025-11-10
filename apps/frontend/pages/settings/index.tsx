@@ -7,6 +7,7 @@ import HistorianContext from 'apps/frontend/context/historian';
 import { useRouter } from 'next/router';
 import { isUserLoggedIn } from 'apps/frontend/src/isUserLoggedIn';
 import { FONT_LOGO } from 'apps/frontend/src/constants';
+import getDisplayName from 'apps/frontend/src/utils/getDisplayName';
 import { PageTitle } from 'apps/frontend/src/components/FontTypes';
 import { Button } from '@mui/material';
 import { getUserDelete } from 'apps/frontend/src/fetch';
@@ -38,7 +39,7 @@ const Settings: NextPage = () => {
                     </Typography>
                     <Typography variant="body1" component="p" gutterBottom>
                         ID: {user?.id} <br />
-                        Username: {user?.username}
+                        Username: {getDisplayName(user) || 'N/A'}
                     </Typography>
 
                     <br />
