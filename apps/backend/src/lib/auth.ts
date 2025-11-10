@@ -5,8 +5,11 @@ import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
+const baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3333';
+const isProduction = baseURL.startsWith('https://');
+
 export const auth = betterAuth({
-    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3333',
+    baseURL,
     basePath: '/api/auth',
     database: prismaAdapter(prisma, {
         provider: 'postgresql'
@@ -32,7 +35,7 @@ export const auth = betterAuth({
         path: '/',
         sameSite: 'none',
         httpOnly: true,
-        secure: false
+        secure: isProduction
     },
     advanced: {
         database: {
