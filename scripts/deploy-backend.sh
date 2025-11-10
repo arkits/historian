@@ -6,10 +6,6 @@ echo ">>> inside deploy-backend.sh"
 
 cd /opt/software/historian/
 
-source ~/.bashrc
-
-nvm use
-
 echo ">>> pulling latest"
 git pull
 
