@@ -8,7 +8,7 @@ echo ">>> pulling latest"
 git pull
 
 echo ">>> installing dependencies"
-npm install
+npm ci --omit=dev
 
 echo ">>> prisma migrations"
 cd apps/backend/
