@@ -13,7 +13,12 @@ export const auth = betterAuth({
         enabled: true,
         requireEmailVerification: false
     },
-    trustedOrigins: ['http://localhost:4200'],
+    trustedOrigins: [
+        'http://localhost:4200',  // Alternative development port
+        'http://10.0.0.93:4200',
+        'https://*.historian.pages.dev',
+        'https://historian.archit.xyz'
+    ],
     session: {
         cookieCache: {
             enabled: true,
