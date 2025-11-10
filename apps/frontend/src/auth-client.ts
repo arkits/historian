@@ -4,7 +4,7 @@ import { createAuthClient } from 'better-auth/react';
 const isLocalhost = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-const apiBaseUrl = isLocalhost ? 'http://localhost:3333' : 'https://historian-api.archit.xyz';
+const apiBaseUrl = isLocalhost ? 'http://localhost:3333/api/auth' : 'https://historian-api.archit.xyz/api/auth';
 
 export const authClient = createAuthClient({
     baseURL: apiBaseUrl
