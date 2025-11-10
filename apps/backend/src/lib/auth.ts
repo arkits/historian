@@ -33,12 +33,17 @@ export const auth = betterAuth({
     },
     cookieOptions: {
         path: '/',
-        sameSite: 'none',
-        httpOnly: false,
-        secure: isProduction
+        sameSite: isProduction ? 'none' : 'lax',
+        httpOnly: true,
+        secure: isProduction,
+        domain: isProduction ? '.archit.xyz' : undefined
     },
     advanced: {
         disableOriginCheck: true,
+        crossSubDomainCookies: {
+            enabled: isProduction,
+            domain: '.archit.xyz'
+        },
         database: {
             generateId: () => randomUUID()
         }
