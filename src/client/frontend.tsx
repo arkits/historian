@@ -8,7 +8,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
-import { TRPCProvider } from "./client/TRPCProvider";
+import { TRPCProvider } from "./TRPCProvider";
 
 const elem = document.getElementById("root")!;
 const app = (
