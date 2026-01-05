@@ -5,6 +5,10 @@ import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { SignUpPage } from "@/pages/SignUpPage";
 import { Dashboard } from "@/pages/Dashboard";
+import { HistoryPage } from "@/pages/HistoryPage";
+import { HistoryDetailPage } from "@/pages/HistoryDetailPage";
+import { ImportPage } from "@/pages/ImportPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -52,8 +56,14 @@ function AuthCallback({ onAuthSuccess }: { onAuthSuccess: () => void }) {
 }
 
 export function App() {
+  const [signOutKey, setSignOutKey] = useState(0);
+
+  const handleSignOut = () => {
+    setSignOutKey((prev) => prev + 1);
+  };
+
   return (
-    <BrowserRouter>
+    <BrowserRouter key={signOutKey}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -62,7 +72,39 @@ export function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard onSignOut={() => {}} />
+              <Dashboard onSignOut={handleSignOut} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <HistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history/:id"
+          element={
+            <ProtectedRoute>
+              <HistoryDetailPage onSignOut={handleSignOut} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/import"
+          element={
+            <ProtectedRoute>
+              <ImportPage onSignOut={handleSignOut} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage onSignOut={handleSignOut} />
             </ProtectedRoute>
           }
         />

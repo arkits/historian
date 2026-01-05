@@ -69,7 +69,7 @@ export const history = pgTable(
     contentId: text("contentId").notNull(),
     content: jsonb("content").notNull(),
     searchContent: text("searchContent"),
-    userId: uuid("userId")
+    userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
@@ -84,3 +84,16 @@ export const history = pgTable(
     },
   ],
 );
+
+export const apiKey = pgTable("api_key", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
+  name: text("name").notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt", { mode: "string" }).notNull().defaultNow(),
+  lastUsedAt: timestamp("lastUsedAt", { mode: "string" }),
+  expiresAt: timestamp("expiresAt", { mode: "string" }),
+  isActive: boolean("isActive").default(true).notNull(),
+});

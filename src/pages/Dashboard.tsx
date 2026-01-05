@@ -2,7 +2,18 @@ import { Link } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, User, LogOut, ArrowLeft } from "lucide-react";
+import {
+  Clock,
+  User,
+  LogOut,
+  ArrowLeft,
+  History,
+  Upload,
+  Settings,
+  FileText,
+} from "lucide-react";
+import { ActivityHeatmap } from "@/components/heatmap";
+import { useMemo } from "react";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -16,6 +27,39 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     retry: false,
     refetchOnWindowFocus: false,
   });
+  const { data: stats } = trpc.getHistoryStats.useQuery(undefined, {
+    retry: false,
+  });
+
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const startDate365 = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - 364);
+    return d.toISOString();
+  }, [today]);
+  const endDate365 = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString();
+  }, [today]);
+
+  const { data: heatmapData } = trpc.getHistoryByDateRange.useQuery(
+    { startDate: startDate365, endDate: endDate365 },
+    { retry: false },
+  );
+
+  const formattedHeatmapData = useMemo(() => {
+    if (!heatmapData) return [];
+    return heatmapData.map((item) => ({
+      date: item.date,
+      count: item.count,
+    }));
+  }, [heatmapData]);
+
   const signOutMutation = trpc.signOut.useMutation({
     onSuccess: () => {
       onSignOut();
@@ -32,16 +76,28 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               Historian
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => signOutMutation.mutate()}
-            disabled={signOutMutation.isPending}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            {signOutMutation.isPending ? "Signing out..." : "Sign Out"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/settings">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => signOutMutation.mutate()}
+              disabled={signOutMutation.isPending}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {signOutMutation.isPending ? "Signing out..." : "Sign Out"}
+            </Button>
+          </div>
         </div>
       </nav>
 
@@ -55,36 +111,19 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           </div>
 
           <div
-            className="grid gap-6 md:grid-cols-2 animate-scale-in"
+            className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-scale-in"
             style={{ animationDelay: "100ms" }}
           >
             <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
-              <CardHeader className="flex flex-row items-center gap-4 pb-4">
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="font-heading text-2xl text-foreground">
-                    User Profile
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Your account details
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-accent/30 inner-shadow">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary">
-                      {user?.name?.charAt(0).toUpperCase() || "U"}
-                    </span>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <User className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-foreground text-lg">
+                    <p className="text-sm text-muted-foreground">User</p>
+                    <p className="font-medium text-foreground text-lg truncate max-w-[150px]">
                       {user?.name || "User"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {user?.email || "No email provided"}
                     </p>
                   </div>
                 </div>
@@ -92,38 +131,48 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             </Card>
 
             <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
-              <CardHeader className="flex flex-row items-center gap-4 pb-4">
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="font-heading text-2xl text-foreground">
-                    Session Info
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Current session details
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 rounded-lg bg-accent/30 inner-shadow space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      User ID
-                    </span>
-                    <span className="text-sm font-mono text-foreground truncate max-w-[200px]">
-                      {session?.session?.id || "N/A"}
-                    </span>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      Expires
-                    </span>
-                    <span className="text-sm text-foreground">
-                      {session?.session?.expiresAt
-                        ? new Date(session.session.expiresAt).toLocaleString()
-                        : "N/A"}
-                    </span>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Items</p>
+                    <p className="font-medium text-foreground text-lg">
+                      {stats?.totalCount || 0}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Types</p>
+                    <p className="font-medium text-foreground text-lg">
+                      {stats?.byType?.length || 0}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <History className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Latest Type</p>
+                    <p className="font-medium text-foreground text-lg capitalize">
+                      {stats?.byType?.[0]?.type || "None"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -137,36 +186,90 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl text-foreground">
+                  Activity Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActivityHeatmap data={formattedHeatmapData} />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div
+            className="mt-8 animate-fade-in"
+            style={{ animationDelay: "300ms" }}
+          >
+            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+              <CardHeader>
+                <CardTitle className="font-heading text-2xl text-foreground">
                   Quick Actions
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Button
-                    variant="outline"
-                    className="h-auto py-4 flex-col gap-2"
-                  >
-                    <Clock className="w-5 h-5" />
-                    <span>View All History</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-auto py-4 flex-col gap-2"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                    <span>Import Data</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-auto py-4 flex-col gap-2"
-                  >
-                    <Clock className="w-5 h-5" />
-                    <span>Activity Log</span>
-                  </Button>
+                  <Link to="/history">
+                    <Button
+                      variant="outline"
+                      className="w-full h-auto py-4 flex-col gap-2 hover:bg-accent/50"
+                    >
+                      <History className="w-5 h-5" />
+                      <span>View All History</span>
+                    </Button>
+                  </Link>
+                  <Link to="/import">
+                    <Button
+                      variant="outline"
+                      className="w-full h-auto py-4 flex-col gap-2 hover:bg-accent/50"
+                    >
+                      <Upload className="w-5 h-5" />
+                      <span>Import Data</span>
+                    </Button>
+                  </Link>
+                  <Link to="/settings">
+                    <Button
+                      variant="outline"
+                      className="w-full h-auto py-4 flex-col gap-2 hover:bg-accent/50"
+                    >
+                      <Settings className="w-5 h-5" />
+                      <span>Settings</span>
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {stats?.byType && stats.byType.length > 0 && (
+            <div
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: "500ms" }}
+            >
+              <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+                <CardHeader>
+                  <CardTitle className="font-heading text-2xl text-foreground">
+                    History by Type
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {stats.byType.map((type) => (
+                      <div
+                        key={type.type}
+                        className="p-4 rounded-lg bg-accent/30 flex items-center justify-between"
+                      >
+                        <span className="capitalize text-foreground">
+                          {type.type}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {Number(type.count)} items
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
     </div>

@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 import plugin from "bun-plugin-tailwind";
-import { existsSync } from "fs";
-import { rm } from "fs/promises";
+import {
+  existsSync,
+  mkdirSync,
+  copyFileSync,
+  readdirSync,
+  lstatSync,
+} from "fs";
+import { rm, readFile, writeFile } from "fs/promises";
 import path from "path";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
@@ -24,16 +30,21 @@ Common Options:
   --external <list>        External packages (comma separated)
   --banner <text>          Add banner text to output
   --footer <text>          Add footer text to output
-  --define <obj>           Define global constants (e.g. --define.VERSION=1.0.0)
   --help, -h               Show this help message
+
+Extension Options:
+  --extension              Build Chrome extension only
+  --extension-out <path>   Extension output directory (default: "extension")
 
 Example:
   bun run build.ts --outdir=dist --minify --sourcemap=linked --external=react,react-dom
+  bun run build.ts --extension
 `);
   process.exit(0);
 }
 
-const toCamelCase = (str: string): string => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+const toCamelCase = (str: string): string =>
+  str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
 
 const parseValue = (value: string): any => {
   if (value === "true") return true;
@@ -42,7 +53,7 @@ const parseValue = (value: string): any => {
   if (/^\d+$/.test(value)) return parseInt(value, 10);
   if (/^\d*\.\d+$/.test(value)) return parseFloat(value);
 
-  if (value.includes(",")) return value.split(",").map(v => v.trim());
+  if (value.includes(",")) return value.split(",").map((v) => v.trim());
 
   return value;
 };
@@ -62,7 +73,10 @@ function parseArgs(): Partial<Bun.BuildConfig> {
       continue;
     }
 
-    if (!arg.includes("=") && (i === args.length - 1 || args[i + 1]?.startsWith("--"))) {
+    if (
+      !arg.includes("=") &&
+      (i === args.length - 1 || args[i + 1]?.startsWith("--"))
+    ) {
       const key = toCamelCase(arg.slice(2));
       config[key] = true;
       continue;
@@ -117,10 +131,12 @@ if (existsSync(outdir)) {
 
 const start = performance.now();
 
-const entrypoints = [...new Bun.Glob("**.html").scanSync("src")]
-  .map(a => path.resolve("src", a))
-  .filter(dir => !dir.includes("node_modules"));
-console.log(`📄 Found ${entrypoints.length} HTML ${entrypoints.length === 1 ? "file" : "files"} to process\n`);
+const entrypoints = Array.from(new Bun.Glob("**/*.html").scanSync("src"))
+  .map((a) => path.resolve("src", a))
+  .filter((dir) => !dir.includes("node_modules") && !dir.includes("extension"));
+console.log(
+  `📄 Found ${entrypoints.length} HTML ${entrypoints.length === 1 ? "file" : "files"} to process\n`,
+);
 
 const result = await Bun.build({
   entrypoints,
@@ -137,7 +153,7 @@ const result = await Bun.build({
 
 const end = performance.now();
 
-const outputTable = result.outputs.map(output => ({
+const outputTable = result.outputs.map((output) => ({
   File: path.relative(process.cwd(), output.path),
   Type: output.kind,
   Size: formatFileSize(output.size),
@@ -147,3 +163,63 @@ console.table(outputTable);
 const buildTime = (end - start).toFixed(2);
 
 console.log(`\n✅ Build completed in ${buildTime}ms\n`);
+
+async function buildExtension(): Promise<void> {
+  const extensionOut =
+    cliConfig.extensionOut || path.join(process.cwd(), "extension");
+
+  console.log("\n🔧 Building Chrome extension...\n");
+
+  if (existsSync(extensionOut)) {
+    console.log(`🗑️ Cleaning previous extension build at ${extensionOut}`);
+    await rm(extensionOut, { recursive: true, force: true });
+  }
+
+  mkdirSync(extensionOut, { recursive: true });
+
+  const extSrc = path.join(process.cwd(), "src", "extension");
+
+  console.log("📦 Compiling TypeScript files...");
+
+  const tsFiles = [
+    { src: "background.ts", out: "background.js" },
+    { src: "content.ts", out: "content.js" },
+    { src: "popup.ts", out: "popup.js" },
+  ];
+
+  for (const file of tsFiles) {
+    const srcPath = path.join(extSrc, file.src);
+    const outPath = path.join(extensionOut, file.out);
+
+    console.log(`  Compiling ${file.src} -> ${file.out}`);
+
+    const result = await Bun.build({
+      entrypoints: [srcPath],
+      outdir: extensionOut,
+      minify: true,
+      target: "browser",
+      sourcemap: "none",
+    });
+
+    if (!result.success) {
+      console.error(`❌ Failed to compile ${file.src}`);
+      process.exit(1);
+    }
+  }
+
+  console.log("📋 Copying manifest and HTML files...");
+
+  const staticFiles = ["manifest.json", "popup.html"];
+  for (const file of staticFiles) {
+    const srcPath = path.join(extSrc, file);
+    const outPath = path.join(extensionOut, file);
+    copyFileSync(srcPath, outPath);
+    console.log(`  Copied ${file}`);
+  }
+
+  console.log(`\n✅ Extension built at ${extensionOut}\n`);
+}
+
+if (cliConfig.extension) {
+  await buildExtension();
+}
