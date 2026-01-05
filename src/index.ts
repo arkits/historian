@@ -1,5 +1,5 @@
 import { serve } from "bun";
-import index from "./index.html";
+import index from "./client/index.html";
 import { createTRPCHandler } from "./server/handler";
 
 const trpcHandler = createTRPCHandler();

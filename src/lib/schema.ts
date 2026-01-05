@@ -4,6 +4,9 @@ import {
   timestamp,
   integer,
   boolean,
+  uuid,
+  jsonb,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -53,3 +56,31 @@ export const verification = pgTable("verification", {
   value: text("value").notNull(),
   expiresAt: timestamp("expiresAt", { mode: "string" }).notNull(),
 });
+
+export const history = pgTable(
+  "history",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    createdAt: timestamp("createdAt", { mode: "string" })
+      .notNull()
+      .defaultNow(),
+    timelineTime: timestamp("timelineTime", { mode: "string" }).notNull(),
+    type: text("type").notNull(),
+    contentId: text("contentId").notNull(),
+    content: jsonb("content").notNull(),
+    searchContent: text("searchContent"),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    {
+      historyHash: uniqueIndex("History_hash").on(
+        table.contentId,
+        table.userId,
+        table.type,
+        table.timelineTime,
+      ),
+    },
+  ],
+);
