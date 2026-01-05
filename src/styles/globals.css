@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -40,9 +41,11 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-heading: var(--font-heading);
+  --font-sans: var(--font-sans);
 }
 
 :root {
+  --font-sans: "Nunito", sans-serif;
   --font-heading: "Pirata One", cursive;
   --radius: 0.5rem;
 

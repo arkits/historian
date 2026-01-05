@@ -18,7 +18,10 @@ import {
   Key,
   Copy,
   Check,
+  History,
+  Settings,
 } from "lucide-react";
+import { NavBar } from "@/components/NavBar";
 
 interface SettingsPageProps {
   onSignOut?: () => void;
@@ -450,28 +453,7 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
 
   return (
     <div className="min-h-screen">
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <span className="text-3xl">🕵️</span>
-              <span className="font-heading text-2xl text-foreground">
-                Settings
-              </span>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <NavBar title="Settings" onSignOut={onSignOut} showBack />
 
       <main className="pt-24 pb-12 px-6">
         <div className="max-w-5xl mx-auto">

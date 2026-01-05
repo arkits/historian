@@ -163,6 +163,17 @@ export const appRouter = router({
     return { totalCount, byType: types };
   }),
 
+  getHistoryTypes: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const types = await db
+      .selectDistinct({ type: history.type })
+      .from(history)
+      .where(eq(history.userId, userId))
+      .orderBy(history.type);
+
+    return types.map((t) => t.type).filter(Boolean) as string[];
+  }),
+
   getHistoryByDateRange: protectedProcedure
     .input(
       z.object({
@@ -203,6 +214,57 @@ export const appRouter = router({
         .from(history)
         .where(and(eq(history.id, input.id), eq(history.userId, userId)));
       return result ?? null;
+    }),
+
+  getHistoryByDate: protectedProcedure
+    .input(z.object({ date: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const startDate = new Date(input.date).toISOString();
+      const endDate = new Date(input.date);
+      endDate.setDate(endDate.getDate() + 1);
+
+      const items = await db
+        .select()
+        .from(history)
+        .where(
+          and(
+            eq(history.userId, userId),
+            gte(history.timelineTime, startDate),
+            lt(history.timelineTime, endDate.toISOString()),
+          ),
+        )
+        .orderBy(desc(history.timelineTime));
+
+      return items;
+    }),
+
+  getHistoryItemsByDateRange: protectedProcedure
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const start = new Date(input.startDate).toISOString();
+      const end = new Date(input.endDate);
+      end.setDate(end.getDate() + 1);
+
+      const items = await db
+        .select()
+        .from(history)
+        .where(
+          and(
+            eq(history.userId, userId),
+            gte(history.timelineTime, start),
+            lt(history.timelineTime, end.toISOString()),
+          ),
+        )
+        .orderBy(desc(history.timelineTime));
+
+      return items;
     }),
 
   listApiKeys: protectedProcedure.query(async ({ ctx }) => {

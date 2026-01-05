@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,15 +12,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft,
   Search,
   X,
   Clock,
   Hash,
   Filter,
   ExternalLink,
+  CalendarIcon,
 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { NavBar } from "@/components/NavBar";
+
+interface HistoryPageProps {
+  onSignOut?: () => void;
+}
 
 interface HistoryItem {
   id: string;
@@ -182,11 +193,60 @@ function TimelineSkeleton() {
   );
 }
 
-export function HistoryPage() {
-  const [selectedType, setSelectedType] = useState<string>("all");
+export function HistoryPage({ onSignOut }: HistoryPageProps) {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const urlType = searchParams.get("type");
+  const urlDateFrom = searchParams.get("from");
+  const urlDateTo = searchParams.get("to");
+  const [selectedType, setSelectedType] = useState<string>(urlType || "all");
+  const [dateRange, setDateRange] = useState<
+    { from?: string; to?: string } | undefined
+  >(
+    urlDateFrom
+      ? { from: urlDateFrom, to: urlDateTo || urlDateFrom }
+      : undefined,
+  );
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
   const pageSize = 50;
+
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    const params = new URLSearchParams();
+    if (selectedType !== "all") {
+      params.set("type", selectedType);
+    }
+    if (dateRange?.from) {
+      params.set("from", dateRange.from);
+    }
+    if (dateRange?.to) {
+      params.set("to", dateRange.to);
+    }
+    const queryString = params.toString();
+    navigate(`/history${queryString ? `?${queryString}` : ""}`, {
+      replace: true,
+    });
+  }, [selectedType, dateRange, navigate]);
+
+  const dateQuery = trpc.getHistoryByDate.useQuery(
+    { date: dateRange?.from! },
+    { enabled: !!dateRange?.from && !dateRange?.to, retry: false },
+  );
+
+  const dateRangeQuery = trpc.getHistoryItemsByDateRange.useQuery(
+    { startDate: dateRange?.from!, endDate: dateRange?.to! },
+    { enabled: !!dateRange?.from && !!dateRange?.to, retry: false },
+  );
+
+  const { data: allTypes } = trpc.getHistoryTypes.useQuery(undefined, {
+    retry: false,
+  });
 
   const {
     data: historyData,
@@ -200,13 +260,28 @@ export function HistoryPage() {
       limit: pageSize,
       type: selectedType === "all" ? undefined : selectedType,
     },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !dateRange?.from,
+    },
   );
 
   const allItems = useMemo(() => {
+    if (dateRange?.from && !dateRange?.to && dateQuery.data) {
+      return dateQuery.data.map((item) => ({
+        ...item,
+        createdAt: new Date(item.timelineTime).toISOString(),
+      })) as HistoryItem[];
+    }
+    if (dateRange?.from && dateRange?.to && dateRangeQuery.data) {
+      return dateRangeQuery.data.map((item) => ({
+        ...item,
+        createdAt: new Date(item.timelineTime).toISOString(),
+      })) as HistoryItem[];
+    }
     if (!historyData) return [];
     return historyData.pages.flatMap((page) => page.items) as HistoryItem[];
-  }, [historyData]);
+  }, [historyData, dateQuery.data, dateRangeQuery.data, dateRange]);
 
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return allItems;
@@ -256,14 +331,61 @@ export function HistoryPage() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const uniqueTypes = useMemo(() => {
-    const types = new Set(allItems.map((item) => item.type));
-    return Array.from(types).sort();
-  }, [allItems]);
-
   const handleClearSearch = useCallback(() => setSearchQuery(""), []);
 
-  useCallback(() => {
+  const isDateFilter = !!dateRange?.from;
+  const isLoadingSingleDate =
+    isDateFilter && !dateRange?.to && dateQuery.isLoading;
+  const isLoadingDateRange =
+    isDateFilter && !!dateRange?.to && dateRangeQuery.isLoading;
+  const isDateLoading = isLoadingSingleDate || isLoadingDateRange;
+  const isErrorDate =
+    (isDateFilter && !dateRange?.to && dateQuery.isError) ||
+    (isDateFilter &&
+      !!dateRange?.to &&
+      dateRange.to !== dateRange.from &&
+      dateRangeQuery.isError);
+
+  const handleDateSelect = (
+    date: Date | { from: Date; to: Date } | undefined,
+  ) => {
+    if (!date) {
+      setDateRange(undefined);
+      setIsCalendarOpen(false);
+      return;
+    }
+    if ("from" in date && date.from) {
+      if (date.to) {
+        setDateRange({
+          from: date.from.toISOString().split("T")[0],
+          to: date.to.toISOString().split("T")[0],
+        });
+        setIsCalendarOpen(false);
+      } else {
+        setDateRange({ from: date.from.toISOString().split("T")[0] });
+      }
+    }
+  };
+
+  const handleClearDate = () => {
+    setDateRange(undefined);
+  };
+
+  const getDateLabel = () => {
+    if (!dateRange?.from) return "Date";
+    const from = new Date(dateRange.from);
+    if (dateRange?.to && dateRange.to !== dateRange.from) {
+      const to = new Date(dateRange.to);
+      return `${from.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${to.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+    }
+    return from.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  useEffect(() => {
     const handleScroll = (e: Event) => {
       const target = e.target as HTMLDivElement;
       if (
@@ -286,7 +408,7 @@ export function HistoryPage() {
     };
   }, [hasNextPage, isFetchingNextPage, handleLoadMore]);
 
-  if (isError) {
+  if (isError || isErrorDate) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="border-border/50 bg-card/80 backdrop-blur-xl max-w-md w-full mx-4">
@@ -307,40 +429,20 @@ export function HistoryPage() {
     );
   }
 
+  const signOutMutation = trpc.signOut.useMutation({
+    onSuccess: () => {
+      onSignOut?.();
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-border/50 h-14 flex-shrink-0">
-        <div className="max-w-5xl mx-auto px-4 h-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🕵️</span>
-              <span className="font-heading text-lg text-foreground">
-                History
-              </span>
-            </div>
-          </div>
-          <Link to="/import">
-            <Button variant="outline" size="sm">
-              Import Data
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      <NavBar title="History" onSignOut={onSignOut} showBack />
 
-      <main className="flex-1 flex flex-col pt-14 min-h-0">
+      <main className="flex-1 flex flex-col pt-16 min-h-0">
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="px-4 py-3 border-b border-border/50 bg-background/50 backdrop-blur flex-shrink-0">
-            <div className="max-w-5xl mx-auto flex flex-col sm:flex-row gap-3">
+          <div className="px-6 py-3 border-b border-border/50 bg-background/50 backdrop-blur flex-shrink-0">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -359,6 +461,50 @@ export function HistoryPage() {
                   </button>
                 )}
               </div>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className={`flex items-center gap-2 px-3 rounded-md border h-9 transition-colors ${
+                      isDateFilter
+                        ? "bg-primary/10 border-primary/20 text-primary"
+                        : "bg-card/50 border-border/50 text-muted-foreground hover:text-foreground hover:border-border"
+                    }`}
+                  >
+                    <CalendarIcon className="w-4 h-4" />
+                    <span className="text-xs font-medium">
+                      {getDateLabel()}
+                    </span>
+                    {isDateFilter && (
+                      <div
+                        role="button"
+                        className="h-4 w-4 rounded-full hover:bg-primary/20 ml-1 flex items-center justify-center cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearDate();
+                        }}
+                      >
+                        <X className="w-3 h-3" />
+                      </div>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    selected={
+                      dateRange?.from
+                        ? dateRange.to
+                          ? {
+                              from: new Date(dateRange.from),
+                              to: new Date(dateRange.to),
+                            }
+                          : new Date(dateRange.from)
+                        : undefined
+                    }
+                    onSelect={handleDateSelect}
+                    mode="range"
+                  />
+                </PopoverContent>
+              </Popover>
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger className="w-full sm:w-[160px] bg-card/50 border-border/50 h-9">
                   <Filter className="w-4 h-4 mr-2" />
@@ -366,7 +512,7 @@ export function HistoryPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  {uniqueTypes.map((type) => (
+                  {allTypes?.map((type) => (
                     <SelectItem key={type} value={type}>
                       <span className="flex items-center gap-2">
                         <span>{getTypeIcon(type)}</span>
@@ -381,10 +527,10 @@ export function HistoryPage() {
 
           <div className="flex-1 min-h-0 overflow-hidden history-scroll-container">
             <div
-              className="h-full max-w-5xl mx-auto px-4 py-4 overflow-y-auto"
+              className="h-full max-w-7xl mx-auto px-6 py-4 overflow-y-auto"
               style={{ height: "100%" }}
             >
-              {isLoading ? (
+              {isLoading || isDateLoading ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
                     <TimelineSkeleton key={i} />
@@ -398,17 +544,34 @@ export function HistoryPage() {
                         <Search className="w-8 h-8 text-primary" />
                       </div>
                       <h3 className="font-heading text-xl mb-2">
-                        {searchQuery ? "No Results Found" : "No History Yet"}
+                        {searchQuery
+                          ? "No Results Found"
+                          : isDateFilter
+                            ? "No History Found"
+                            : "No History Yet"}
                       </h3>
                       <p className="text-muted-foreground mb-4">
                         {searchQuery
                           ? "Try adjusting your search terms"
-                          : "Start importing your browsing history to see it here"}
+                          : isDateFilter
+                            ? "No history entries match your filters"
+                            : "Start importing your browsing history to see it here"}
                       </p>
-                      {!searchQuery && (
+                      {!searchQuery && !isDateFilter && (
                         <Link to="/import">
                           <Button variant="outline">Import Data</Button>
                         </Link>
+                      )}
+                      {(isDateFilter || searchQuery) && (
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setSearchQuery("");
+                            handleClearDate();
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
                       )}
                     </CardContent>
                   </Card>
@@ -436,10 +599,17 @@ export function HistoryPage() {
                 </div>
               )}
 
-              {!hasNextPage && filteredItems.length > 0 && (
+              {!hasNextPage && !isDateFilter && filteredItems.length > 0 && (
                 <p className="text-center text-xs text-muted-foreground py-4">
                   You've reached the end of your history (
                   {filteredItems.length.toLocaleString()} items)
+                </p>
+              )}
+
+              {isDateFilter && filteredItems.length > 0 && (
+                <p className="text-center text-xs text-muted-foreground py-4">
+                  Showing {filteredItems.length.toLocaleString()} item
+                  {filteredItems.length === 1 ? "" : "s"} for selected date
                 </p>
               )}
             </div>

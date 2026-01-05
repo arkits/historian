@@ -74,6 +74,10 @@ Required in `.env`:
 - Test location: `tests/` directory
 - Run tests: `bun test`
 
+## Debugging
+
+- Use Playwright MCP to browse the UI on http://localhost:3000/dashboard . Use credentials for testing: username `arkits` / password `admin123`
+
 ## Database
 
 - **ORM**: Drizzle ORM
@@ -104,3 +108,8 @@ docker run -p 3000:3000 historian
 - `src/lib/schema.ts` - Database schema definitions
 - `src/lib/db.ts` - Database connection setup
 - `src/server/auth.ts` - Authentication configuration
+
+
+## Development Workflow
+
+- You must execute `bun run build` and `bun run test` ; and ensure that there are no build issues and that all tests pass.

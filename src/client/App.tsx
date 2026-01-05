@@ -9,6 +9,7 @@ import { HistoryPage } from "@/pages/HistoryPage";
 import { HistoryDetailPage } from "@/pages/HistoryDetailPage";
 import { ImportPage } from "@/pages/ImportPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { ConnectionsPage } from "@/pages/ConnectionsPage";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -80,7 +81,7 @@ export function App() {
           path="/history"
           element={
             <ProtectedRoute>
-              <HistoryPage />
+              <HistoryPage onSignOut={handleSignOut} />
             </ProtectedRoute>
           }
         />
@@ -105,6 +106,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <SettingsPage onSignOut={handleSignOut} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/connections"
+          element={
+            <ProtectedRoute>
+              <ConnectionsPage onSignOut={handleSignOut} />
             </ProtectedRoute>
           }
         />

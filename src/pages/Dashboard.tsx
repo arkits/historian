@@ -1,16 +1,17 @@
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Clock,
-  User,
   LogOut,
   ArrowLeft,
   History,
   Upload,
   Settings,
   FileText,
+  Link2,
 } from "lucide-react";
 import { ActivityHeatmap } from "@/components/heatmap";
 import { useMemo } from "react";
@@ -20,6 +21,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onSignOut }: DashboardProps) {
+  const navigate = useNavigate();
   const { data: session } = trpc.getSession.useQuery(undefined, {
     retry: false,
   });
@@ -66,6 +68,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     },
   });
 
+  const handleDayClick = (date: string) => {
+    navigate(`/history?from=${date}`);
+  };
+
+  const getPercentage = (count: number, total: number) => {
+    if (!total) return 0;
+    return Math.round((count / total) * 100);
+  };
+
   return (
     <div className="min-h-screen">
       <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-border/50">
@@ -77,6 +88,26 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/history">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <History className="w-4 h-4 mr-2" />
+                History
+              </Button>
+            </Link>
+            <Link to="/connections">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Link2 className="w-4 h-4 mr-2" />
+                Connections
+              </Button>
+            </Link>
             <Link to="/settings">
               <Button
                 variant="ghost"
@@ -105,7 +136,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 animate-fade-in">
             <h1 className="font-heading text-4xl text-foreground mb-2">
-              Dashboard
+              Namaste{user?.name ? `, ${user.name}!` : "!"}
             </h1>
             <p className="text-muted-foreground">Your history at a glance</p>
           </div>
@@ -114,22 +145,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-scale-in"
             style={{ animationDelay: "100ms" }}
           >
-            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <User className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">User</p>
-                    <p className="font-medium text-foreground text-lg truncate max-w-[150px]">
-                      {user?.name || "User"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -190,51 +205,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ActivityHeatmap data={formattedHeatmapData} />
-              </CardContent>
-            </Card>
-          </div>
-
-          <div
-            className="mt-8 animate-fade-in"
-            style={{ animationDelay: "300ms" }}
-          >
-            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
-              <CardHeader>
-                <CardTitle className="font-heading text-2xl text-foreground">
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Link to="/history">
-                    <Button
-                      variant="outline"
-                      className="w-full h-auto py-4 flex-col gap-2 hover:bg-accent/50"
-                    >
-                      <History className="w-5 h-5" />
-                      <span>View All History</span>
-                    </Button>
-                  </Link>
-                  <Link to="/import">
-                    <Button
-                      variant="outline"
-                      className="w-full h-auto py-4 flex-col gap-2 hover:bg-accent/50"
-                    >
-                      <Upload className="w-5 h-5" />
-                      <span>Import Data</span>
-                    </Button>
-                  </Link>
-                  <Link to="/settings">
-                    <Button
-                      variant="outline"
-                      className="w-full h-auto py-4 flex-col gap-2 hover:bg-accent/50"
-                    >
-                      <Settings className="w-5 h-5" />
-                      <span>Settings</span>
-                    </Button>
-                  </Link>
-                </div>
+                <ActivityHeatmap
+                  data={formattedHeatmapData}
+                  onDayClick={handleDayClick}
+                />
               </CardContent>
             </Card>
           </div>
@@ -251,20 +225,102 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {stats.byType.map((type) => (
-                      <div
-                        key={type.type}
-                        className="p-4 rounded-lg bg-accent/30 flex items-center justify-between"
-                      >
-                        <span className="capitalize text-foreground">
-                          {type.type}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {Number(type.count)} items
-                        </span>
+                  <div className="flex flex-col lg:flex-row gap-8 items-center">
+                    <div className="relative w-64 h-64">
+                      {(() => {
+                        const colors = [
+                          "#3b82f6",
+                          "#10b981",
+                          "#f59e0b",
+                          "#ef4444",
+                          "#8b5cf6",
+                          "#ec4899",
+                          "#06b6d4",
+                          "#84cc16",
+                          "#f97316",
+                          "#6366f1",
+                          "#14b8a6",
+                          "#a855f7",
+                        ];
+                        let currentAngle = 0;
+                        const gradients = stats.byType.map((type, index) => {
+                          const percentage = getPercentage(
+                            type.count,
+                            stats.totalCount,
+                          );
+                          const angle = (percentage / 100) * 360;
+                          const color = colors[index % colors.length];
+                          const gradient = `${color} ${currentAngle}deg ${currentAngle + angle}deg`;
+                          currentAngle += angle;
+                          return gradient;
+                        });
+                        const conicGradient = `conic-gradient(${gradients.join(", ")})`;
+                        return (
+                          <div
+                            className="w-full h-full rounded-full shadow-2xl"
+                            style={{
+                              background: conicGradient,
+                              boxShadow: "0 0 40px rgba(59, 130, 246, 0.15)",
+                            }}
+                          />
+                        );
+                      })()}
+                      <div className="absolute inset-4 rounded-full bg-background dark:bg-gray-950 flex flex-col items-center justify-center shadow-inner">
+                        <p className="text-3xl font-bold text-foreground">
+                          {stats.byType.length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Types</p>
                       </div>
-                    ))}
+                    </div>
+                    <div className="flex-1 grid gap-3 md:grid-cols-2 w-full">
+                      {stats.byType.map((type, index) => {
+                        const colors = [
+                          "#3b82f6",
+                          "#10b981",
+                          "#f59e0b",
+                          "#ef4444",
+                          "#8b5cf6",
+                          "#ec4899",
+                          "#06b6d4",
+                          "#84cc16",
+                          "#f97316",
+                          "#6366f1",
+                          "#14b8a6",
+                          "#a855f7",
+                        ];
+                        const percentage = getPercentage(
+                          type.count,
+                          stats.totalCount,
+                        );
+                        return (
+                          <Link
+                            to={`/history?type=${type.type}`}
+                            key={type.type}
+                            className="flex items-center gap-3 p-3 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer group"
+                          >
+                            <div
+                              className="w-4 h-4 rounded-full flex-shrink-0 transition-transform group-hover:scale-125"
+                              style={{
+                                backgroundColor: colors[index % colors.length],
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="capitalize text-foreground font-medium truncate">
+                                {type.type}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {Number(type.count).toLocaleString()} items
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-foreground">
+                                {percentage}%
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

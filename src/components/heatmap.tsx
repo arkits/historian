@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -11,6 +11,7 @@ interface HeatmapDay {
 interface HeatmapProps {
   data: HeatmapDay[];
   className?: string;
+  onDayClick?: (date: string) => void;
 }
 
 const MONTHS = [
@@ -48,48 +49,53 @@ function formatDate(dateStr: string): string {
 interface TooltipProps {
   day: HeatmapDay;
   children: React.ReactNode;
+  onDayClick?: (date: string) => void;
 }
 
-function Tooltip({ day, children }: TooltipProps) {
+function Tooltip({ day, children, onDayClick }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
-  const showTooltip = (e: React.MouseEvent) => {
-    setIsVisible(true);
-    setPosition({ x: e.clientX, y: e.clientY });
-  };
+  const updatePosition = (e: React.MouseEvent) => {
+    const tooltip = tooltipRef.current;
+    if (!tooltip) return;
 
-  const hideTooltip = () => {
-    setIsVisible(false);
+    const x = e.clientX + 12;
+    const y = e.clientY + 12;
+
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
   };
 
   return (
     <div
       className="relative inline-block w-full h-full"
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      onMouseMove={showTooltip}
+      onMouseEnter={(e) => {
+        setIsVisible(true);
+        updatePosition(e);
+      }}
+      onMouseLeave={() => setIsVisible(false)}
+      onMouseMove={updatePosition}
+      onClick={() => onDayClick?.(day.date)}
     >
       {children}
-      {isVisible && (
-        <div
-          className="fixed z-50 px-3 py-2 text-sm bg-popover text-popover-foreground border border-border rounded-md shadow-md pointer-events-none"
-          style={{
-            left: Math.min(position.x + 10, window.innerWidth - 200),
-            top: position.y - 45,
-          }}
-        >
-          <div className="font-medium">{day.count} entries</div>
-          <div className="text-xs text-muted-foreground">
-            {formatDate(day.date)}
-          </div>
+      <div
+        ref={tooltipRef}
+        className="fixed z-50 px-3 py-1.5 text-xs bg-popover text-popover-foreground border border-border rounded-md shadow-md pointer-events-none opacity-0 transition-opacity"
+        style={{
+          opacity: isVisible ? 1 : 0,
+        }}
+      >
+        <div className="font-medium">
+          {day.count} {day.count === 1 ? "entry" : "entries"}
         </div>
-      )}
+        <div className="text-muted-foreground">{formatDate(day.date)}</div>
+      </div>
     </div>
   );
 }
 
-export function ActivityHeatmap({ data, className }: HeatmapProps) {
+export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
   const heatmapData = useMemo(() => {
     const dataMap = new Map<string, HeatmapDay>();
     data.forEach((day) => {
@@ -181,7 +187,11 @@ export function ActivityHeatmap({ data, className }: HeatmapProps) {
                 const colorClass = getLevelColor(count, maxCount);
 
                 return (
-                  <Tooltip key={dateStr} day={{ date: dateStr, count }}>
+                  <Tooltip
+                    key={dateStr}
+                    day={{ date: dateStr, count }}
+                    onDayClick={onDayClick}
+                  >
                     <div
                       className={cn(
                         "aspect-square rounded-[1px] transition-all duration-150 hover:ring-1 hover:ring-primary/60 cursor-pointer",
