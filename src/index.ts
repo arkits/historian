@@ -31,6 +31,7 @@ async function handleRequest(request: Request): Promise<Response> {
 }
 
 const server = serve({
+  port: Number(process.env.PORT ?? 3000),
   routes: {
     "/*": index,
     "/api/trpc/*": trpcHandler,
