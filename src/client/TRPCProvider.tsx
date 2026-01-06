@@ -22,9 +22,9 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           url: `${getBaseUrl()}/api/trpc`,
           headers() {
             const headers = new Map<string, string>();
-            const cookie = document.cookie;
-            if (cookie) {
-              headers.set("cookie", cookie);
+            const token = localStorage.getItem("auth-token");
+            if (token) {
+              headers.set("Authorization", `Bearer ${token}`);
             }
             return Object.fromEntries(headers);
           },

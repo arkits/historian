@@ -177,7 +177,15 @@ export function createTRPCHandler() {
         return new Response(null, { status: 204 });
       }
       try {
-        const response = await auth.handler(req);
+        const authHeader = req.headers.get("Authorization");
+        let authReq = req;
+        if (authHeader?.startsWith("Bearer ")) {
+          const token = authHeader.slice(7);
+          const headers = new Headers(req.headers);
+          headers.set("x-better-auth-token", token);
+          authReq = new Request(req, { headers });
+        }
+        const response = await auth.handler(authReq);
         captureServerEvent("auth.request", {
           method: req.method,
           pathname: url.pathname,

@@ -17,11 +17,6 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  trustedOrigins: [
-    "http://localhost:3000",
-    "https://historian.archit.xyz",
-    "https://historian-api.archit.xyz",
-  ],
   advanced: {
     cookiePrefix: "historian",
     useSecureCookies: true,
@@ -33,5 +28,6 @@ export const auth = betterAuth({
       sameSite: "none",
       secure: true,
     },
+    secret: process.env.AUTH_SECRET || "secret",
   },
 });

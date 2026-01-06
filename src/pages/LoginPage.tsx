@@ -52,6 +52,10 @@ export function LoginPage() {
         return;
       }
 
+      if (data.token) {
+        localStorage.setItem("auth-token", data.token);
+      }
+
       await utils.getSession.invalidate();
       navigate("/dashboard");
     } catch (err) {
