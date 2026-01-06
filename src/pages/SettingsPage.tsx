@@ -223,9 +223,7 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
                         key={type.type}
                         className="flex items-center justify-between p-3 rounded-lg bg-accent/20"
                       >
-                        <span className="text-foreground capitalize">
-                          {type.type}
-                        </span>
+                        <span className="text-foreground">{type.type}</span>
                         <span className="text-muted-foreground">
                           {Number(type.count)}
                         </span>

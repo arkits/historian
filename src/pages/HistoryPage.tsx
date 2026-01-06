@@ -49,10 +49,6 @@ interface HistoryGroup {
   items: HistoryItem[];
 }
 
-function formatType(type: string): string {
-  return type.charAt(0).toUpperCase() + type.slice(1);
-}
-
 function formatDate(dateStr: string): { date: string; time: string } {
   const date = new Date(dateStr);
   return {
@@ -98,60 +94,51 @@ function HistoryCard({ item }: { item: HistoryItem }) {
     (content.description as string) || (content.url as string) || "";
   const url = content.url as string;
   const favicon = content.favicon as string;
+  const thumbnail = content.thumbnail as string;
 
   return (
     <Link to={`/history/${item.id}`} className="block">
       <Card className="border-border/50 bg-card/80 backdrop-blur-xl transition-all cursor-pointer hover:border-primary/30">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="relative flex flex-col items-center flex-shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-primary/10 flex-shrink-0">
-                {favicon ? (
-                  <img
-                    src={favicon}
-                    alt=""
-                    className="w-4 h-4"
-                    onError={(e) => (e.currentTarget.style.display = "none")}
-                  />
-                ) : (
-                  <span>{getTypeIcon(item.type)}</span>
-                )}
-              </div>
-              <div className="w-px h-8 bg-border/50 mt-1" />
-            </div>
-            <div className="flex-1 min-w-0 pt-0.5 overflow-hidden">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Hash className="w-2.5 h-2.5" />
-                  {formatType(item.type)}
-                </span>
-                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5" />
-                  {time}
-                </span>
-              </div>
-              <h3 className="font-medium text-foreground text-sm truncate pr-4">
-                {title}
-              </h3>
-              {subtitle && (
-                <p className="text-xs text-muted-foreground truncate mt-0.5">
-                  {subtitle}
-                </p>
-              )}
-              {item.searchContent && (
-                <p className="text-[10px] text-muted-foreground mt-1 italic flex items-center gap-1">
-                  <Search className="w-2.5 h-2.5 flex-shrink-0" />
-                  <span className="truncate">"{item.searchContent}"</span>
-                </p>
-              )}
-              {url && !subtitle.includes(url) && (
-                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate flex items-center gap-1">
-                  <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
-                  <span className="truncate">{url}</span>
-                </p>
+        <CardContent className="p-1 flex items-center gap-3">
+          <div className="relative flex flex-col items-center flex-shrink-0">
+            <div className="w-8 h-8 rounded flex items-center justify-center text-sm bg-primary/10 flex-shrink-0 overflow-hidden">
+              {favicon ? (
+                <img
+                  src={favicon}
+                  alt=""
+                  className="w-4 h-4"
+                  onError={(e) => (e.currentTarget.style.display = "none")}
+                />
+              ) : (
+                <span>{getTypeIcon(item.type)}</span>
               )}
             </div>
+            <div className="w-px h-4 bg-border/50 mt-0.5" />
           </div>
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                <Hash className="w-2.5 h-2.5" />
+                {item.type.toLowerCase()}
+              </span>
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                {time}
+              </span>
+            </div>
+            <h3 className="font-medium text-foreground text-sm truncate pr-2">
+              {title}
+            </h3>
+          </div>
+          {thumbnail && (
+            <div className="w-20 h-full rounded flex-shrink-0 overflow-hidden">
+              <img
+                src={thumbnail}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>
@@ -160,9 +147,12 @@ function HistoryCard({ item }: { item: HistoryItem }) {
 
 function GroupHeader({ group }: { group: HistoryGroup }) {
   return (
-    <div className="flex items-center gap-3 py-3">
+    <div className="flex items-center gap-3 py-2">
       <div className="flex-1 h-px bg-border/50" />
-      <span className="text-xs font-medium text-muted-foreground whitespace-nowrap px-3 py-0.5 bg-background/80 backdrop-blur rounded-full border border-border/50">
+      <span
+        className="text-xs font-medium text-muted-foreground whitespace-nowrap px-3 py-0.5 bg-background/80 backdrop-blur rounded-full border border-border/50"
+        style={{ fontFamily: "Nunito, sans-serif" }}
+      >
         {group.date}
       </span>
       <div className="flex-1 h-px bg-border/50" />
@@ -173,21 +163,19 @@ function GroupHeader({ group }: { group: HistoryGroup }) {
 function TimelineSkeleton() {
   return (
     <Card className="border-border/50 bg-card/80 backdrop-blur-xl">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="relative flex flex-col items-center flex-shrink-0">
-            <div className="w-8 h-8 rounded-full bg-primary/10 animate-pulse flex-shrink-0" />
-            <div className="w-px h-8 bg-border/50 mt-1" />
-          </div>
-          <div className="flex-1 min-w-0 space-y-2 pt-0.5">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-16 bg-primary/10 rounded animate-pulse" />
-              <div className="h-3 w-12 bg-primary/10 rounded animate-pulse" />
-            </div>
-            <div className="h-4 w-3/4 bg-primary/10 rounded animate-pulse" />
-            <div className="h-3 w-1/2 bg-primary/10 rounded animate-pulse" />
-          </div>
+      <CardContent className="p-2 flex items-center gap-3">
+        <div className="relative flex flex-col items-center flex-shrink-0">
+          <div className="w-8 h-8 rounded bg-primary/10 animate-pulse flex-shrink-0" />
+          <div className="w-px h-4 bg-border/50 mt-0.5" />
         </div>
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-12 bg-primary/10 rounded animate-pulse" />
+            <div className="h-3 w-10 bg-primary/10 rounded animate-pulse" />
+          </div>
+          <div className="h-3 w-3/4 bg-primary/10 rounded animate-pulse" />
+        </div>
+        <div className="w-16 h-10 rounded bg-primary/10 animate-pulse flex-shrink-0" />
       </CardContent>
     </Card>
   );
@@ -516,7 +504,7 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
                     <SelectItem key={type} value={type}>
                       <span className="flex items-center gap-2">
                         <span>{getTypeIcon(type)}</span>
-                        {formatType(type)}
+                        {type.toLowerCase()}
                       </span>
                     </SelectItem>
                   ))}

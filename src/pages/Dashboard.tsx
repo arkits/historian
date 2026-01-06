@@ -185,7 +185,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Latest Type</p>
-                    <p className="font-medium text-foreground text-lg capitalize">
+                    <p className="font-medium text-foreground text-lg">
                       {stats?.byType?.[0]?.type || "None"}
                     </p>
                   </div>
@@ -305,7 +305,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                               }}
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="capitalize text-foreground font-medium truncate">
+                              <p className="text-foreground font-medium truncate">
                                 {type.type}
                               </p>
                               <p className="text-xs text-muted-foreground">
