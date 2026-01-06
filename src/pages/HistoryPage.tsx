@@ -197,6 +197,7 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   );
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pageSize = 50;
 
   const isInitialMount = useRef(true);
@@ -374,10 +375,15 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   };
 
   useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLDivElement;
+    const scrollElement = scrollContainerRef.current;
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
       if (
-        target.scrollHeight - target.scrollTop - target.clientHeight < 100 &&
+        scrollElement.scrollHeight -
+          scrollElement.scrollTop -
+          scrollElement.clientHeight <
+          100 &&
         hasNextPage &&
         !isFetchingNextPage
       ) {
@@ -385,14 +391,9 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
       }
     };
 
-    const scrollContainer = document.querySelector(".history-scroll-container");
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll);
-    }
+    scrollElement.addEventListener("scroll", handleScroll);
     return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener("scroll", handleScroll);
-      }
+      scrollElement.removeEventListener("scroll", handleScroll);
     };
   }, [hasNextPage, isFetchingNextPage, handleLoadMore]);
 
@@ -514,92 +515,91 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
           </div>
 
           <div className="flex-1 min-h-0 overflow-hidden history-scroll-container">
-            <div
-              className="h-full max-w-7xl mx-auto px-6 py-4 overflow-y-auto"
-              style={{ height: "100%" }}
-            >
-              {isLoading || isDateLoading ? (
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <TimelineSkeleton key={i} />
-                  ))}
-                </div>
-              ) : filteredItems.length === 0 ? (
-                <div className="flex items-center justify-center h-64">
-                  <Card className="border-border/50 bg-card/80 backdrop-blur-xl max-w-md w-full mx-4">
-                    <CardContent className="p-8 text-center">
-                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                        <Search className="w-8 h-8 text-primary" />
+            <div ref={scrollContainerRef} className="h-full overflow-y-auto">
+              <div className="max-w-7xl mx-auto px-6 py-4">
+                {isLoading || isDateLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <TimelineSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : filteredItems.length === 0 ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Card className="border-border/50 bg-card/80 backdrop-blur-xl max-w-md w-full mx-4">
+                      <CardContent className="p-8 text-center">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                          <Search className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="font-heading text-xl mb-2">
+                          {searchQuery
+                            ? "No Results Found"
+                            : isDateFilter
+                              ? "No History Found"
+                              : "No History Yet"}
+                        </h3>
+                        <p className="text-muted-foreground mb-4">
+                          {searchQuery
+                            ? "Try adjusting your search terms"
+                            : isDateFilter
+                              ? "No history entries match your filters"
+                              : "Start importing your browsing history to see it here"}
+                        </p>
+                        {!searchQuery && !isDateFilter && (
+                          <Link to="/import">
+                            <Button variant="outline">Import Data</Button>
+                          </Link>
+                        )}
+                        {(isDateFilter || searchQuery) && (
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setSearchQuery("");
+                              handleClearDate();
+                            }}
+                          >
+                            Clear Filters
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {groupedItems.map((group) => (
+                      <div key={group.date}>
+                        <GroupHeader group={group} />
+                        <div className="space-y-3">
+                          {group.items.map((item) => (
+                            <HistoryCard key={item.id} item={item} />
+                          ))}
+                        </div>
                       </div>
-                      <h3 className="font-heading text-xl mb-2">
-                        {searchQuery
-                          ? "No Results Found"
-                          : isDateFilter
-                            ? "No History Found"
-                            : "No History Yet"}
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        {searchQuery
-                          ? "Try adjusting your search terms"
-                          : isDateFilter
-                            ? "No history entries match your filters"
-                            : "Start importing your browsing history to see it here"}
-                      </p>
-                      {!searchQuery && !isDateFilter && (
-                        <Link to="/import">
-                          <Button variant="outline">Import Data</Button>
-                        </Link>
-                      )}
-                      {(isDateFilter || searchQuery) && (
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setSearchQuery("");
-                            handleClearDate();
-                          }}
-                        >
-                          Clear Filters
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {groupedItems.map((group) => (
-                    <div key={group.date}>
-                      <GroupHeader group={group} />
-                      <div className="space-y-3">
-                        {group.items.map((item) => (
-                          <HistoryCard key={item.id} item={item} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              {isFetchingNextPage && (
-                <div className="space-y-3 mt-4">
-                  {[...Array(3)].map((_, i) => (
-                    <TimelineSkeleton key={i} />
-                  ))}
-                </div>
-              )}
+                {isFetchingNextPage && (
+                  <div className="space-y-3 mt-4">
+                    {[...Array(3)].map((_, i) => (
+                      <TimelineSkeleton key={i} />
+                    ))}
+                  </div>
+                )}
 
-              {!hasNextPage && !isDateFilter && filteredItems.length > 0 && (
-                <p className="text-center text-xs text-muted-foreground py-4">
-                  You've reached the end of your history (
-                  {filteredItems.length.toLocaleString()} items)
-                </p>
-              )}
+                {!hasNextPage && !isDateFilter && filteredItems.length > 0 && (
+                  <p className="text-center text-xs text-muted-foreground py-4">
+                    You've reached the end of your history (
+                    {filteredItems.length.toLocaleString()} items)
+                  </p>
+                )}
 
-              {isDateFilter && filteredItems.length > 0 && (
-                <p className="text-center text-xs text-muted-foreground py-4">
-                  Showing {filteredItems.length.toLocaleString()} item
-                  {filteredItems.length === 1 ? "" : "s"} for selected date
-                </p>
-              )}
+                {isDateFilter && filteredItems.length > 0 && (
+                  <p className="text-center text-xs text-muted-foreground py-4">
+                    Showing {filteredItems.length.toLocaleString()} item
+                    {filteredItems.length === 1 ? "" : "s"} for selected date
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
