@@ -13,6 +13,7 @@ import { handleExtensionRequest } from "./server/extension";
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "https://historian.archit.xyz",
+  "https://historian-api.archit.xyz",
 ];
 
 initObservability({

@@ -6,7 +6,7 @@ import { trpc } from "./trpc";
 function getBaseUrl() {
   if (typeof window !== "undefined") {
     return window.location.origin === "https://historian.archit.xyz"
-      ? "https://historian-api.archit.xyz/api"
+      ? "https://historian-api.archit.xyz"
       : "";
   }
   if (process.env.BASE_URL) return process.env.BASE_URL;

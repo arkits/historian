@@ -15,6 +15,7 @@ import { SpanKind } from "@opentelemetry/api";
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "https://historian.archit.xyz",
+  "https://historian-api.archit.xyz",
 ];
 
 function addCorsHeaders(response: Response, origin: string | null): Response {
