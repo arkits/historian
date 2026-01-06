@@ -32,7 +32,7 @@ export function LoginPage() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.BASE_URL || ""}/auth/sign-in/email`,
+        `${import.meta.env.BUN_PUBLIC_BASE_URL || ""}/auth/sign-in/email`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
