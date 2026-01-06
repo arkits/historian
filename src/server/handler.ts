@@ -12,6 +12,30 @@ import {
 } from "./observability";
 import { SpanKind } from "@opentelemetry/api";
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "https://historian.archit.xyz",
+];
+
+function addCorsHeaders(response: Response, origin: string | null): Response {
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    const headers = new Headers(response.headers);
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS",
+    );
+    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    headers.set("Access-Control-Allow-Credentials", "true");
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+  return response;
+}
+
 export async function handleTRPCRequest(req: Request): Promise<Response> {
   const startTime = Date.now();
   const url = new URL(req.url);
@@ -73,7 +97,7 @@ export async function handleTRPCRequest(req: Request): Promise<Response> {
         });
 
         span.end();
-        return response;
+        return addCorsHeaders(response, req.headers.get("origin"));
       } catch (error) {
         const duration = Date.now() - startTime;
 
@@ -98,17 +122,20 @@ export async function handleTRPCRequest(req: Request): Promise<Response> {
 
         span.end();
 
-        return new Response(
-          JSON.stringify({
-            error: {
-              message: "Internal server error",
-              code: "INTERNAL_SERVER_ERROR",
+        return addCorsHeaders(
+          new Response(
+            JSON.stringify({
+              error: {
+                message: "Internal server error",
+                code: "INTERNAL_SERVER_ERROR",
+              },
+            }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
             },
-          }),
-          {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          },
+          ),
+          req.headers.get("origin"),
         );
       }
     },
@@ -139,7 +166,7 @@ export function createTRPCHandler() {
           duration_ms: Date.now() - startTime,
           status: response.status,
         });
-        return response;
+        return addCorsHeaders(response, req.headers.get("origin"));
       } catch (error) {
         logError(error as Error, {
           method: req.method,
@@ -149,6 +176,9 @@ export function createTRPCHandler() {
       }
     }
 
-    return new Response("Not found", { status: 404 });
+    return addCorsHeaders(
+      new Response("Not found", { status: 404 }),
+      req.headers.get("origin"),
+    );
   };
 }

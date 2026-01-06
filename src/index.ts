@@ -10,6 +10,11 @@ import {
 } from "./server/observability";
 import { handleExtensionRequest } from "./server/extension";
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "https://historian.archit.xyz",
+];
+
 initObservability({
   serviceName: "historian",
   serviceVersion: "1.0.0",
@@ -26,8 +31,44 @@ const trpcHandler = createTRPCHandler();
 
 async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
+  const response = await handleExtensionRequest(request);
 
-  return handleExtensionRequest(request);
+  const origin = request.headers.get("origin");
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    const headers = new Headers(response.headers);
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS",
+    );
+    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    headers.set("Access-Control-Allow-Credentials", "true");
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+
+  return response;
+}
+
+function handleOptions(request: Request): Response {
+  const origin = request.headers.get("origin");
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "86400",
+      },
+    });
+  }
+  return new Response(null, { status: 204 });
 }
 
 const server = serve({
