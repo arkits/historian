@@ -4,17 +4,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Code2,
   ArrowRight,
-  ChevronRight,
   Copy,
   CheckCircle2,
   Terminal,
   Lock,
   Zap,
-  ArrowLeft,
+  Menu,
+  X,
 } from "lucide-react";
 import { DocsNavBar } from "@/components/DocsNavBar";
+import { DocsSidebar } from "@/components/DocsSidebar";
+import { useState } from "react";
 
 export function DocsApiPage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const endpoints = [
     {
       method: "GET",
@@ -141,43 +145,38 @@ const { status } = await response.json();`,
 
   return (
     <div className="min-h-screen">
-      <DocsNavBar showBackLink />
+      <DocsNavBar
+        showBackLink
+        onMenuToggle={() => setIsMenuOpen(!isMenuOpen)}
+        isMenuOpen={isMenuOpen}
+      />
+      <DocsSidebar />
 
-      <main className="pt-24">
-        {/* Hero */}
-        <section className="py-16 px-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/10" />
-
-          <div className="max-w-7xl mx-auto relative">
-            <div className="text-center max-w-4xl mx-auto animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/50 border border-border mb-6">
-                <Code2 className="w-4 h-4 text-primary" />
-                <span className="text-sm text-muted-foreground">API v1</span>
-              </div>
-
-              <h1 className="font-heading text-5xl md:text-6xl text-foreground mb-6 leading-tight">
-                API <span className="text-primary">Reference</span>
-              </h1>
-
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Build custom integrations with Historian's REST API. Access your
-                history data programmatically with full CRUD operations.
-              </p>
+      <main className="pt-16 lg:pl-64">
+        <div className="max-w-4xl mx-auto px-4 lg:px-8 py-12">
+          <div className="mb-12">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/50 border border-border w-fit mb-4">
+              <Code2 className="w-4 h-4 text-primary" />
+              <span className="text-sm text-muted-foreground">API v1</span>
             </div>
+            <h1 className="font-heading text-4xl lg:text-5xl text-foreground mb-4">
+              API <span className="text-primary">Reference</span>
+            </h1>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Build custom integrations with Historian's REST API. Access your
+              history data programmatically with full CRUD operations.
+            </p>
           </div>
-        </section>
 
-        {/* Authentication */}
-        <section className="py-12 px-6 border-y border-border/50 bg-card/30">
-          <div className="max-w-5xl mx-auto">
+          <section id="authentication" className="mb-12">
             <Card className="border-border/50 bg-card/50">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                    <Lock className="w-6 h-6 text-emerald-500" />
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Lock className="w-5 h-5 text-emerald-500" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="font-heading text-2xl text-foreground mb-2">
+                    <h2 className="font-heading text-xl text-foreground mb-3">
                       Authentication
                     </h2>
                     <p className="text-muted-foreground mb-4">
@@ -197,13 +196,10 @@ const { status } = await response.json();`,
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </section>
+          </section>
 
-        {/* Base URL */}
-        <section className="py-8 px-6">
-          <div className="max-w-5xl mx-auto">
-            <div className="bg-background/50 rounded-lg p-4 font-mono text-sm flex items-center gap-4">
+          <section className="mb-8">
+            <div className="bg-background/50 rounded-lg p-4 font-mono text-sm flex items-center gap-4 flex-wrap">
               <span className="text-muted-foreground">Base URL:</span>
               <code className="text-green-400">
                 https://api.historian.app/v1
@@ -219,29 +215,22 @@ const { status } = await response.json();`,
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Endpoints */}
-        <section className="py-12 px-6">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12 animate-fade-in">
-              <h2 className="font-heading text-4xl text-foreground mb-4">
-                API <span className="text-primary">Endpoints</span>
-              </h2>
-            </div>
-
-            <div className="space-y-6">
-              {endpoints.map((endpoint, index) => (
+          <section id="endpoints" className="mb-12">
+            <h2 className="font-heading text-2xl text-foreground mb-6">
+              Endpoints
+            </h2>
+            <div className="space-y-4">
+              {endpoints.map((endpoint) => (
                 <Card
                   key={endpoint.path}
-                  className="border-border/50 bg-card/50 hover:bg-card/80 transition-colors animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="border-border/50 bg-card/50 hover:bg-card/80 transition-colors"
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4 mb-4">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-3 mb-3">
                       <div
-                        className={`px-3 py-1 rounded-lg text-sm font-mono font-bold ${
+                        className={`px-2.5 py-1 rounded text-xs font-mono font-bold flex-shrink-0 ${
                           endpoint.method === "GET"
                             ? "bg-blue-500/20 text-blue-400"
                             : endpoint.method === "POST"
@@ -253,27 +242,27 @@ const { status } = await response.json();`,
                       >
                         {endpoint.method}
                       </div>
-                      <code className="font-mono text-foreground flex-1">
+                      <code className="font-mono text-sm text-foreground flex-1 break-all">
                         {endpoint.path}
                       </code>
                     </div>
 
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-muted-foreground text-sm mb-4 ml-1">
                       {endpoint.description}
                     </p>
 
                     {endpoint.params.length > 0 && (
-                      <div className="bg-background/30 rounded-lg overflow-hidden">
+                      <div className="bg-background/30 rounded-lg overflow-hidden ml-1">
                         <table className="w-full text-sm">
                           <thead className="bg-accent/30">
                             <tr>
-                              <th className="text-left p-3 font-medium text-muted-foreground">
+                              <th className="text-left p-2 font-medium text-muted-foreground">
                                 Parameter
                               </th>
-                              <th className="text-left p-3 font-medium text-muted-foreground">
+                              <th className="text-left p-2 font-medium text-muted-foreground">
                                 Type
                               </th>
-                              <th className="text-left p-3 font-medium text-muted-foreground">
+                              <th className="text-left p-2 font-medium text-muted-foreground">
                                 Description
                               </th>
                             </tr>
@@ -284,13 +273,13 @@ const { status } = await response.json();`,
                                 key={param.name}
                                 className="border-t border-border/50"
                               >
-                                <td className="p-3 font-mono text-primary">
+                                <td className="p-2 font-mono text-primary text-xs">
                                   {param.name}
                                 </td>
-                                <td className="p-3 text-muted-foreground">
+                                <td className="p-2 text-muted-foreground text-xs">
                                   {param.type}
                                 </td>
-                                <td className="p-3 text-muted-foreground">
+                                <td className="p-2 text-muted-foreground text-xs">
                                   {param.description}
                                 </td>
                               </tr>
@@ -303,27 +292,17 @@ const { status } = await response.json();`,
                 </Card>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Code Examples */}
-        <section className="py-16 px-6 bg-gradient-to-b from-transparent via-accent/10 to-transparent">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12 animate-fade-in">
-              <h2 className="font-heading text-4xl text-foreground mb-4">
-                Code <span className="text-primary">Examples</span>
-              </h2>
-              <p className="text-muted-foreground">
-                Common use cases and integration patterns
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {Object.entries(codeExamples).map(([key, code], index) => (
+          <section id="examples" className="mb-12">
+            <h2 className="font-heading text-2xl text-foreground mb-6">
+              Code Examples
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(codeExamples).map(([key, code]) => (
                 <Card
                   key={key}
-                  className="border-border/50 bg-card/50 overflow-hidden animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="border-border/50 bg-card/50 overflow-hidden"
                 >
                   <div className="bg-accent/30 px-4 py-2 border-b border-border/50 flex items-center justify-between">
                     <span className="text-sm font-medium text-muted-foreground capitalize">
@@ -337,31 +316,28 @@ const { status } = await response.json();`,
                       <Copy className="w-4 h-4" />
                     </Button>
                   </div>
-                  <pre className="p-4 text-sm font-mono overflow-x-auto">
+                  <pre className="p-4 text-xs font-mono overflow-x-auto">
                     <code className="text-muted-foreground">{code}</code>
                   </pre>
                 </Card>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Rate Limits */}
-        <section className="py-16 px-6">
-          <div className="max-w-4xl mx-auto">
+          <section id="rate-limits" className="mb-12">
             <Card className="border-border/50 bg-card/50">
-              <CardContent className="p-8">
-                <div className="flex items-start gap-6">
-                  <div className="w-14 h-14 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-7 h-7 text-amber-500" />
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-6 h-6 text-amber-500" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="font-heading text-2xl text-foreground mb-4">
+                    <h2 className="font-heading text-xl text-foreground mb-4">
                       Rate Limits
                     </h2>
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid sm:grid-cols-3 gap-4">
                       <div className="bg-background/30 rounded-lg p-4 text-center">
-                        <p className="font-heading text-3xl text-primary mb-1">
+                        <p className="font-heading text-2xl text-primary mb-1">
                           1,000
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -369,7 +345,7 @@ const { status } = await response.json();`,
                         </p>
                       </div>
                       <div className="bg-background/30 rounded-lg p-4 text-center">
-                        <p className="font-heading text-3xl text-primary mb-1">
+                        <p className="font-heading text-2xl text-primary mb-1">
                           10,000
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -377,7 +353,7 @@ const { status } = await response.json();`,
                         </p>
                       </div>
                       <div className="bg-background/30 rounded-lg p-4 text-center">
-                        <p className="font-heading text-3xl text-primary mb-1">
+                        <p className="font-heading text-2xl text-primary mb-1">
                           Unlimited
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -389,56 +365,32 @@ const { status } = await response.json();`,
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </section>
+          </section>
 
-        {/* SDKs */}
-        <section className="py-16 px-6">
-          <div className="max-w-4xl mx-auto text-center animate-fade-in">
-            <h2 className="font-heading text-4xl text-foreground mb-6">
-              Official <span className="text-primary">SDKs</span>
-            </h2>
-            <p className="text-muted-foreground mb-8">
-              Official client libraries for popular languages
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              {["JavaScript", "Python", "Go", "Rust", "Ruby"].map((lang) => (
-                <Button key={lang} variant="outline" className="px-6">
-                  <Terminal className="w-4 h-4 mr-2" />
-                  {lang}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="py-12 px-6 border-t border-border/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🕵️</span>
-              <span className="font-heading text-lg text-foreground">
-                Historian
-              </span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link
-                to="/docs"
-                className="hover:text-foreground transition-colors"
-              >
-                Docs
-              </Link>
-              <Link to="/docs/api" className="text-primary">
-                API Reference
-              </Link>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 Historian Documentation
-            </p>
-          </div>
+          <section className="pt-8 border-t border-border/50">
+            <Card className="border-border/50 bg-card/50">
+              <CardContent className="p-6 text-center">
+                <h2 className="font-heading text-xl text-foreground mb-3">
+                  Official <span className="text-primary">SDKs</span>
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  Official client libraries for popular languages
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {["JavaScript", "Python", "Go", "Rust", "Ruby"].map(
+                    (lang) => (
+                      <Button key={lang} variant="outline" size="sm">
+                        <Terminal className="w-3 h-3 mr-2" />
+                        {lang}
+                      </Button>
+                    ),
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
         </div>
-      </footer>
+      </main>
     </div>
   );
 }

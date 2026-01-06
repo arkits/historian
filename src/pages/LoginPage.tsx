@@ -38,6 +38,7 @@ export function LoginPage() {
       const response = await fetch(`${apiBase}/auth/sign-in/email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email: `${username}@example.com`,
           password,

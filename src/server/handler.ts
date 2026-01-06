@@ -28,6 +28,8 @@ function addCorsHeaders(response: Response, origin: string | null): Response {
     );
     headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     headers.set("Access-Control-Allow-Credentials", "true");
+    headers.set("Access-Control-Expose-Headers", "Set-Cookie");
+
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,

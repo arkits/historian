@@ -28,8 +28,7 @@ initObservability({
   otlpEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
 });
 
-const SERVE_WEBUI =
-  process.env.SERVE_WEBUI !== "false" && process.env.NODE_ENV !== "production";
+const SERVE_WEBUI = process.env.SERVE_WEBUI !== "false";
 
 const trpcHandler = createTRPCHandler();
 
