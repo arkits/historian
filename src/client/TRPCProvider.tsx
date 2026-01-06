@@ -21,12 +21,12 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           headers() {
-            const headers = new Map<string, string>();
+            const headers: Record<string, string> = {};
             const token = localStorage.getItem("auth-token");
             if (token) {
-              headers.set("x-better-auth-token", token);
+              headers["Authorization"] = `Bearer ${token}`;
             }
-            return Object.fromEntries(headers);
+            return headers;
           },
         }),
       ],

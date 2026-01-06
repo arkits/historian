@@ -13,8 +13,12 @@ function generateApiKey(): string {
 
 export const appRouter = router({
   getSession: publicProcedure.query(async ({ ctx }) => {
+    const headers: Record<string, string> = {};
+    for (const [key, value] of ctx.headers.entries()) {
+      headers[key] = value;
+    }
     const session = await auth.api.getSession({
-      headers: ctx.headers,
+      headers,
     });
     return session;
   }),

@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { bearer } from "better-auth/plugins";
 import { db } from "@/lib/db";
 import { user, session, account, verification } from "@/lib/schema";
 
@@ -22,6 +23,7 @@ export const auth = betterAuth({
     "https://historian.archit.xyz",
     "https://historian-api.archit.xyz",
   ],
+  plugins: [bearer()],
   advanced: {
     cookiePrefix: "historian",
     useSecureCookies: true,
