@@ -142,8 +142,18 @@ function serveStaticFile(path: string): Response {
   }
 }
 
+const distDir = join(__dirname, "..", "dist");
+
+function serveStaticAsset(path: string): Response | null {
+  const filePath = join(distDir, path);
+  if (existsSync(filePath)) {
+    return serveStaticFile(filePath);
+  }
+  return null;
+}
+
 function createSPAHandler(): Response {
-  const indexPath = join(__dirname, "..", "dist", "index.html");
+  const indexPath = join(distDir, "index.html");
   try {
     const indexContent = readFileSync(indexPath, "utf-8");
     return new Response(indexContent, {
@@ -166,7 +176,14 @@ const routes: Record<string, any> = {
 
 if (SERVE_WEBUI) {
   if (isProduction) {
-    routes["/*"] = createSPAHandler();
+    routes["/*"] = async (request: Request) => {
+      const url = new URL(request.url);
+      const staticResponse = serveStaticAsset(url.pathname);
+      if (staticResponse) {
+        return staticResponse;
+      }
+      return createSPAHandler();
+    };
   } else {
     routes["/*"] = serveStaticFile(join(__dirname, "..", "index.html"));
   }

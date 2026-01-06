@@ -8,6 +8,7 @@ import {
   jsonb,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -18,6 +19,13 @@ export const user = pgTable("user", {
   createdAt: timestamp("createdAt", { mode: "string" }).notNull().defaultNow(),
   updatedAt: timestamp("updatedAt", { mode: "string" }).notNull().defaultNow(),
 });
+
+export const userRelations = relations(user, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
+  history: many(history),
+  apiKeys: many(apiKey),
+}));
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -31,6 +39,13 @@ export const session = pgTable("session", {
   ipAddress: text("ipAddress"),
   userAgent: text("userAgent"),
 });
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+  }),
+}));
 
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
@@ -49,6 +64,13 @@ export const account = pgTable("account", {
   createdAt: timestamp("createdAt", { mode: "string" }).notNull().defaultNow(),
   updatedAt: timestamp("updatedAt", { mode: "string" }).notNull().defaultNow(),
 });
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
+  }),
+}));
 
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
@@ -85,6 +107,13 @@ export const history = pgTable(
   ],
 );
 
+export const historyRelations = relations(history, ({ one }) => ({
+  user: one(user, {
+    fields: [history.userId],
+    references: [user.id],
+  }),
+}));
+
 export const apiKey = pgTable("api_key", {
   id: uuid("id").primaryKey().defaultRandom(),
   key: text("key").notNull().unique(),
@@ -97,3 +126,10 @@ export const apiKey = pgTable("api_key", {
   expiresAt: timestamp("expiresAt", { mode: "string" }),
   isActive: boolean("isActive").default(true).notNull(),
 });
+
+export const apiKeyRelations = relations(apiKey, ({ one }) => ({
+  user: one(user, {
+    fields: [apiKey.userId],
+    references: [user.id],
+  }),
+}));

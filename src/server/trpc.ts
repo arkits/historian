@@ -1,6 +1,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { auth } from "./auth";
 import type { Context } from "./context";
+import { db } from "@/lib/db";
+import { apiKey as apiKeyTable } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 import {
   logInfo,
   logError,

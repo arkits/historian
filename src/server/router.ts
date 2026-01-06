@@ -150,6 +150,12 @@ export const appRouter = router({
       return { success: true };
     }),
 
+  clearAllHistory: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    await db.delete(history).where(eq(history.userId, userId));
+    return { success: true };
+  }),
+
   getHistoryStats: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     const result = await db

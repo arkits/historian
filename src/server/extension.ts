@@ -20,6 +20,15 @@ interface VisitData {
   localTimestamp?: number;
 }
 
+interface HistoryItem {
+  id: string;
+  timelineTime: string;
+  type: string;
+  contentId: string;
+  content: Record<string, unknown>;
+  searchContent?: string;
+}
+
 function generateApiKey(): string {
   const array = new Uint8Array(32);
   globalThis.crypto.getRandomValues(array);
@@ -128,39 +137,28 @@ async function handleImport(request: Request): Promise<Response> {
 
   try {
     const body = await request.json();
-    const visits: VisitData[] = body.visits || [];
+    const items: HistoryItem[] = body.items || [];
 
-    if (visits.length === 0) {
+    if (items.length === 0) {
       return new Response(JSON.stringify({ imported: 0 }), {
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const values = visits.map((visit) => ({
+    const values = items.map((item) => ({
       userId,
-      timelineTime: visit.visitTime,
-      type: "page_view",
-      contentId: generateContentId(visit.url, visit.visitTime),
-      content: {
-        url: visit.url,
-        title: visit.title,
-        domain: visit.domain,
-        referrer: visit.referrer,
-        metadata: visit.metadata || {},
-        content: visit.content || "",
-        visitDuration: visit.visitDuration || 0,
-      },
-      searchContent: extractSearchQuery(visit.url),
+      timelineTime: item.timelineTime,
+      type: item.type,
+      contentId: item.contentId,
+      content: item.content,
+      searchContent: item.searchContent,
     }));
 
     await db.insert(history).values(values);
 
-    const processedIds = visits.map((v) => v.id);
-
     return new Response(
       JSON.stringify({
-        imported: visits.length,
-        processedIds,
+        imported: items.length,
       }),
       {
         headers: { "Content-Type": "application/json" },

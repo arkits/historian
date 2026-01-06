@@ -34,9 +34,12 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const { data: stats } = trpc.getHistoryStats.useQuery(undefined, {
-    retry: false,
-  });
+  const { data: stats, refetch: refetchStats } = trpc.getHistoryStats.useQuery(
+    undefined,
+    {
+      retry: false,
+    },
+  );
 
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [name, setName] = useState(user?.name || "");
@@ -78,6 +81,12 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
 
   const toggleKeyMutation = trpc.toggleApiKey.useMutation({
     onSuccess: () => refetchKeys(),
+  });
+
+  const clearHistoryMutation = trpc.clearAllHistory.useMutation({
+    onSuccess: () => {
+      refetchStats();
+    },
   });
 
   const handleSaveProfile = async () => {
@@ -404,10 +413,26 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
                 </Button>
                 <Button
                   variant="outline"
-                  disabled
+                  onClick={() => {
+                    if (
+                      confirm(
+                        "Are you sure you want to clear all your history? This action cannot be undone.",
+                      )
+                    ) {
+                      clearHistoryMutation.mutate();
+                    }
+                  }}
+                  disabled={
+                    clearHistoryMutation.isPending ||
+                    (stats?.totalCount ?? 0) === 0
+                  }
                   className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  {clearHistoryMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4 mr-2" />
+                  )}
                   Clear History
                 </Button>
               </div>

@@ -1,14 +1,15 @@
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { default as Bun } from "bun";
-import type { AppRouter } from "../src/server/router";
-
 const CSV_PATH = process.argv[2];
-const API_URL = process.env.API_URL || "http://localhost:3000";
+const API_URL = process.env.API_URL || "https://historian-api.archit.xyz";
 const API_KEY = process.env.API_KEY;
 
 if (!CSV_PATH) {
   console.error("Usage: bun scripts/import-csv.ts <csv-file> [--dry-run]");
   console.error("Environment variables: API_URL, API_KEY");
+  process.exit(1);
+}
+
+if (!API_KEY) {
+  console.error("Error: API_KEY environment variable is required");
   process.exit(1);
 }
 
@@ -25,9 +26,19 @@ interface CsvRow {
   timelineTime: string;
 }
 
+interface HistoryItem {
+  id: string;
+  timelineTime: string;
+  type: string;
+  contentId: string;
+  content: Record<string, unknown>;
+  searchContent?: string;
+}
+
 function parseCSV(text: string): CsvRow[] {
   const lines = text.trim().split("\n");
-  const header = lines[0].split(",").map((h) => h.replace(/^"|"$/g, ""));
+  if (lines.length === 0) return [];
+  const header = lines[0]!.split(",").map((h) => h.replace(/^"|"$/g, ""));
 
   return lines.slice(1).map((line) => {
     const values = splitCSVLine(line);
@@ -64,7 +75,7 @@ function splitCSVLine(line: string): string[] {
   return result;
 }
 
-function transformToHistoryItem(row: CsvRow) {
+function transformToHistoryItem(row: CsvRow): HistoryItem {
   let content: Record<string, unknown> = {};
   try {
     content = JSON.parse(row.content.replace(/""/g, '"'));
@@ -77,22 +88,38 @@ function transformToHistoryItem(row: CsvRow) {
     : row.timelineTime;
 
   return {
-    timelineTime: new Date(timelineTime).toISOString(),
+    id: row.id || crypto.randomUUID(),
+    timelineTime,
     type: row.type,
-    contentId: row.contentId,
+    contentId: row.contentId || crypto.randomUUID(),
     content,
     searchContent: row.searchContent || undefined,
   };
 }
 
-async function main() {
-  if (!API_KEY) {
-    console.error("Error: API_KEY environment variable is required");
-    process.exit(1);
+async function importHistory(
+  items: HistoryItem[],
+): Promise<{ imported: number }> {
+  const response = await fetch(`${API_URL}/api/extension/import`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": API_KEY!,
+    },
+    body: JSON.stringify({ items }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Import failed: ${response.status} - ${error}`);
   }
 
+  return response.json();
+}
+
+async function main() {
   console.log(`Reading CSV from: ${CSV_PATH}`);
-  const file = Bun.file(CSV_PATH);
+  const file = Bun.file(CSV_PATH!);
   if (!(await file.exists())) {
     console.error(`Error: File not found: ${CSV_PATH}`);
     process.exit(1);
@@ -102,42 +129,39 @@ async function main() {
   const rows = parseCSV(csvText);
   console.log(`Parsed ${rows.length} rows from CSV`);
 
-  const historyItems = rows.map(transformToHistoryItem);
-  console.log(`Transformed ${historyItems.length} history items`);
+  const items = rows.map(transformToHistoryItem);
+
+  const typeCounts = items.reduce(
+    (acc, item) => {
+      acc[item.type] = (acc[item.type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+  console.log(`Transformed ${items.length} history items by type:`, typeCounts);
 
   if (isDryRun) {
-    console.log("\n[Dry run] Would import items:");
-    historyItems.slice(0, 3).forEach((item, i) => {
+    console.log("\n[Dry run] Would import history items:");
+    items.slice(0, 5).forEach((item, i) => {
       console.log(
-        `  ${i + 1}. ${item.type} - ${item.contentId} (${item.timelineTime})`,
+        `  ${i + 1}. [${item.type}] ${(item.content as any).url || item.contentId} (${item.timelineTime})`,
       );
     });
-    if (historyItems.length > 3) {
-      console.log(`  ... and ${historyItems.length - 3} more`);
+    if (items.length > 5) {
+      console.log(`  ... and ${items.length - 5} more`);
     }
-    console.log(`\nTotal: ${historyItems.length} items`);
+    console.log(`\nTotal: ${items.length} items`);
     return;
   }
-
-  const client = createTRPCProxyClient<AppRouter>({
-    links: [
-      httpBatchLink({
-        url: `${API_URL}/api/trpc`,
-        headers: {
-          Authorization: `Bearer ${API_KEY}`,
-        },
-      }),
-    ],
-  });
 
   const BATCH_SIZE = 100;
   let imported = 0;
 
-  for (let i = 0; i < historyItems.length; i += BATCH_SIZE) {
-    const batch = historyItems.slice(i, i + BATCH_SIZE);
-    const result = await client.importHistory.mutate(batch);
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    const batch = items.slice(i, i + BATCH_SIZE);
+    const result = await importHistory(batch);
     imported += result.imported;
-    console.log(`Imported ${imported}/${historyItems.length} items`);
+    console.log(`Imported ${imported}/${items.length} items`);
   }
 
   console.log(`\nSuccessfully imported ${imported} history items`);
