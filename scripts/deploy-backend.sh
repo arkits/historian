@@ -4,6 +4,8 @@ set -e
 
 cd /opt/software/historian/
 
+mkdir -p logs
+
 echo ">>> pulling latest code"
 git pull
 
@@ -17,4 +19,4 @@ echo ">>> building"
 bun run build
 
 echo ">>> restarting server"
-bun start >../logs/historian.log 2>&1 &
+bun start > logs/historian.log 2>&1 &
