@@ -1,5 +1,6 @@
 import { serve } from "bun";
 import { createTRPCHandler } from "./server/handler";
+import { auth } from "./server/auth";
 import {
   initObservability,
   logInfo,
@@ -55,6 +56,7 @@ function createHealthHandler(): Response {
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
+  "http://localhost:5173",
   "https://historian.archit.xyz",
   "https://historian-api.archit.xyz",
 ];
@@ -74,6 +76,66 @@ initObservability({
 const SERVE_WEBUI = process.env.SERVE_WEBUI !== "false";
 const isProduction = process.env.NODE_ENV === "production";
 
+function createAuthHandler() {
+  return async (req: Request) => {
+    try {
+      const url = new URL(req.url);
+      const pathname = url.pathname;
+      const body = await req.json().catch(() => ({}));
+      const headers = new Headers();
+      req.headers.forEach((value, key) => {
+        if (key !== "host" && key !== "content-length") {
+          headers.set(key, value);
+        }
+      });
+
+      let data: any;
+
+      if (pathname === "/auth/sign-in/email" && req.method === "POST") {
+        data = await auth.api.signInEmail({
+          body: {
+            email: body.email,
+            password: body.password,
+          },
+          headers,
+        });
+      } else if (pathname === "/auth/sign-up/email" && req.method === "POST") {
+        data = await auth.api.signUpEmail({
+          body: {
+            name: body.name,
+            email: body.email,
+            password: body.password,
+          },
+          headers,
+        });
+      } else if (pathname === "/auth/sign-out" && req.method === "POST") {
+        data = await auth.api.signOut({ headers });
+      } else if (pathname === "/auth/get-session" && req.method === "GET") {
+        data = await auth.api.getSession({ headers, query: {} as any });
+      } else {
+        return new Response("Not found", { status: 404 });
+      }
+
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      logError(error as Error, { handler: "auth" });
+      return new Response(
+        JSON.stringify({
+          error: error instanceof Error ? error.message : "Auth error",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+  };
+}
+
+const authHandler = createAuthHandler();
 const trpcHandler = createTRPCHandler();
 
 async function handleRequest(request: Request): Promise<Response> {
@@ -185,7 +247,34 @@ if (SERVE_WEBUI) {
       return createSPAHandler();
     };
   } else {
-    routes["/*"] = serveStaticFile(join(__dirname, "..", "index.html"));
+    routes["/auth/*"] = authHandler;
+    routes["/api/*"] = trpcHandler;
+    routes["/*"] = async (request: Request) => {
+      const url = new URL(request.url);
+      try {
+        const response = await fetch(
+          `http://localhost:5173${url.pathname}${url.search}`,
+          {
+            method: request.method,
+            headers: request.headers,
+            body: request.body,
+          },
+        );
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+      } catch {
+        return new Response(
+          "Vite dev server not running. Run 'bun run dev:ui' or 'bun run dev'.",
+          {
+            status: 503,
+            headers: { "Content-Type": "text/plain" },
+          },
+        );
+      }
+    };
   }
 }
 

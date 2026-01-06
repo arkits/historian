@@ -22,4 +22,20 @@ export default defineConfig({
   css: {
     postcss: "./postcss.config.mjs",
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      "/trpc": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      "/auth": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
+  },
 });

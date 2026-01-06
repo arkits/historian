@@ -14,6 +14,7 @@ import { SpanKind } from "@opentelemetry/api";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
+  "http://localhost:5173",
   "https://historian.archit.xyz",
   "https://historian-api.archit.xyz",
 ];
@@ -179,7 +180,12 @@ export function createTRPCHandler() {
       return handleTRPCRequest(req);
     }
 
-    if (url.pathname === "/api/auth" || url.pathname.startsWith("/api/auth/")) {
+    if (
+      url.pathname === "/api/auth" ||
+      url.pathname.startsWith("/api/auth/") ||
+      url.pathname === "/auth" ||
+      url.pathname.startsWith("/auth/")
+    ) {
       if (req.method === "OPTIONS") {
         const origin = req.headers.get("origin");
         if (origin && ALLOWED_ORIGINS.includes(origin)) {
