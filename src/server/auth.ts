@@ -16,12 +16,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://historian.archit.xyz",
+    "https://historian-api.archit.xyz",
+  ],
   advanced: {
     cookiePrefix: "historian",
-    allowedOrigins: [
-      "http://localhost:3000",
-      "https://historian.archit.xyz",
-      "https://historian-api.archit.xyz",
-    ],
   },
 });
