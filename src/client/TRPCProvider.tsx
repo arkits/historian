@@ -4,7 +4,11 @@ import { useState } from "react";
 import { trpc } from "./trpc";
 
 function getBaseUrl() {
-  if (typeof window !== "undefined") return "";
+  if (typeof window !== "undefined") {
+    return window.location.origin === "https://historian.archit.xyz"
+      ? "https://historian-api.archit.xyz/api"
+      : "";
+  }
   if (process.env.BASE_URL) return process.env.BASE_URL;
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }

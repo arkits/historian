@@ -31,17 +31,18 @@ export function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.BUN_PUBLIC_BASE_URL || ""}/auth/sign-in/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: `${username}@example.com`,
-            password,
-          }),
-        },
-      );
+      const apiBase =
+        window.location.origin === "https://historian.archit.xyz"
+          ? "https://historian-api.archit.xyz/api"
+          : "";
+      const response = await fetch(`${apiBase}/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: `${username}@example.com`,
+          password,
+        }),
+      });
 
       const data = await response.json();
 

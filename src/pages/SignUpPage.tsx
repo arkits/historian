@@ -28,18 +28,19 @@ export function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.BUN_PUBLIC_BASE_URL || ""}/auth/sign-up/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: username,
-            email: `${username}@example.com`,
-            password,
-          }),
-        },
-      );
+      const apiBase =
+        window.location.origin === "https://historian.archit.xyz"
+          ? "https://historian-api.archit.xyz/api"
+          : "";
+      const response = await fetch(`${apiBase}/auth/sign-up/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: username,
+          email: `${username}@example.com`,
+          password,
+        }),
+      });
 
       const data = await response.json();
 
