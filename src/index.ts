@@ -1,5 +1,4 @@
 import { serve } from "bun";
-import index from "./client/index.html";
 import { createTRPCHandler } from "./server/handler";
 import {
   initObservability,
@@ -9,6 +8,12 @@ import {
   captureServerEvent,
 } from "./server/observability";
 import { handleExtensionRequest } from "./server/extension";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
@@ -29,6 +34,7 @@ initObservability({
 });
 
 const SERVE_WEBUI = process.env.SERVE_WEBUI !== "false";
+const isProduction = process.env.NODE_ENV === "production";
 
 const trpcHandler = createTRPCHandler();
 
@@ -74,6 +80,45 @@ function handleOptions(request: Request): Response {
   return new Response(null, { status: 204 });
 }
 
+function serveStaticFile(path: string): Response {
+  try {
+    const content = readFileSync(path);
+    const ext = path.split(".").pop();
+    const contentTypes: Record<string, string> = {
+      html: "text/html",
+      js: "application/javascript",
+      css: "text/css",
+      json: "application/json",
+      png: "image/png",
+      jpg: "image/jpeg",
+      svg: "image/svg+xml",
+      ico: "image/x-icon",
+    };
+    return new Response(content, {
+      headers: {
+        "Content-Type": contentTypes[ext!] || "application/octet-stream",
+      },
+    });
+  } catch {
+    return new Response("Not Found", { status: 404 });
+  }
+}
+
+function createSPAHandler(): Response {
+  const indexPath = join(__dirname, "..", "dist", "index.html");
+  try {
+    const indexContent = readFileSync(indexPath, "utf-8");
+    return new Response(indexContent, {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  } catch {
+    return new Response("Application not built. Run 'bun run build' first.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+}
+
 const routes: Record<string, any> = {
   "/api/trpc/*": trpcHandler,
   "/api/auth/*": trpcHandler,
@@ -81,7 +126,11 @@ const routes: Record<string, any> = {
 };
 
 if (SERVE_WEBUI) {
-  routes["/*"] = index;
+  if (isProduction) {
+    routes["/*"] = createSPAHandler();
+  } else {
+    routes["/*"] = serveStaticFile(join(__dirname, "..", "index.html"));
+  }
 }
 
 const server = serve({
