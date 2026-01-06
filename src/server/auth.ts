@@ -24,5 +24,14 @@ export const auth = betterAuth({
   ],
   advanced: {
     cookiePrefix: "historian",
+    useSecureCookies: true,
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: "archit.xyz",
+    },
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+    },
   },
 });
