@@ -25,6 +25,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
             const token = localStorage.getItem("auth-token");
             if (token) {
               headers.set("Authorization", `Bearer ${token}`);
+              headers.set("x-better-auth-token", token);
             }
             return Object.fromEntries(headers);
           },

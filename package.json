@@ -8,6 +8,7 @@
     "dev:ui": "vite",
     "start": "NODE_ENV=production bun src/index.ts",
     "build": "vite build",
+    "build:server": "bun build --minify --sourcemap src/index.ts --outfile dist/server",
     "build:ext": "bun run build-extension.ts",
     "preview": "vite preview",
     "test": "vitest run tests",
