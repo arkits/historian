@@ -2,24 +2,21 @@
 
 set -e
 
-echo ">>> inside deploy-backend.sh"
-
 cd /opt/software/historian/
 
-echo ">>> pulling latest"
+mkdir -p logs
+
+echo ">>> pulling latest code"
 git pull
 
 echo ">>> installing dependencies"
-npm ci 
+bun install
 
-echo ">>> prisma migrations"
-cd apps/backend/
-npx prisma generate --schema=prisma/schema.prisma
-npx prisma migrate deploy --schema=prisma/schema.prisma
-cd ../../
+echo ">>> running migrations"
+bun run migrate
 
-echo ">>> building backend"
-npm run backend:build:prod
+echo ">>> building"
+bun run build
 
-echo ">>> restarting backend with ecosystem config"
-pm2 startOrReload ecosystem.config.js --update-env
+echo ">>> restarting server"
+bun start > logs/historian.log 2>&1 &

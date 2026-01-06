@@ -1,26 +1,30 @@
-FROM node:22-alpine AS builder
+FROM oven/bun:1-alpine AS base
 
-WORKDIR /usr/src/historian
+FROM base AS installer
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-COPY package*.json ./
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 
-RUN npm install --legacy-peer-deps
+FROM base AS builder
+RUN apk add --no-cache libc6-compat build-base
+WORKDIR /app
 
-# Bundle app source
+COPY --from=installer /app/node_modules /app/node_modules
 COPY . .
 
-RUN npx nx export frontend
+RUN bun run build
 
-WORKDIR /usr/src/historian/apps/backend/
-RUN npx prisma generate --schema=prisma/schema.prisma
+FROM base AS runner
+WORKDIR /app
 
-WORKDIR /usr/src/historian
-RUN npm run backend:build:prod
+ENV NODE_ENV=production
 
-FROM node:22-alpine
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/src/index.ts /app/src/index.ts
+COPY --from=builder /app/drizzle /app/drizzle
 
-COPY --from=builder /usr/src/historian/dist/ /usr/src/historian/dist/
-COPY --from=builder /usr/src/historian/package*.json /usr/src/historian/
-COPY --from=builder /usr/src/historian/node_modules /usr/src/historian/node_modules
+EXPOSE 3000
 
-CMD [ "npm", "run", "backend:run:prod" ]
+CMD ["bun", "run", "src/index.ts"]
