@@ -26,10 +26,7 @@ function addCorsHeaders(response: Response, origin: string | null): Response {
       "Access-Control-Allow-Methods",
       "GET, POST, PUT, DELETE, OPTIONS",
     );
-    headers.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, x-better-auth-token",
-    );
+    headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     headers.set("Access-Control-Allow-Credentials", "true");
     headers.set("Access-Control-Expose-Headers", "Set-Cookie");
 
@@ -168,8 +165,7 @@ export function createTRPCHandler() {
             headers: {
               "Access-Control-Allow-Origin": origin,
               "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-              "Access-Control-Allow-Headers":
-                "Content-Type, Authorization, x-better-auth-token",
+              "Access-Control-Allow-Headers": "Content-Type, Authorization",
               "Access-Control-Allow-Credentials": "true",
             },
           });
@@ -188,8 +184,7 @@ export function createTRPCHandler() {
             headers: {
               "Access-Control-Allow-Origin": origin,
               "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-              "Access-Control-Allow-Headers":
-                "Content-Type, Authorization, x-better-auth-token",
+              "Access-Control-Allow-Headers": "Content-Type, Authorization",
               "Access-Control-Allow-Credentials": "true",
             },
           });
@@ -197,15 +192,7 @@ export function createTRPCHandler() {
         return new Response(null, { status: 204 });
       }
       try {
-        const authHeader = req.headers.get("Authorization");
-        let authReq = req;
-        if (authHeader?.startsWith("Bearer ")) {
-          const token = authHeader.slice(7);
-          const headers = new Headers(req.headers);
-          headers.set("x-better-auth-token", token);
-          authReq = new Request(req, { headers });
-        }
-        const response = await auth.handler(authReq);
+        const response = await auth.handler(req);
         captureServerEvent("auth.request", {
           method: req.method,
           pathname: url.pathname,
