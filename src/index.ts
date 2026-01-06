@@ -8,12 +8,50 @@ import {
   captureServerEvent,
 } from "./server/observability";
 import { handleExtensionRequest } from "./server/extension";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+function getGitCommitId(): string {
+  try {
+    const headPath = join(__dirname, "..", ".git", "HEAD");
+    if (existsSync(headPath)) {
+      const head = readFileSync(headPath, "utf-8").trim();
+      if (head.startsWith("ref:")) {
+        const refPath = join(
+          __dirname,
+          "..",
+          ".git",
+          head.replace("ref: ", ""),
+        );
+        if (existsSync(refPath)) {
+          return readFileSync(refPath, "utf-8").trim().substring(0, 7);
+        }
+      } else {
+        return head.substring(0, 7);
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return "unknown";
+}
+
+function createHealthHandler(): Response {
+  const health = {
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    commit: getGitCommitId(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+  };
+  return new Response(JSON.stringify(health), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
@@ -123,6 +161,7 @@ const routes: Record<string, any> = {
   "/api/trpc/*": trpcHandler,
   "/api/auth/*": trpcHandler,
   "/api/extension/*": handleRequest,
+  "/health": createHealthHandler(),
 };
 
 if (SERVE_WEBUI) {
