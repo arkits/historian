@@ -159,6 +159,21 @@ export function createTRPCHandler() {
     }
 
     if (url.pathname === "/api/auth" || url.pathname.startsWith("/api/auth/")) {
+      if (req.method === "OPTIONS") {
+        const origin = req.headers.get("origin");
+        if (origin && ALLOWED_ORIGINS.includes(origin)) {
+          return new Response(null, {
+            status: 204,
+            headers: {
+              "Access-Control-Allow-Origin": origin,
+              "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+              "Access-Control-Allow-Headers": "Content-Type, Authorization",
+              "Access-Control-Allow-Credentials": "true",
+            },
+          });
+        }
+        return new Response(null, { status: 204 });
+      }
       try {
         const response = await auth.handler(req);
         captureServerEvent("auth.request", {
