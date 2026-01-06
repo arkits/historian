@@ -28,6 +28,9 @@ initObservability({
   otlpEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
 });
 
+const SERVE_WEBUI =
+  process.env.SERVE_WEBUI !== "false" && process.env.NODE_ENV !== "production";
+
 const trpcHandler = createTRPCHandler();
 
 async function handleRequest(request: Request): Promise<Response> {
@@ -72,14 +75,19 @@ function handleOptions(request: Request): Response {
   return new Response(null, { status: 204 });
 }
 
+const routes: Record<string, any> = {
+  "/api/trpc/*": trpcHandler,
+  "/api/auth/*": trpcHandler,
+  "/api/extension/*": handleRequest,
+};
+
+if (SERVE_WEBUI) {
+  routes["/*"] = index;
+}
+
 const server = serve({
   port: Number(process.env.PORT ?? 3000),
-  routes: {
-    "/*": index,
-    "/api/trpc/*": trpcHandler,
-    "/api/auth/*": trpcHandler,
-    "/api/extension/*": handleRequest,
-  },
+  routes,
 
   development: process.env.NODE_ENV !== "production" && {
     hmr: true,

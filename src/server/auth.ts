@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { user, session, account, verification } from "@/lib/schema";
 
 export const auth = betterAuth({
+  baseURL: "https://historian-api.archit.xyz",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
