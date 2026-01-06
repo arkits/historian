@@ -7,7 +7,7 @@ import {
   Code2,
   Server,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -95,6 +95,18 @@ function NavSection({
     section.items[0]?.href.split("#")[0] || "",
   );
 
+  const handleHashLinkClick = (e: React.MouseEvent, href: string) => {
+    const hash = href.split("#")[1];
+    if (hash && location.pathname === href.split("#")[0]) {
+      e.preventDefault();
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.history.pushState(null, "", href);
+      }
+    }
+  };
+
   return (
     <div className="mb-1">
       <button
@@ -120,13 +132,17 @@ function NavSection({
         <div className="mt-1 ml-4 space-y-0.5 border-l border-border/50 ml-7">
           {section.items.map((item) => {
             const isItemActive = location.pathname === item.href.split("#")[0];
+            const hasHash =
+              item.href.includes("#") &&
+              location.pathname === item.href.split("#")[0];
             return (
               <Link
                 key={item.href}
                 to={item.href}
+                onClick={(e) => handleHashLinkClick(e, item.href)}
                 className={cn(
                   "block px-3 py-1.5 text-sm rounded-md transition-colors",
-                  isItemActive
+                  isItemActive || hasHash
                     ? "text-primary font-medium"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/30",
                 )}
@@ -154,6 +170,16 @@ export function DocsSidebar() {
       )
       .map((section) => section.title);
   });
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [location.pathname, location.hash]);
 
   const toggleSection = (title: string) => {
     setOpenSections((prev) =>

@@ -10,46 +10,6 @@
 - Tailwind CSS with shadcn/ui components
 - Vitest for testing
 
-## Tech Stack
-
-| Category          | Technology   |
-| ----------------- | ------------ |
-| Runtime           | Bun          |
-| Frontend          | React 19     |
-| Backend Framework | tRPC         |
-| Database          | PostgreSQL   |
-| ORM               | Drizzle ORM  |
-| Authentication    | better-auth  |
-| Styling           | Tailwind CSS |
-| Testing           | Vitest       |
-
-## Project Structure
-
-```
-/historian
-├── src/
-│   ├── client/           # tRPC client setup
-│   ├── components/       # React components (shadcn/ui)
-│   ├── lib/              # Utilities, schema, db connection
-│   ├── pages/            # Route pages (HomePage, LoginPage, etc.)
-│   ├── server/           # tRPC router, auth, context, handlers
-│   ├── App.tsx           # Main app component
-│   ├── frontend.tsx      # Frontend entry
-│   └── index.ts          # Application entry point
-├── drizzle/
-│   ├── meta/             # Migration metadata
-│   └── 0000_heavy_venom.sql  # Migration files
-├── tests/                # Vitest test files
-├── build.ts              # Build script
-├── migrate.ts            # Database migration script
-├── scripts/
-│   └── reset-db.ts       # Database reset script
-├── bunfig.toml           # Bun configuration
-├── drizzle.config.*      # Drizzle ORM config
-├── vitest.config.ts      # Vitest configuration
-└── package.json
-```
-
 ## Development Commands
 
 | Command            | Description                              |
@@ -60,13 +20,6 @@
 | `bun test`         | Run tests with Vitest                    |
 | `bun run migrate`  | Run database migrations                  |
 | `bun run db:reset` | Reset and reapply database schema        |
-
-## Environment Variables
-
-Required in `.env`:
-
-- `DATABASE_URL` - PostgreSQL connection string
-- `AUTH_SECRET` - Secret for authentication
 
 ## Testing
 
@@ -92,24 +45,35 @@ Required in `.env`:
 - Output: `dist/` directory
 - Command: `bun run build`
 
-## Docker
-
-A Dockerfile is available for containerized deployment:
-
-```bash
-docker build -t historian .
-docker run -p 3000:3000 historian
-```
-
-## Key Files
-
-- `src/index.ts` - Application entry point
-- `src/server/router.ts` - tRPC router definition
-- `src/lib/schema.ts` - Database schema definitions
-- `src/lib/db.ts` - Database connection setup
-- `src/server/auth.ts` - Authentication configuration
-
-
 ## Development Workflow
 
 - You must execute `bun run build` and `bun run test` ; and ensure that there are no build issues and that all tests pass.
+
+## Landing the Plane (Session Completion)
+
+**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+
+## MANDATORY WORKFLOW:
+
+1. **File issues for remaining work** - Create issues for anything that needs follow-up
+2. **Run quality gates** (if code changed) - Tests, linters, builds
+3. **Update issue status** - Close finished work, update in-progress items
+4. **PUSH TO REMOTE** - This is MANDATORY:
+   ```bash
+   git pull --rebase
+   bd sync
+   git push
+   git status  # MUST show "up to date with origin"
+   ```
+5. **Clean up** - Clear stashes, prune remote branches
+6. **Verify** - All changes committed AND pushed
+7. **Hand off** - Provide context for next session
+
+## CRITICAL RULES:
+
+- Work is NOT complete until `git push` succeeds
+- NEVER stop before pushing - that leaves work stranded locally
+- NEVER say "ready to push when you are" - YOU must push
+- If push fails, resolve and retry until it succeeds
+- Use 'bd' for task tracking
+- NEVER use npm. Always use bun.
