@@ -31,7 +31,6 @@ const elements = {
   statusText: document.getElementById("statusText"),
   recentVisits: document.getElementById("recentVisits"),
   message: document.getElementById("message"),
-  openOptions: document.getElementById("openOptions"),
 };
 
 function showMessage(text: string, type: "success" | "error" | "info") {
@@ -282,28 +281,11 @@ async function syncNow() {
   }
 }
 
-function openOptions(e: Event) {
-  e.preventDefault();
-  console.log("Settings clicked, openOptions element:", elements.openOptions);
-  if (!elements.openOptions) {
-    console.error("openOptions element not found");
-    return;
-  }
-  if (chrome.runtime.openOptionsPage) {
-    console.log("Using openOptionsPage API");
-    chrome.runtime.openOptionsPage();
-  } else {
-    console.log("Using window.open fallback");
-    window.open(chrome.runtime.getURL("options.html"), "_blank");
-  }
-}
-
 elements.saveBtn?.addEventListener("click", saveConfig);
 elements.trackingToggle?.addEventListener("change", (e) =>
   toggleTracking((e.target as HTMLInputElement).checked),
 );
 elements.syncBtn?.addEventListener("click", syncNow);
-elements.openOptions?.addEventListener("click", openOptions);
 
 loadStatus();
 
