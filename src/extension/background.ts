@@ -75,30 +75,55 @@ function generateVisitId(visit: Visit): string {
   return `ext_${Math.abs(hash).toString(36)}_${Date.now()}`;
 }
 
-async function saveVisit(visit: Omit<Visit, "id" | "localTimestamp">): Promise<Visit> {
+async function saveVisit(
+  visit: Omit<Visit, "id" | "localTimestamp">,
+): Promise<Visit> {
   const visitWithId: Visit = {
     ...visit,
     id: generateVisitId(visit as Visit),
     localTimestamp: Date.now(),
   };
 
-  const stored = (await chrome.storage.local.get(["pendingVisits"])) as { pendingVisits?: Visit[] };
+  const stored = (await chrome.storage.local.get([
+    "pendingVisits",
+    "recentVisits",
+  ])) as {
+    pendingVisits?: Visit[];
+    recentVisits?: Visit[];
+  };
   const pending = stored.pendingVisits || [];
   pending.push(visitWithId);
 
+  // Track recent visits locally (keep last 100 visits)
+  const recentVisits = stored.recentVisits || [];
+  recentVisits.push(visitWithId);
+  const trimmedRecent = recentVisits
+    .sort(
+      (a, b) =>
+        new Date(b.visitTime).getTime() - new Date(a.visitTime).getTime(),
+    )
+    .slice(0, 100);
+
   await chrome.storage.local.set({
     pendingVisits: pending.slice(-config.batchSize),
+    recentVisits: trimmedRecent,
   });
 
   return visitWithId;
 }
 
-async function syncWithServer(): Promise<{ success: boolean; synced?: number; error?: string }> {
+async function syncWithServer(): Promise<{
+  success: boolean;
+  synced?: number;
+  error?: string;
+}> {
   if (!config.apiKey || !config.serverUrl) {
     return { success: false, error: "Not configured" };
   }
 
-  const stored = (await chrome.storage.local.get(["pendingVisits"])) as { pendingVisits?: Visit[] };
+  const stored = (await chrome.storage.local.get(["pendingVisits"])) as {
+    pendingVisits?: Visit[];
+  };
   const visits = stored.pendingVisits || [];
 
   if (visits.length === 0) {
@@ -106,13 +131,29 @@ async function syncWithServer(): Promise<{ success: boolean; synced?: number; er
   }
 
   try {
+    const items = visits.map((v) => ({
+      id: v.id,
+      timelineTime: v.visitTime,
+      type: "page",
+      contentId: `page_${v.domain}_${new Date(v.visitTime).getTime()}`,
+      content: {
+        url: v.url,
+        title: v.title,
+        domain: v.domain,
+        referrer: v.referrer,
+        metadata: v.metadata,
+        content: v.content,
+        visitDuration: v.visitDuration,
+      },
+    }));
+
     const response = await fetch(`${config.serverUrl}/api/extension/import`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-API-Key": config.apiKey,
       },
-      body: JSON.stringify({ visits }),
+      body: JSON.stringify({ items }),
     });
 
     if (!response.ok) {
@@ -132,10 +173,14 @@ async function syncWithServer(): Promise<{ success: boolean; synced?: number; er
     const result = await response.json();
 
     if (result.imported > 0) {
-      const processedIds = new Set(result.processedIds || visits.map((v) => v.id));
+      const processedIds = new Set(
+        result.processedIds || visits.map((v) => v.id),
+      );
       const remaining = visits.filter((v) => !processedIds.has(v.id));
 
-      const syncedData = (await chrome.storage.local.get("totalSynced")) as { totalSynced?: number };
+      const syncedData = (await chrome.storage.local.get("totalSynced")) as {
+        totalSynced?: number;
+      };
       const currentTotal = syncedData.totalSynced || 0;
 
       await chrome.storage.local.set({
@@ -154,11 +199,14 @@ async function syncWithServer(): Promise<{ success: boolean; synced?: number; er
   }
 }
 
-async function handleNavigation(details: chrome.webNavigation.WebNavigationTransitionCallbackDetails) {
+async function handleNavigation(
+  details: chrome.webNavigation.WebNavigationTransitionCallbackDetails,
+) {
   const isEnabled = await loadConfig();
   if (!isEnabled || !config.apiKey || !config.serverUrl) return;
 
-  if (config.excludedDomains.some((domain) => details.url.startsWith(domain))) return;
+  if (config.excludedDomains.some((domain) => details.url.startsWith(domain)))
+    return;
 
   const tab = await chrome.tabs.get(details.tabId);
   if (!tab || !tab.url) return;
@@ -177,7 +225,9 @@ async function handleNavigation(details: chrome.webNavigation.WebNavigationTrans
 }
 
 async function updateBadge() {
-  const stored = (await chrome.storage.local.get(["pendingVisits"])) as { pendingVisits?: Visit[] };
+  const stored = (await chrome.storage.local.get(["pendingVisits"])) as {
+    pendingVisits?: Visit[];
+  };
   const count = (stored.pendingVisits || []).length;
 
   await chrome.action.setBadgeText({
@@ -212,116 +262,157 @@ function stopSync() {
   }
 }
 
-async function handleMessage(
+function handleMessage(
   message: Record<string, unknown>,
   _sender: chrome.runtime.MessageSender,
-  sendResponse: (response: unknown) => void
-): Promise<boolean> {
+  sendResponse: (response: unknown) => void,
+): boolean {
   switch (message.type) {
     case "GET_STATUS": {
-      const stored = (await chrome.storage.local.get([
-        "apiKey",
-        "serverUrl",
-        "enabled",
-        "pendingVisits",
-        "lastSyncTime",
-        "totalSynced",
-      ])) as {
-        apiKey?: string | null;
-        serverUrl?: string | null;
-        enabled?: boolean;
-        pendingVisits?: Visit[];
-        lastSyncTime?: number;
-        totalSynced?: number;
-      };
+      (async () => {
+        try {
+          const stored = (await chrome.storage.local.get([
+            "apiKey",
+            "serverUrl",
+            "enabled",
+            "pendingVisits",
+            "recentVisits",
+            "lastSyncTime",
+            "totalSynced",
+          ])) as {
+            apiKey?: string | null;
+            serverUrl?: string | null;
+            enabled?: boolean;
+            pendingVisits?: Visit[];
+            recentVisits?: Visit[];
+            lastSyncTime?: number;
+            totalSynced?: number;
+          };
 
-      const pendingVisits = stored.pendingVisits || [];
-      const recentVisits = pendingVisits
-        .sort((a, b) => new Date(b.visitTime).getTime() - new Date(a.visitTime).getTime())
-        .slice(0, 5);
+          const pendingVisits = stored.pendingVisits || [];
+          
+          // Get recent visits from local storage (all visits, not just pending)
+          const allRecentVisits = stored.recentVisits || [];
+          const recentVisits = allRecentVisits
+            .sort(
+              (a, b) =>
+                new Date(b.visitTime).getTime() - new Date(a.visitTime).getTime(),
+            )
+            .slice(0, 10);
 
-      sendResponse({
-        isConfigured: !!(stored.apiKey && stored.serverUrl),
-        isEnabled: stored.enabled !== false,
-        pendingCount: pendingVisits.length,
-        lastSyncTime: stored.lastSyncTime,
-        totalSynced: stored.totalSynced || 0,
-        recentVisits,
-      });
-      break;
+          // Use only locally stored totalSynced (no API call)
+          const localTotalSynced = stored.totalSynced || 0;
+
+          sendResponse({
+            isConfigured: !!(stored.apiKey && stored.serverUrl),
+            isEnabled: stored.enabled !== false,
+            pendingCount: pendingVisits.length,
+            lastSyncTime: stored.lastSyncTime,
+            totalSynced: localTotalSynced,
+            recentVisits,
+          });
+        } catch (error) {
+          console.error("Error in GET_STATUS:", error);
+          sendResponse({
+            isConfigured: false,
+            isEnabled: false,
+            pendingCount: 0,
+            lastSyncTime: null,
+            totalSynced: 0,
+            recentVisits: [],
+          });
+        }
+      })();
+      return true; // Indicates we will send a response asynchronously
     }
 
     case "SYNC_NOW": {
-      const result = await syncWithServer();
-      await updateBadge();
-      sendResponse(result);
-      break;
+      (async () => {
+        const result = await syncWithServer();
+        await updateBadge();
+        sendResponse(result);
+      })();
+      return true;
     }
 
     case "CLEAR_PENDING": {
-      await chrome.storage.local.set({ pendingVisits: [] });
-      await updateBadge();
-      sendResponse({ success: true });
-      break;
+      (async () => {
+        await chrome.storage.local.set({ pendingVisits: [] });
+        await updateBadge();
+        sendResponse({ success: true });
+      })();
+      return true;
     }
 
     case "SET_CONFIG": {
-      const payload = message.payload as Partial<Config>;
-      
-      await chrome.storage.local.set({
-        apiKey: payload.apiKey ?? config.apiKey,
-        serverUrl: payload.serverUrl ?? config.serverUrl,
-        enabled: payload.enabled ?? config.enabled,
-        trackContent: payload.trackContent ?? config.trackContent,
-        autoSync: payload.autoSync ?? config.autoSync,
-      });
+      (async () => {
+        const payload = message.payload as Partial<Config>;
 
-      config = { ...config, ...payload };
-      
-      await loadConfig();
+        await chrome.storage.local.set({
+          apiKey: payload.apiKey ?? config.apiKey,
+          serverUrl: payload.serverUrl ?? config.serverUrl,
+          enabled: payload.enabled ?? config.enabled,
+          trackContent: payload.trackContent ?? config.trackContent,
+          autoSync: payload.autoSync ?? config.autoSync,
+        });
 
-      if (config.enabled && config.apiKey && config.serverUrl) {
-        startSync();
-      } else {
-        stopSync();
-      }
+        config = { ...config, ...payload };
 
-      await updateBadge();
-      sendResponse({ success: true });
-      break;
+        await loadConfig();
+
+        if (config.enabled && config.apiKey && config.serverUrl) {
+          startSync();
+        } else {
+          stopSync();
+        }
+
+        await updateBadge();
+        sendResponse({ success: true });
+      })();
+      return true;
     }
 
     case "SET_SYNC_CONFIG": {
-      const payload = message.payload as { syncInterval: number; batchSize: number };
-      
-      await chrome.storage.local.set({
-        syncInterval: payload.syncInterval,
-        batchSize: payload.batchSize,
-      });
+      (async () => {
+        const payload = message.payload as {
+          syncInterval: number;
+          batchSize: number;
+        };
 
-      config.syncInterval = payload.syncInterval;
-      config.batchSize = payload.batchSize;
+        await chrome.storage.local.set({
+          syncInterval: payload.syncInterval,
+          batchSize: payload.batchSize,
+        });
 
-      stopSync();
-      startSync();
+        config.syncInterval = payload.syncInterval;
+        config.batchSize = payload.batchSize;
 
-      sendResponse({ success: true });
-      break;
+        stopSync();
+        startSync();
+
+        sendResponse({ success: true });
+      })();
+      return true;
     }
 
     case "GET_PENDING": {
-      const pending = (await chrome.storage.local.get(["pendingVisits"])) as { pendingVisits?: Visit[] };
-      sendResponse({ visits: pending.pendingVisits || [] });
-      break;
+      (async () => {
+        const pending = (await chrome.storage.local.get(["pendingVisits"])) as {
+          pendingVisits?: Visit[];
+        };
+        sendResponse({ visits: pending.pendingVisits || [] });
+      })();
+      return true;
     }
-  }
 
-  return true;
+    default:
+      return false;
+  }
 }
 
 async function handleContentMessage(
   message: Record<string, unknown>,
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<void> {
   if (message.type === "PAGE_DATA") {
     const isEnabled = await loadConfig();

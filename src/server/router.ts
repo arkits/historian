@@ -138,6 +138,20 @@ export const appRouter = router({
       return { imported: values.length };
     }),
 
+  getHistoryById: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const [item] = await db
+        .select()
+        .from(history)
+        .where(
+          and(eq(history.id, input.id), eq(history.userId, userId)) as SQL,
+        )
+        .limit(1);
+      return item ?? null;
+    }),
+
   deleteHistory: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
@@ -215,16 +229,45 @@ export const appRouter = router({
       }));
     }),
 
-  getHistoryById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+  getRecentVisits: protectedProcedure
+    .input(z.object({ limit: z.number().min(1).max(20).default(10) }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const [result] = await db
-        .select()
+      const { limit } = input;
+
+      const items = await db
+        .select({
+          id: history.id,
+          url: sql<string>`${history.content}->>'url'`,
+          title: sql<string>`${history.content}->>'title'`,
+          domain: sql<string>`${history.content}->>'domain'`,
+          visitTime: history.timelineTime,
+        })
         .from(history)
-        .where(and(eq(history.id, input.id), eq(history.userId, userId)));
-      return result ?? null;
+        .where(eq(history.userId, userId))
+        .orderBy(desc(history.timelineTime))
+        .limit(limit);
+
+      return items.map((item) => ({
+        id: item.id,
+        url: item.url ?? "",
+        title: item.title ?? "",
+        domain: item.domain ?? "",
+        visitTime: item.visitTime
+          ? new Date(item.visitTime).toISOString()
+          : new Date().toISOString(),
+      }));
     }),
+
+  getExtensionStats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const result = await db
+      .select({ count: count(history.id) })
+      .from(history)
+      .where(eq(history.userId, userId));
+    const totalCount = Number(result[0]?.count ?? 0);
+    return { totalSynced: totalCount };
+  }),
 
   getHistoryByDate: protectedProcedure
     .input(z.object({ date: z.string() }))

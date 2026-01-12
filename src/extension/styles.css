@@ -48,14 +48,13 @@ body {
 }
 
 .popup-container {
-  width: 340px;
+  width: 480px;
   min-height: 400px;
 }
 
 .options-container {
   width: 480px;
   min-height: 600px;
-  padding: 16px;
 }
 
 .header {

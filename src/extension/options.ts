@@ -9,19 +9,37 @@ interface Config {
   excludedDomains: string[];
 }
 
+const DEFAULT_SERVER_URL = "https://historian-api.archit.xyz";
+
 const elements = {
   serverUrl: document.getElementById("serverUrl") as HTMLInputElement | null,
   apiKey: document.getElementById("apiKey") as HTMLInputElement | null,
   saveBtn: document.getElementById("saveBtn") as HTMLButtonElement | null,
-  trackingToggle: document.getElementById("trackingToggle") as HTMLInputElement | null,
-  contentToggle: document.getElementById("contentToggle") as HTMLInputElement | null,
-  autoSyncToggle: document.getElementById("autoSyncToggle") as HTMLInputElement | null,
-  syncInterval: document.getElementById("syncInterval") as HTMLInputElement | null,
+  trackingToggle: document.getElementById(
+    "trackingToggle",
+  ) as HTMLInputElement | null,
+  contentToggle: document.getElementById(
+    "contentToggle",
+  ) as HTMLInputElement | null,
+  autoSyncToggle: document.getElementById(
+    "autoSyncToggle",
+  ) as HTMLInputElement | null,
+  syncInterval: document.getElementById(
+    "syncInterval",
+  ) as HTMLInputElement | null,
   batchSize: document.getElementById("batchSize") as HTMLInputElement | null,
-  excludedDomains: document.getElementById("excludedDomains") as HTMLTextAreaElement | null,
-  saveSyncBtn: document.getElementById("saveSyncBtn") as HTMLButtonElement | null,
-  saveDomainsBtn: document.getElementById("saveDomainsBtn") as HTMLButtonElement | null,
-  clearPendingBtn: document.getElementById("clearPendingBtn") as HTMLButtonElement | null,
+  excludedDomains: document.getElementById(
+    "excludedDomains",
+  ) as HTMLTextAreaElement | null,
+  saveSyncBtn: document.getElementById(
+    "saveSyncBtn",
+  ) as HTMLButtonElement | null,
+  saveDomainsBtn: document.getElementById(
+    "saveDomainsBtn",
+  ) as HTMLButtonElement | null,
+  clearPendingBtn: document.getElementById(
+    "clearPendingBtn",
+  ) as HTMLButtonElement | null,
   resetBtn: document.getElementById("resetBtn") as HTMLButtonElement | null,
   message: document.getElementById("message"),
 };
@@ -37,6 +55,7 @@ function showMessage(text: string, type: "success" | "error" | "info") {
 }
 
 async function loadConfig() {
+  console.log("Loading config...");
   try {
     const stored = (await chrome.storage.local.get([
       "serverUrl",
@@ -49,15 +68,30 @@ async function loadConfig() {
       "excludedDomains",
     ])) as Partial<Config>;
 
-    if (elements.serverUrl) elements.serverUrl.value = stored.serverUrl || "";
-    if (elements.apiKey) elements.apiKey.value = stored.apiKey || "";
-    if (elements.trackingToggle) elements.trackingToggle.checked = stored.enabled !== false;
-    if (elements.contentToggle) elements.contentToggle.checked = stored.trackContent !== false;
-    if (elements.autoSyncToggle) elements.autoSyncToggle.checked = stored.autoSync !== false;
-    if (elements.syncInterval) elements.syncInterval.value = (stored.syncInterval || 30).toString();
-    if (elements.batchSize) elements.batchSize.value = (stored.batchSize || 50).toString();
+    console.log("Stored config:", stored);
+
+    const serverUrl = stored.serverUrl || DEFAULT_SERVER_URL;
+    const apiKey = stored.apiKey || "";
+
+    console.log("Setting serverUrl:", serverUrl);
+    console.log("Setting apiKey:", apiKey ? "***" : "empty");
+
+    if (elements.serverUrl) elements.serverUrl.value = serverUrl;
+    if (elements.apiKey) elements.apiKey.value = apiKey;
+    if (elements.trackingToggle)
+      elements.trackingToggle.checked = stored.enabled !== false;
+    if (elements.contentToggle)
+      elements.contentToggle.checked = stored.trackContent !== false;
+    if (elements.autoSyncToggle)
+      elements.autoSyncToggle.checked = stored.autoSync !== false;
+    if (elements.syncInterval)
+      elements.syncInterval.value = (stored.syncInterval || 30).toString();
+    if (elements.batchSize)
+      elements.batchSize.value = (stored.batchSize || 50).toString();
     if (elements.excludedDomains) {
-      elements.excludedDomains.value = (stored.excludedDomains || getDefaultExcludedDomains()).join("\n");
+      elements.excludedDomains.value = (
+        stored.excludedDomains || getDefaultExcludedDomains()
+      ).join("\n");
     }
   } catch (error) {
     console.error("Failed to load config:", error);
@@ -79,6 +113,9 @@ function getDefaultExcludedDomains(): string[] {
 async function saveConfig() {
   const serverUrl = elements.serverUrl?.value.trim() ?? "";
   const apiKey = elements.apiKey?.value.trim() ?? "";
+
+  console.log("Saving serverUrl:", serverUrl);
+  console.log("Saving apiKey:", apiKey ? "***" : "empty");
 
   if (!serverUrl) {
     showMessage("Please enter the server URL", "error");
@@ -119,6 +156,9 @@ async function saveConfig() {
       },
     });
     showMessage("Configuration saved!", "success");
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   } catch (error) {
     showMessage("Failed to save configuration", "error");
   } finally {
@@ -225,7 +265,11 @@ async function saveExcludedDomains() {
 }
 
 async function clearPending() {
-  if (!confirm("Are you sure you want to clear all pending visits? This cannot be undone.")) {
+  if (
+    !confirm(
+      "Are you sure you want to clear all pending visits? This cannot be undone.",
+    )
+  ) {
     return;
   }
 
@@ -259,7 +303,11 @@ async function clearPending() {
 }
 
 async function resetAll() {
-  if (!confirm("Are you sure you want to reset all settings? This will clear your configuration and all data.")) {
+  if (
+    !confirm(
+      "Are you sure you want to reset all settings? This will clear your configuration and all data.",
+    )
+  ) {
     return;
   }
 

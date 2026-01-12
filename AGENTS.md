@@ -27,6 +27,12 @@
 - Test location: `tests/` directory
 - Run tests: `bun test`
 
+## [Chrome Extension](./src/extension/README.md)
+
+Companion Chrome extension that submits user's browser history.
+
+- Run `bun run build:ext`
+
 ## Debugging
 
 - Use Playwright MCP to browse the UI on http://localhost:3000/dashboard . Use credentials for testing: username `arkits` / password `admin123`
@@ -48,4 +54,3 @@
 ## Development Workflow
 
 - You must execute `bun run build` and `bun run test` ; and ensure that there are no build issues and that all tests pass.
-

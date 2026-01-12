@@ -128,6 +128,12 @@ async function authenticateRequest(request: Request): Promise<string | null> {
 async function handleImport(request: Request): Promise<Response> {
   const userId = await authenticateRequest(request);
 
+  console.log("[Import] userId:", userId);
+  console.log(
+    "[Import] API Key:",
+    request.headers.get("X-API-Key")?.slice(0, 10) + "...",
+  );
+
   if (!userId) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
@@ -138,6 +144,7 @@ async function handleImport(request: Request): Promise<Response> {
   try {
     const body = await request.json();
     const items: HistoryItem[] = body.items || [];
+    console.log("[Import] items count:", items.length);
 
     if (items.length === 0) {
       return new Response(JSON.stringify({ imported: 0 }), {

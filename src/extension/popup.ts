@@ -116,34 +116,40 @@ async function loadStatus() {
   try {
     const response = (await chrome.runtime.sendMessage({
       type: "GET_STATUS",
-    })) as StatusResponse;
+    })) as StatusResponse | undefined;
+
+    if (!response || typeof response !== "object") {
+      console.error("Invalid status response:", response);
+      // Show setup view if no response
+      elements.setupView?.classList.remove("hidden");
+      elements.mainView?.classList.add("hidden");
+      return;
+    }
 
     if (response.isConfigured) {
       elements.setupView?.classList.add("hidden");
       elements.mainView?.classList.remove("hidden");
 
       if (elements.trackingToggle) {
-        elements.trackingToggle.checked = response.isEnabled;
+        elements.trackingToggle.checked = response.isEnabled ?? false;
       }
 
       if (elements.pendingCount) {
-        elements.pendingCount.textContent = response.pendingCount.toString();
+        elements.pendingCount.textContent = (response.pendingCount ?? 0).toString();
       }
 
       if (elements.totalSynced) {
-        elements.totalSynced.textContent =
-          response.totalSynced.toLocaleString();
+        elements.totalSynced.textContent = (response.totalSynced ?? 0).toLocaleString();
       }
 
       if (elements.lastSync) {
-        elements.lastSync.textContent = formatTime(response.lastSyncTime);
+        elements.lastSync.textContent = formatTime(response.lastSyncTime ?? null);
       }
 
       if (elements.statusText) {
-        elements.statusText.textContent = response.isEnabled
-          ? "Active"
-          : "Paused";
-        elements.statusText.style.color = response.isEnabled
+        const isEnabled = response.isEnabled ?? false;
+        elements.statusText.textContent = isEnabled ? "Active" : "Paused";
+        elements.statusText.style.color = isEnabled
           ? "oklch(0.6 0.15 160)"
           : "oklch(0.65 0.04 50)";
       }
@@ -155,6 +161,9 @@ async function loadStatus() {
     }
   } catch (error) {
     console.error("Failed to load status:", error);
+    // Show setup view on error
+    elements.setupView?.classList.remove("hidden");
+    elements.mainView?.classList.add("hidden");
   }
 }
 
@@ -235,6 +244,7 @@ async function toggleTracking(enabled: boolean) {
 }
 
 async function syncNow() {
+  console.log("Sync button clicked!");
   if (elements.syncBtn) {
     elements.syncBtn.disabled = true;
     elements.syncBtn.innerHTML = `
@@ -249,7 +259,16 @@ async function syncNow() {
     const result = (await chrome.runtime.sendMessage({ type: "SYNC_NOW" })) as {
       success: boolean;
       synced?: number;
+      error?: string;
     };
+    console.log("Sync result:", result);
+
+    if (!result || typeof result !== "object") {
+      console.error("Invalid sync result:", result);
+      showMessage("Sync failed: Invalid response", "error");
+      return;
+    }
+
     if (result.success) {
       const count = result.synced || 0;
       if (count > 0) {
@@ -262,10 +281,12 @@ async function syncNow() {
       }
       await loadStatus();
     } else {
-      showMessage("Sync failed", "error");
+      console.error("Sync error:", result.error);
+      showMessage(`Sync failed: ${result.error || "Unknown error"}`, "error");
     }
   } catch (error) {
-    showMessage("Sync failed", "error");
+    console.error("Sync exception:", error);
+    showMessage("Sync failed: Connection error", "error");
   } finally {
     if (elements.syncBtn) {
       elements.syncBtn.disabled = false;
