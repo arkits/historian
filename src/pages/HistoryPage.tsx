@@ -95,50 +95,89 @@ function HistoryCard({ item }: { item: HistoryItem }) {
   const url = content.url as string;
   const favicon = content.favicon as string;
   const thumbnail = content.thumbnail as string;
+  const [thumbnailError, setThumbnailError] = useState(false);
 
   return (
-    <Link to={`/history/${item.id}`} className="block">
-      <Card className="border-border/50 bg-card/80 backdrop-blur-xl transition-all cursor-pointer hover:border-primary/30">
-        <CardContent className="p-1 flex items-center gap-3">
-          <div className="relative flex flex-col items-center flex-shrink-0">
-            <div className="w-8 h-8 rounded flex items-center justify-center text-sm bg-primary/10 flex-shrink-0 overflow-hidden">
+    <Link to={`/history/${item.id}`} className="block group">
+      <Card className="border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 overflow-hidden relative py-0">
+        {/* Subtle gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
+        
+        <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
+          {/* Left side: Icon with timeline connector */}
+          <div className="relative flex flex-col items-center flex-shrink-0 self-center">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:from-primary/30 group-hover:to-primary/20 group-hover:border-primary/30 transition-all duration-300 flex-shrink-0 overflow-hidden shadow-sm">
               {favicon ? (
                 <img
                   src={favicon}
                   alt=""
-                  className="w-4 h-4"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
+                  className="w-5 h-5 rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<span>${getTypeIcon(item.type)}</span>`;
+                    }
+                  }}
                 />
               ) : (
-                <span>{getTypeIcon(item.type)}</span>
+                <span className="text-lg">{getTypeIcon(item.type)}</span>
               )}
             </div>
-            <div className="w-px h-4 bg-border/50 mt-0.5" />
           </div>
-          <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                <Hash className="w-2.5 h-2.5" />
+
+          {/* Center: Content */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
+            {/* Meta info row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-md flex items-center gap-1.5 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300">
+                <Hash className="w-3 h-3" />
                 {item.type.toLowerCase()}
               </span>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <Clock className="w-2.5 h-2.5" />
+              <span className="text-xs text-muted-foreground/80 flex items-center gap-1.5 font-medium">
+                <Clock className="w-3 h-3" />
                 {time}
               </span>
             </div>
-            <h3 className="font-medium text-foreground text-sm truncate pr-2">
+
+            {/* Title */}
+            <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary/90 transition-colors duration-300 line-clamp-2">
               {title}
             </h3>
+
+            {/* Subtitle/Description */}
+            {subtitle && subtitle !== title && (
+              <p className="text-xs text-muted-foreground/90 leading-relaxed line-clamp-2 group-hover:text-muted-foreground transition-colors duration-300">
+                {subtitle}
+              </p>
+            )}
+
+            {/* URL preview (if available and different from title/subtitle) */}
+            {url && !subtitle.includes(url) && !title.includes(url) && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <ExternalLink className="w-3 h-3 text-muted-foreground/60" />
+                <span className="text-xs text-muted-foreground/70 truncate max-w-md">
+                  {url.length > 50 ? `${url.substring(0, 50)}...` : url}
+                </span>
+              </div>
+            )}
           </div>
-          {thumbnail && (
-            <div className="w-20 h-full rounded flex-shrink-0 overflow-hidden">
+
+          {/* Right side: Thumbnail - Full Height */}
+          <div className="w-24 h-full rounded-lg flex-shrink-0 overflow-hidden border border-border/30 group-hover:border-primary/30 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-primary/10 bg-muted/30">
+            {thumbnail && !thumbnailError ? (
               <img
                 src={thumbnail}
                 alt=""
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={() => setThumbnailError(true)}
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                <div className="text-2xl opacity-50">{getTypeIcon(item.type)}</div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </Link>
@@ -147,35 +186,35 @@ function HistoryCard({ item }: { item: HistoryItem }) {
 
 function GroupHeader({ group }: { group: HistoryGroup }) {
   return (
-    <div className="flex items-center gap-3 py-2">
-      <div className="flex-1 h-px bg-border/50" />
+    <div className="flex items-center gap-4 py-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md -mx-6 px-6">
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-border/30" />
       <span
-        className="text-xs font-medium text-muted-foreground whitespace-nowrap px-3 py-0.5 bg-background/80 backdrop-blur rounded-full border border-border/50"
+        className="text-sm font-semibold text-foreground/90 whitespace-nowrap px-4 py-1.5 bg-gradient-to-r from-primary/10 via-primary/15 to-primary/10 backdrop-blur-sm rounded-lg border border-primary/20 shadow-sm"
         style={{ fontFamily: "Nunito, sans-serif" }}
       >
         {group.date}
       </span>
-      <div className="flex-1 h-px bg-border/50" />
+      <div className="flex-1 h-px bg-gradient-to-l from-transparent via-border/60 to-border/30" />
     </div>
   );
 }
 
 function TimelineSkeleton() {
   return (
-    <Card className="border-border/50 bg-card/80 backdrop-blur-xl">
-      <CardContent className="p-2 flex items-center gap-3">
-        <div className="relative flex flex-col items-center flex-shrink-0">
-          <div className="w-8 h-8 rounded bg-primary/10 animate-pulse flex-shrink-0" />
-          <div className="w-px h-4 bg-border/50 mt-0.5" />
+    <Card className="border-border/40 bg-card/90 backdrop-blur-xl py-0">
+      <CardContent className="py-2 px-3 flex items-stretch gap-3">
+        <div className="relative flex flex-col items-center flex-shrink-0 self-center">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 animate-pulse flex-shrink-0" />
         </div>
-        <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-12 bg-primary/10 rounded animate-pulse" />
-            <div className="h-3 w-10 bg-primary/10 rounded animate-pulse" />
+            <div className="h-4 w-14 bg-primary/10 rounded-md animate-pulse" />
+            <div className="h-4 w-10 bg-primary/10 rounded animate-pulse" />
           </div>
-          <div className="h-3 w-3/4 bg-primary/10 rounded animate-pulse" />
+          <div className="h-4 w-3/4 bg-primary/10 rounded animate-pulse" />
+          <div className="h-3 w-full bg-primary/10 rounded animate-pulse" />
         </div>
-        <div className="w-16 h-10 rounded bg-primary/10 animate-pulse flex-shrink-0" />
+        <div className="w-24 h-full rounded-lg bg-primary/10 animate-pulse flex-shrink-0" />
       </CardContent>
     </Card>
   );
@@ -564,11 +603,11 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
                     </Card>
                   </div>
                 ) : (
-                  <div className="space-y-1">
+                  <div className="space-y-6">
                     {groupedItems.map((group) => (
                       <div key={group.date}>
                         <GroupHeader group={group} />
-                        <div className="space-y-3">
+                        <div className="space-y-4 mt-4">
                           {group.items.map((item) => (
                             <HistoryCard key={item.id} item={item} />
                           ))}
