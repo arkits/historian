@@ -14,9 +14,9 @@ function generateApiKey(): string {
 export const appRouter = router({
   getSession: publicProcedure.query(async ({ ctx }) => {
     const headers: Record<string, string> = {};
-    for (const [key, value] of ctx.headers.entries()) {
+    ctx.headers.forEach((value, key) => {
       headers[key] = value;
-    }
+    });
     const session = await auth.api.getSession({
       headers,
     });
@@ -326,6 +326,28 @@ export const appRouter = router({
         .update(apiKey)
         .set({ isActive: input.isActive })
         .where(and(eq(apiKey.id, input.id), eq(apiKey.userId, userId)));
+      return { success: true };
+    }),
+
+  changePassword: protectedProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(8),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const headers: Record<string, string> = {};
+      ctx.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      await auth.api.changePassword({
+        headers,
+        body: {
+          currentPassword: input.currentPassword,
+          newPassword: input.newPassword,
+        },
+      });
       return { success: true };
     }),
 });

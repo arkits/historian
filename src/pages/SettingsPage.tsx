@@ -20,6 +20,7 @@ import {
   Check,
   History,
   Settings,
+  Lock,
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 
@@ -27,7 +28,13 @@ interface SettingsPageProps {
   onSignOut?: () => void;
 }
 
-type SettingsTab = "profile" | "activity" | "data" | "account" | "extensions";
+type SettingsTab =
+  | "profile"
+  | "activity"
+  | "data"
+  | "account"
+  | "extensions"
+  | "security";
 
 export function SettingsPage({ onSignOut }: SettingsPageProps) {
   const { data: user } = trpc.getUser.useQuery(undefined, {
@@ -53,6 +60,10 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
   const [newKeyName, setNewKeyName] = useState("");
   const [showNewKey, setShowNewKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const signOutMutation = trpc.signOut.useMutation({
     onSuccess: () => {
@@ -89,6 +100,24 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
     },
   });
 
+  const changePasswordMutation = trpc.changePassword.useMutation({
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setSaveMessage({
+        type: "success",
+        text: "Password changed successfully",
+      });
+    },
+    onError: (error) => {
+      setSaveMessage({
+        type: "error",
+        text: error.message || "Failed to change password",
+      });
+    },
+  });
+
   const handleSaveProfile = async () => {
     setIsSaving(true);
     setSaveMessage(null);
@@ -106,6 +135,7 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
     { id: "extensions" as const, label: "Extensions", icon: Key },
     { id: "data" as const, label: "Data", icon: Download },
     { id: "account" as const, label: "Account", icon: LogOut },
+    { id: "security" as const, label: "Security", icon: Lock },
   ];
 
   const renderContent = () => {
@@ -465,6 +495,109 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
                   <>
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        );
+
+      case "security":
+        return (
+          <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+            <CardHeader>
+              <CardTitle className="font-heading text-2xl text-foreground flex items-center gap-2">
+                <Lock className="w-5 h-5" />
+                Security
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Change your password to keep your account secure
+              </p>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="bg-card/50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="bg-card/50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="bg-card/50"
+                  />
+                </div>
+              </div>
+
+              {saveMessage && (
+                <div
+                  className={`p-3 rounded-lg ${
+                    saveMessage.type === "success"
+                      ? "bg-green-500/10 text-green-500"
+                      : "bg-red-500/10 text-red-500"
+                  }`}
+                >
+                  {saveMessage.text}
+                </div>
+              )}
+
+              <Button
+                onClick={() => {
+                  if (newPassword !== confirmPassword) {
+                    setSaveMessage({
+                      type: "error",
+                      text: "New passwords do not match",
+                    });
+                    return;
+                  }
+                  if (newPassword.length < 8) {
+                    setSaveMessage({
+                      type: "error",
+                      text: "Password must be at least 8 characters",
+                    });
+                    return;
+                  }
+                  changePasswordMutation.mutate({
+                    currentPassword,
+                    newPassword,
+                  });
+                }}
+                disabled={
+                  changePasswordMutation.isPending ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword
+                }
+              >
+                {changePasswordMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Changing password...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Change Password
                   </>
                 )}
               </Button>
