@@ -21,7 +21,9 @@ const elements = {
   serverUrl: document.getElementById("serverUrl") as HTMLInputElement | null,
   apiKey: document.getElementById("apiKey") as HTMLInputElement | null,
   saveBtn: document.getElementById("saveBtn") as HTMLButtonElement | null,
-  trackingToggle: document.getElementById("trackingToggle") as HTMLInputElement | null,
+  trackingToggle: document.getElementById(
+    "trackingToggle",
+  ) as HTMLInputElement | null,
   syncBtn: document.getElementById("syncBtn") as HTMLButtonElement | null,
   pendingCount: document.getElementById("pendingCount"),
   totalSynced: document.getElementById("totalSynced"),
@@ -69,7 +71,7 @@ function getFaviconUrl(domain: string): string {
 
 function renderRecentVisits(visits: Visit[]) {
   if (!elements.recentVisits) return;
-  
+
   if (visits.length === 0) {
     elements.recentVisits.innerHTML = `
       <div class="empty-state">
@@ -83,7 +85,10 @@ function renderRecentVisits(visits: Visit[]) {
     return;
   }
 
-  elements.recentVisits.innerHTML = visits.slice(0, 10).map((visit) => `
+  elements.recentVisits.innerHTML = visits
+    .slice(0, 10)
+    .map(
+      (visit) => `
     <div class="recent-item">
       <div class="recent-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -97,7 +102,9 @@ function renderRecentVisits(visits: Visit[]) {
       </div>
       <div class="recent-time">${formatVisitTime(visit.visitTime)}</div>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
 function escapeHtml(text: string): string {
@@ -115,27 +122,30 @@ async function loadStatus() {
     if (response.isConfigured) {
       elements.setupView?.classList.add("hidden");
       elements.mainView?.classList.remove("hidden");
-      
+
       if (elements.trackingToggle) {
         elements.trackingToggle.checked = response.isEnabled;
       }
-      
+
       if (elements.pendingCount) {
         elements.pendingCount.textContent = response.pendingCount.toString();
       }
-      
+
       if (elements.totalSynced) {
-        elements.totalSynced.textContent = response.totalSynced.toLocaleString();
+        elements.totalSynced.textContent =
+          response.totalSynced.toLocaleString();
       }
-      
+
       if (elements.lastSync) {
         elements.lastSync.textContent = formatTime(response.lastSyncTime);
       }
-      
+
       if (elements.statusText) {
-        elements.statusText.textContent = response.isEnabled ? "Active" : "Paused";
-        elements.statusText.style.color = response.isEnabled 
-          ? "oklch(0.6 0.15 160)" 
+        elements.statusText.textContent = response.isEnabled
+          ? "Active"
+          : "Paused";
+        elements.statusText.style.color = response.isEnabled
+          ? "oklch(0.6 0.15 160)"
           : "oklch(0.65 0.04 50)";
       }
 
@@ -237,11 +247,17 @@ async function syncNow() {
   }
 
   try {
-    const result = (await chrome.runtime.sendMessage({ type: "SYNC_NOW" })) as { success: boolean; synced?: number };
+    const result = (await chrome.runtime.sendMessage({ type: "SYNC_NOW" })) as {
+      success: boolean;
+      synced?: number;
+    };
     if (result.success) {
       const count = result.synced || 0;
       if (count > 0) {
-        showMessage(`Synced ${count} visit${count !== 1 ? "s" : ""}!`, "success");
+        showMessage(
+          `Synced ${count} visit${count !== 1 ? "s" : ""}!`,
+          "success",
+        );
       } else {
         showMessage("Already up to date", "info");
       }
@@ -268,11 +284,17 @@ async function syncNow() {
 
 function openOptions(e: Event) {
   e.preventDefault();
-  chrome.runtime.openOptionsPage?.();
+  if (chrome.runtime.openOptionsPage) {
+    chrome.runtime.openOptionsPage();
+  } else {
+    window.open(chrome.runtime.getURL("options.html"), "_blank");
+  }
 }
 
 elements.saveBtn?.addEventListener("click", saveConfig);
-elements.trackingToggle?.addEventListener("change", (e) => toggleTracking((e.target as HTMLInputElement).checked));
+elements.trackingToggle?.addEventListener("change", (e) =>
+  toggleTracking((e.target as HTMLInputElement).checked),
+);
 elements.syncBtn?.addEventListener("click", syncNow);
 elements.openOptions?.addEventListener("click", openOptions);
 
