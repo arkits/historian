@@ -3,8 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Clock, BookOpen } from "lucide-react";
 import { PublicNavBar } from "@/components/PublicNavBar";
+import { trpc } from "@/client/trpc";
 
 export function HomePage() {
+  const { data: session, isLoading } = trpc.getSession.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const isLoggedIn = !!session?.session;
+
   return (
     <div className="min-h-screen">
       <PublicNavBar />
@@ -30,17 +38,40 @@ export function HomePage() {
                 digital legacy.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/login">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto text-base px-8"
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-              </div>
+              {!isLoading && (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  {isLoggedIn ? (
+                    <Link to="/dashboard">
+                      <Button
+                        size="lg"
+                        className="w-full sm:w-auto text-base px-8"
+                      >
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link to="/login">
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          className="w-full sm:w-auto text-base px-8"
+                        >
+                          Sign In
+                        </Button>
+                      </Link>
+                      <Link to="/signup">
+                        <Button
+                          size="lg"
+                          className="w-full sm:w-auto text-base px-8"
+                        >
+                          Create Account
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -172,15 +203,40 @@ export function HomePage() {
               Join users who trust Historian to keep their digital memories
               safe.
             </p>
-            <Link to="/login">
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto text-lg px-10"
-              >
-                Sign In to Your Account
-              </Button>
-            </Link>
+            {!isLoading && (
+              <>
+                {isLoggedIn ? (
+                  <Link to="/dashboard">
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto text-lg px-10"
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <Link to="/login">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full sm:w-auto text-lg px-10"
+                      >
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/signup">
+                      <Button
+                        size="lg"
+                        className="w-full sm:w-auto text-lg px-10"
+                      >
+                        Create Account
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
       </main>

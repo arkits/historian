@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, History, Settings, LogOut, Link2 } from "lucide-react";
+import { ArrowLeft, History, Settings, LogOut, Link2, BookOpen } from "lucide-react";
 
 interface NavBarProps {
   title: string;
@@ -69,6 +69,16 @@ export function NavBar({ title, onSignOut, showBack = false }: NavBarProps) {
             >
               <Link2 className="w-4 h-4 mr-2" />
               Connections
+            </Button>
+          </Link>
+          <Link to="/docs">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Docs
             </Button>
           </Link>
           <Link to="/settings">

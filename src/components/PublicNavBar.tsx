@@ -1,9 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
+import { trpc } from "@/client/trpc";
 
 export function PublicNavBar() {
   const location = useLocation();
+  const { data: session, isLoading } = trpc.getSession.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const isLoggedIn = !!session?.session;
 
   const navLinks = [
     { href: "/about", label: "About" },
@@ -39,9 +46,6 @@ export function PublicNavBar() {
               </Button>
             </Link>
           ))}
-        </div>
-
-        <div className="flex items-center gap-2">
           <a
             href="https://github.com/arkits/historian"
             target="_blank"
@@ -50,15 +54,44 @@ export function PublicNavBar() {
           >
             <Github className="w-5 h-5" />
           </a>
-          <Link to="/login">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground text-sm"
-            >
-              Sign In
-            </Button>
-          </Link>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {!isLoading && (
+            <>
+              {isLoggedIn ? (
+                <Link to="/dashboard">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-foreground text-sm"
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-foreground text-sm"
+                    >
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button
+                      size="sm"
+                      className="text-sm"
+                    >
+                      Create Account
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     </nav>

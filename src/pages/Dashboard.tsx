@@ -12,6 +12,7 @@ import {
   Settings,
   FileText,
   Link2,
+  BookOpen,
 } from "lucide-react";
 import { ActivityHeatmap } from "@/components/heatmap";
 import { useMemo } from "react";
@@ -106,6 +107,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               >
                 <Link2 className="w-4 h-4 mr-2" />
                 Connections
+              </Button>
+            </Link>
+            <Link to="/docs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Docs
               </Button>
             </Link>
             <Link to="/settings">

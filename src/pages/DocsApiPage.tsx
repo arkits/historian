@@ -1,146 +1,87 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Code2,
-  ArrowRight,
   Copy,
-  CheckCircle2,
-  Terminal,
   Lock,
-  Zap,
-  Menu,
-  X,
 } from "lucide-react";
 import { DocsNavBar } from "@/components/DocsNavBar";
 import { DocsSidebar } from "@/components/DocsSidebar";
 import { useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function DocsApiPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeResponseTab, setActiveResponseTab] = useState<Record<string, string>>({});
 
   const endpoints = [
     {
-      method: "GET",
-      path: "/api/v1/history",
-      description: "Retrieve paginated history entries",
-      params: [
-        {
-          name: "page",
-          type: "number",
-          description: "Page number (default: 1)",
-        },
-        {
-          name: "limit",
-          type: "number",
-          description: "Items per page (default: 50)",
-        },
-        {
-          name: "service",
-          type: "string",
-          description: "Filter by service ID",
-        },
-        {
-          name: "from",
-          type: "date",
-          description: "Filter entries after date",
-        },
-        { name: "to", type: "date", description: "Filter entries before date" },
-        {
-          name: "search",
-          type: "string",
-          description: "Full-text search query",
-        },
-      ],
-    },
-    {
-      method: "GET",
-      path: "/api/v1/history/:id",
-      description: "Get a single history entry by ID",
-      params: [],
-    },
-    {
-      method: "DELETE",
-      path: "/api/v1/history/:id",
-      description: "Delete a single history entry",
-      params: [],
-    },
-    {
-      method: "GET",
-      path: "/api/v1/services",
-      description: "List all connected services",
-      params: [],
-    },
-    {
       method: "POST",
-      path: "/api/v1/services/:serviceId/sync",
-      description: "Trigger manual sync for a service",
-      params: [],
-    },
+      path: "/api/extension/import",
+      description: "Import history items. Used by the Chrome extension to sync browser history.",
+      requestBody: `{
+  "items": [
     {
-      method: "GET",
-      path: "/api/v1/analytics",
-      description: "Get usage analytics and statistics",
-      params: [
-        {
-          name: "period",
-          type: "string",
-          description: "Period: day, week, month, year",
+      "timelineTime": "2024-01-01T00:00:00Z",
+      "type": "page",
+      "contentId": "page_abc123",
+      "content": {
+        "url": "https://example.com",
+        "title": "Example Page"
+      },
+      "searchContent": "Example page content"
+    }
+  ]
+}`,
+      response: {
+        success: {
+          status: 200,
+          example: `{
+  "imported": 5
+}`,
         },
-      ],
-    },
-    {
-      method: "GET",
-      path: "/api/v1/search",
-      description: "Full-text search across all history",
-      params: [
-        { name: "q", type: "string", description: "Search query (required)" },
-        {
-          name: "limit",
-          type: "number",
-          description: "Max results (default: 20)",
-        },
-      ],
-    },
-    {
-      method: "POST",
-      path: "/api/v1/import",
-      description: "Import data from external source",
-      params: [
-        { name: "source", type: "string", description: "Source service ID" },
-        { name: "data", type: "object", description: "Data to import" },
-      ],
+        errors: [
+          {
+            status: 401,
+            example: `{
+  "error": "Unauthorized"
+}`,
+          },
+          {
+            status: 500,
+            example: `{
+  "error": "Import failed"
+}`,
+          },
+        ],
+      },
     },
   ];
 
   const codeExamples = {
-    fetchHistory: `// Fetch history entries
-const response = await fetch('/api/v1/history', {
+    importHistory: `// Import history items
+const response = await fetch('/api/extension/import', {
+  method: 'POST',
   headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
+    'X-API-Key': 'YOUR_API_KEY',
     'Content-Type': 'application/json'
-  }
+  },
+  body: JSON.stringify({
+    items: [
+      {
+        timelineTime: '2024-01-01T00:00:00Z',
+        type: 'page',
+        contentId: 'page_abc123',
+        content: { url: 'https://example.com', title: 'Example' },
+        searchContent: 'Example page content'
+      }
+    ]
+  })
 });
 
 const data = await response.json();
-console.log(data.results);`,
-    searchHistory: `// Search history
-const response = await fetch('/api/v1/search?q=github&limit=10', {
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
-  }
-});
-
-const { results } = await response.json();`,
-    syncService: `// Trigger service sync
-const response = await fetch('/api/v1/services/github/sync', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
-  }
-});
-
-const { status } = await response.json();`,
+console.log(data.imported); // Number of items imported`,
   };
 
   return (
@@ -157,14 +98,15 @@ const { status } = await response.json();`,
           <div className="mb-12">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/50 border border-border w-fit mb-4">
               <Code2 className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">API v1</span>
+              <span className="text-sm text-muted-foreground">Extension API</span>
             </div>
             <h1 className="font-heading text-4xl lg:text-5xl text-foreground mb-4">
               API <span className="text-primary">Reference</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Build custom integrations with Historian's REST API. Access your
-              history data programmatically with full CRUD operations.
+              REST API endpoint for importing history data. This endpoint is
+              primarily used by the Chrome extension but can be used for custom
+              integrations.
             </p>
           </div>
 
@@ -181,11 +123,10 @@ const { status } = await response.json();`,
                     </h2>
                     <p className="text-muted-foreground mb-4">
                       All API requests require authentication using an API key.
-                      Include your API key in the Authorization header:
+                      Include your API key in the X-API-Key header:
                     </p>
                     <div className="bg-background/50 rounded-lg p-4 font-mono text-sm">
-                      <span className="text-purple-400">Authorization</span>:{" "}
-                      <span className="text-green-400">Bearer</span>{" "}
+                      <span className="text-purple-400">X-API-Key</span>:{" "}
                       <span className="text-yellow-400">YOUR_API_KEY</span>
                     </div>
                     <p className="text-muted-foreground text-sm mt-4">
@@ -202,19 +143,22 @@ const { status } = await response.json();`,
             <div className="bg-background/50 rounded-lg p-4 font-mono text-sm flex items-center gap-4 flex-wrap">
               <span className="text-muted-foreground">Base URL:</span>
               <code className="text-green-400">
-                https://api.historian.app/v1
+                https://historian-api.archit.xyz
               </code>
               <Button
                 variant="ghost"
                 size="sm"
                 className="ml-auto"
                 onClick={() =>
-                  navigator.clipboard.writeText("https://api.historian.app/v1")
+                  navigator.clipboard.writeText("https://historian-api.archit.xyz")
                 }
               >
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
+            <p className="text-muted-foreground text-sm mt-2">
+              All endpoints are relative to the base URL above.
+            </p>
           </section>
 
           <section id="endpoints" className="mb-12">
@@ -251,41 +195,133 @@ const { status } = await response.json();`,
                       {endpoint.description}
                     </p>
 
-                    {endpoint.params.length > 0 && (
-                      <div className="bg-background/30 rounded-lg overflow-hidden ml-1">
-                        <table className="w-full text-sm">
-                          <thead className="bg-accent/30">
-                            <tr>
-                              <th className="text-left p-2 font-medium text-muted-foreground">
-                                Parameter
-                              </th>
-                              <th className="text-left p-2 font-medium text-muted-foreground">
-                                Type
-                              </th>
-                              <th className="text-left p-2 font-medium text-muted-foreground">
-                                Description
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {endpoint.params.map((param) => (
-                              <tr
-                                key={param.name}
-                                className="border-t border-border/50"
+                    {endpoint.requestBody && (
+                      <div className="mb-4 ml-1">
+                        <h3 className="text-sm font-medium text-foreground mb-2">
+                          Request Body
+                        </h3>
+                        <div className="bg-background/30 rounded-lg overflow-hidden">
+                          <div className="p-3">
+                            <SyntaxHighlighter
+                              language="json"
+                              style={oneDark}
+                              customStyle={{
+                                margin: 0,
+                                padding: 0,
+                                background: "transparent",
+                                fontSize: "0.75rem",
+                                lineHeight: "1.5",
+                              }}
+                              codeTagProps={{
+                                style: {
+                                  fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+                                },
+                              }}
+                            >
+                              {endpoint.requestBody}
+                            </SyntaxHighlighter>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {endpoint.response && (
+                      <div className="ml-1">
+                        <h3 className="text-sm font-medium text-foreground mb-3">
+                          Response Format
+                        </h3>
+                        <div className="flex gap-2 mb-3 border-b border-border/50">
+                          <button
+                            onClick={() =>
+                              setActiveResponseTab({
+                                ...activeResponseTab,
+                                [endpoint.path]: "success",
+                              })
+                            }
+                            className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+                              (activeResponseTab[endpoint.path] || "success") ===
+                              "success"
+                                ? "text-green-400 border-green-400"
+                                : "text-muted-foreground border-transparent hover:text-foreground"
+                            }`}
+                          >
+                            Success ({endpoint.response.success.status})
+                          </button>
+                          {endpoint.response.errors.map((error, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() =>
+                                setActiveResponseTab({
+                                  ...activeResponseTab,
+                                  [endpoint.path]: `error-${error.status}`,
+                                })
+                              }
+                              className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+                                activeResponseTab[endpoint.path] ===
+                                `error-${error.status}`
+                                  ? "text-red-400 border-red-400"
+                                  : "text-muted-foreground border-transparent hover:text-foreground"
+                              }`}
+                            >
+                              Error ({error.status})
+                            </button>
+                          ))}
+                        </div>
+                        <div className="bg-background/30 rounded-lg overflow-hidden">
+                          <div className="p-3">
+                            {(activeResponseTab[endpoint.path] || "success") ===
+                            "success" ? (
+                              <SyntaxHighlighter
+                                language="json"
+                                style={oneDark}
+                                customStyle={{
+                                  margin: 0,
+                                  padding: 0,
+                                  background: "transparent",
+                                  fontSize: "0.75rem",
+                                  lineHeight: "1.5",
+                                }}
+                                codeTagProps={{
+                                  style: {
+                                    fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+                                  },
+                                }}
                               >
-                                <td className="p-2 font-mono text-primary text-xs">
-                                  {param.name}
-                                </td>
-                                <td className="p-2 text-muted-foreground text-xs">
-                                  {param.type}
-                                </td>
-                                <td className="p-2 text-muted-foreground text-xs">
-                                  {param.description}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                {endpoint.response.success.example}
+                              </SyntaxHighlighter>
+                            ) : (
+                              endpoint.response.errors.map((error, idx) => {
+                                if (
+                                  activeResponseTab[endpoint.path] ===
+                                  `error-${error.status}`
+                                ) {
+                                  return (
+                                    <SyntaxHighlighter
+                                      key={idx}
+                                      language="json"
+                                      style={oneDark}
+                                      customStyle={{
+                                        margin: 0,
+                                        padding: 0,
+                                        background: "transparent",
+                                        fontSize: "0.75rem",
+                                        lineHeight: "1.5",
+                                      }}
+                                      codeTagProps={{
+                                        style: {
+                                          fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+                                        },
+                                      }}
+                                    >
+                                      {error.example}
+                                    </SyntaxHighlighter>
+                                  );
+                                }
+                                return null;
+                              })
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -298,13 +334,13 @@ const { status } = await response.json();`,
             <h2 className="font-heading text-2xl text-foreground mb-6">
               Code Examples
             </h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-4">
               {Object.entries(codeExamples).map(([key, code]) => (
                 <Card
                   key={key}
-                  className="border-border/50 bg-card/50 overflow-hidden"
+                  className="border-border/50 bg-card/50 overflow-hidden p-0"
                 >
-                  <div className="bg-accent/30 px-4 py-2 border-b border-border/50 flex items-center justify-between">
+                  <div className="bg-accent/30 px-4 py-3 border-b border-border/50 flex items-center justify-between">
                     <span className="text-sm font-medium text-muted-foreground capitalize">
                       {key.replace(/([A-Z])/g, " $1").trim()}
                     </span>
@@ -312,83 +348,36 @@ const { status } = await response.json();`,
                       variant="ghost"
                       size="sm"
                       onClick={() => navigator.clipboard.writeText(code)}
+                      className="h-8"
                     >
                       <Copy className="w-4 h-4" />
                     </Button>
                   </div>
-                  <pre className="p-4 text-xs font-mono overflow-x-auto">
-                    <code className="text-muted-foreground">{code}</code>
-                  </pre>
+                  <div className="overflow-x-auto bg-background/30">
+                    <SyntaxHighlighter
+                      language="javascript"
+                      style={oneDark}
+                      customStyle={{
+                        margin: 0,
+                        padding: "1rem",
+                        background: "transparent",
+                        fontSize: "0.875rem",
+                        lineHeight: "1.5",
+                      }}
+                      codeTagProps={{
+                        style: {
+                          fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+                        },
+                      }}
+                    >
+                      {code}
+                    </SyntaxHighlighter>
+                  </div>
                 </Card>
               ))}
             </div>
           </section>
 
-          <section id="rate-limits" className="mb-12">
-            <Card className="border-border/50 bg-card/50">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-6 h-6 text-amber-500" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="font-heading text-xl text-foreground mb-4">
-                      Rate Limits
-                    </h2>
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <div className="bg-background/30 rounded-lg p-4 text-center">
-                        <p className="font-heading text-2xl text-primary mb-1">
-                          1,000
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          requests/hour (Free)
-                        </p>
-                      </div>
-                      <div className="bg-background/30 rounded-lg p-4 text-center">
-                        <p className="font-heading text-2xl text-primary mb-1">
-                          10,000
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          requests/hour (Pro)
-                        </p>
-                      </div>
-                      <div className="bg-background/30 rounded-lg p-4 text-center">
-                        <p className="font-heading text-2xl text-primary mb-1">
-                          Unlimited
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          requests/hour (Enterprise)
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className="pt-8 border-t border-border/50">
-            <Card className="border-border/50 bg-card/50">
-              <CardContent className="p-6 text-center">
-                <h2 className="font-heading text-xl text-foreground mb-3">
-                  Official <span className="text-primary">SDKs</span>
-                </h2>
-                <p className="text-muted-foreground mb-4">
-                  Official client libraries for popular languages
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  {["JavaScript", "Python", "Go", "Rust", "Ruby"].map(
-                    (lang) => (
-                      <Button key={lang} variant="outline" size="sm">
-                        <Terminal className="w-3 h-3 mr-2" />
-                        {lang}
-                      </Button>
-                    ),
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
         </div>
       </main>
     </div>

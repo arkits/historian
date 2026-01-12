@@ -20,6 +20,8 @@ import {
 import { DocsNavBar } from "@/components/DocsNavBar";
 import { DocsSidebar } from "@/components/DocsSidebar";
 import { useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function DocsSelfHostingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -92,6 +94,7 @@ services:
 
 volumes:
   postgres_data:`,
+      language: "yaml",
     },
     {
       step: "2",
@@ -99,6 +102,7 @@ volumes:
       description:
         "Generate a secure secret key for authentication. This is critical for security.",
       code: `openssl rand -base64 32`,
+      language: "bash",
     },
     {
       step: "3",
@@ -106,6 +110,7 @@ volumes:
       description:
         "Run Docker Compose to start both the Historian app and PostgreSQL database.",
       code: `docker compose up -d`,
+      language: "bash",
     },
     {
       step: "4",
@@ -113,6 +118,7 @@ volumes:
       description: "Check that all containers are running properly.",
       code: `docker compose ps
 # All containers should show "Up" status`,
+      language: "bash",
     },
   ];
 
@@ -130,6 +136,7 @@ sudo apt-get install postgresql postgresql-contrib
 # Start PostgreSQL
 sudo systemctl start postgresql
 sudo systemctl enable postgresql`,
+      language: "bash",
     },
     {
       step: "2",
@@ -142,6 +149,7 @@ CREATE DATABASE historian OWNER historian;
 GRANT ALL PRIVILEGES ON DATABASE historian TO historian;
 
 \q`,
+      language: "sql",
     },
     {
       step: "3",
@@ -151,6 +159,7 @@ GRANT ALL PRIVILEGES ON DATABASE historian TO historian;
 cd historian
 bun install
 bun run build`,
+      language: "bash",
     },
     {
       step: "4",
@@ -162,18 +171,21 @@ AUTH_SECRET=your-super-secret-key-here
 NODE_ENV=production
 PORT=3000
 EOF`,
+      language: "bash",
     },
     {
       step: "5",
       title: "Run Migrations",
       description: "Apply database migrations to set up the schema.",
       code: `bun run migrate`,
+      language: "bash",
     },
     {
       step: "6",
       title: "Start the Server",
       description: "Start Historian in production mode.",
       code: `bun start`,
+      language: "bash",
     },
   ];
 
@@ -253,11 +265,24 @@ EOF`,
                         {step.description}
                       </p>
                       <div className="bg-background/50 rounded-lg overflow-hidden">
-                        <pre className="p-4 text-xs font-mono overflow-x-auto">
-                          <code className="text-muted-foreground">
-                            {step.code}
-                          </code>
-                        </pre>
+                        <SyntaxHighlighter
+                          language={step.language || "bash"}
+                          style={oneDark}
+                          customStyle={{
+                            margin: 0,
+                            padding: "1rem",
+                            background: "transparent",
+                            fontSize: "0.75rem",
+                            lineHeight: "1.5",
+                          }}
+                          codeTagProps={{
+                            style: {
+                              fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+                            },
+                          }}
+                        >
+                          {step.code}
+                        </SyntaxHighlighter>
                       </div>
                     </div>
                   </div>
@@ -291,11 +316,24 @@ EOF`,
                         {step.description}
                       </p>
                       <div className="bg-background/50 rounded-lg overflow-hidden">
-                        <pre className="p-4 text-xs font-mono overflow-x-auto">
-                          <code className="text-muted-foreground">
-                            {step.code}
-                          </code>
-                        </pre>
+                        <SyntaxHighlighter
+                          language={step.language || "bash"}
+                          style={oneDark}
+                          customStyle={{
+                            margin: 0,
+                            padding: "1rem",
+                            background: "transparent",
+                            fontSize: "0.75rem",
+                            lineHeight: "1.5",
+                          }}
+                          codeTagProps={{
+                            style: {
+                              fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+                            },
+                          }}
+                        >
+                          {step.code}
+                        </SyntaxHighlighter>
                       </div>
                     </div>
                   </div>
