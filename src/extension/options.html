@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Historian Settings</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="options-container">
+      <header class="header">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <h1 class="title">Historian Settings</h1>
+      </header>
+
+      <div id="message" class="message hidden"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Connection</h2>
+          <p class="card-description">Configure your connection to the Historian server</p>
+        </div>
+        <div class="card-content">
+          <div class="form-group">
+            <label for="serverUrl">Server URL</label>
+            <input type="url" id="serverUrl" placeholder="https://your-historian-server.com" autocomplete="url" />
+          </div>
+          <div class="form-group">
+            <label for="apiKey">API Key</label>
+            <input type="password" id="apiKey" placeholder="Enter your API key" autocomplete="current-password" />
+          </div>
+          <button id="saveBtn" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Save Configuration
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Tracking</h2>
+          <p class="card-description">Control what browsing activity is tracked</p>
+        </div>
+        <div class="card-content">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label">Enable Tracking</span>
+              <span class="toggle-description">Record your browsing history</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="trackingToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label">Track Page Content</span>
+              <span class="toggle-description">Extract page metadata and content</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="contentToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label">Auto Sync</span>
+              <span class="toggle-description">Automatically sync to server</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="autoSyncToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Sync Settings</h2>
+          <p class="card-description">Configure sync behavior</p>
+        </div>
+        <div class="card-content">
+          <div class="form-group">
+            <label for="syncInterval">Sync Interval (seconds)</label>
+            <input type="number" id="syncInterval" min="5" max="300" value="30" />
+          </div>
+          <div class="form-group">
+            <label for="batchSize">Batch Size</label>
+            <input type="number" id="batchSize" min="10" max="200" value="50" />
+          </div>
+          <button id="saveSyncBtn" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+            Save & Sync Now
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Excluded Domains</h2>
+          <p class="card-description">Domains where tracking is disabled</p>
+        </div>
+        <div class="card-content">
+          <textarea id="excludedDomains" class="textarea" placeholder="Enter domains to exclude, one per line" rows="5"></textarea>
+          <button id="saveDomainsBtn" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Save Exclusions
+          </button>
+        </div>
+      </div>
+
+      <div class="card danger-zone">
+        <div class="card-header">
+          <h2 class="card-title">Danger Zone</h2>
+          <p class="card-description">Irreversible actions</p>
+        </div>
+        <div class="card-content">
+          <button id="clearPendingBtn" class="btn btn-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            Clear Pending Visits
+          </button>
+          <button id="resetBtn" class="btn btn-danger-outline">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2.5 2v6h6M21.5 22v-6h-6" />
+              <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2" />
+            </svg>
+            Reset All Settings
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="options.ts"></script>
+  </body>
+</html>

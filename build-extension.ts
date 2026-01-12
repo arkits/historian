@@ -25,6 +25,7 @@ const tsFiles = [
   { src: "background.ts", out: "background.js" },
   { src: "content.ts", out: "content.js" },
   { src: "popup.ts", out: "popup.js" },
+  { src: "options.ts", out: "options.js" },
 ];
 
 console.log("📦 Compiling TypeScript files...\n");
@@ -63,13 +64,46 @@ for (const file of tsFiles) {
 
 console.log("\n📋 Copying static files...");
 
-const staticFiles = ["manifest.json", "popup.html"];
+const staticFiles = [
+  "manifest.json",
+  "popup.html",
+  "options.html",
+  "styles.css",
+];
 for (const file of staticFiles) {
   const srcPath = path.join(EXTENSION_SRC, file);
   const outPath = path.join(EXTENSION_OUT, file);
-  copyFileSync(srcPath, outPath);
-  console.log(`  ${file}`);
+  if (existsSync(srcPath)) {
+    copyFileSync(srcPath, outPath);
+    console.log(`  ${file}`);
+  }
+}
+
+console.log("\n📁 Copying icons...");
+
+const iconsDir = path.join(EXTENSION_OUT, "icons");
+mkdirSync(iconsDir, { recursive: true });
+
+const iconSizes = ["16", "48", "128"];
+for (const size of iconSizes) {
+  const srcPath = path.join(EXTENSION_SRC, "icons", `icon${size}.png`);
+  const outPath = path.join(iconsDir, `icon${size}.png`);
+  if (existsSync(srcPath)) {
+    copyFileSync(srcPath, outPath);
+    console.log(`  icons/icon${size}.png`);
+  } else {
+    console.log(`  icons/icon${size}.png (placeholder)`);
+    writeFileSync(outPath, createPlaceholderIcon(size));
+  }
 }
 
 console.log(`\n✅ Extension built successfully!`);
 console.log(`📁 Output: ${EXTENSION_OUT}\n`);
+
+function createPlaceholderIcon(size: string): Buffer {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 16 14"/>
+</svg>`;
+  return Buffer.from(svg);
+}

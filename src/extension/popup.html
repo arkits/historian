@@ -1,428 +1,135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Historian</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-          sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
-        min-width: 320px;
-        max-width: 360px;
-      }
-
-      .container {
-        padding: 16px;
-      }
-
-      .header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #1e293b;
-      }
-
-      .logo {
-        width: 32px;
-        height: 32px;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .logo svg {
-        width: 20px;
-        height: 20px;
-        color: white;
-      }
-
-      .title {
-        font-size: 16px;
-        font-weight: 600;
-        color: #f8fafc;
-      }
-
-      .status-card {
-        background: #1e293b;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
-      }
-
-      .status-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-
-      .status-row:last-child {
-        margin-bottom: 0;
-      }
-
-      .status-label {
-        font-size: 13px;
-        color: #94a3b8;
-      }
-
-      .status-value {
-        font-size: 13px;
-        font-weight: 500;
-        color: #e2e8f0;
-      }
-
-      .status-indicator {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #64748b;
-      }
-
-      .indicator.active {
-        background: #22c55e;
-        box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-      }
-
-      .pending-count {
-        font-size: 24px;
-        font-weight: 700;
-        color: #3b82f6;
-      }
-
-      .section {
-        margin-bottom: 16px;
-      }
-
-      .section-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #64748b;
-        margin-bottom: 10px;
-      }
-
-      .input-group {
-        margin-bottom: 12px;
-      }
-
-      .input-group label {
-        display: block;
-        font-size: 13px;
-        color: #94a3b8;
-        margin-bottom: 6px;
-      }
-
-      .input-group input {
-        width: 100%;
-        padding: 10px 12px;
-        background: #1e293b;
-        border: 1px solid #334155;
-        border-radius: 8px;
-        color: #e2e8f0;
-        font-size: 13px;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-
-      .input-group input:focus {
-        border-color: #3b82f6;
-      }
-
-      .input-group input::placeholder {
-        color: #475569;
-      }
-
-      .btn {
-        width: 100%;
-        padding: 10px 16px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-
-      .btn-primary {
-        background: #3b82f6;
-        color: white;
-      }
-
-      .btn-primary:hover {
-        background: #2563eb;
-      }
-
-      .btn-primary:disabled {
-        background: #475569;
-        cursor: not-allowed;
-      }
-
-      .btn-secondary {
-        background: #1e293b;
-        color: #94a3b8;
-        border: 1px solid #334155;
-      }
-
-      .btn-secondary:hover {
-        background: #334155;
-        color: #e2e8f0;
-      }
-
-      .toggle-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-      }
-
-      .toggle-label {
-        font-size: 14px;
-        color: #e2e8f0;
-      }
-
-      .toggle {
-        position: relative;
-        width: 44px;
-        height: 24px;
-      }
-
-      .toggle input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .toggle-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #475569;
-        border-radius: 24px;
-        transition: 0.3s;
-      }
-
-      .toggle-slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background: white;
-        border-radius: 50%;
-        transition: 0.3s;
-      }
-
-      .toggle input:checked + .toggle-slider {
-        background: #3b82f6;
-      }
-
-      .toggle input:checked + .toggle-slider:before {
-        transform: translateX(20px);
-      }
-
-      .actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 16px;
-      }
-
-      .actions .btn {
-        flex: 1;
-      }
-
-      .error {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        color: #f87171;
-        padding: 10px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        margin-bottom: 12px;
-        display: none;
-      }
-
-      .error.visible {
-        display: block;
-      }
-
-      .success {
-        background: rgba(34, 197, 94, 0.1);
-        border: 1px solid rgba(34, 197, 94, 0.3);
-        color: #4ade80;
-        padding: 10px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        margin-bottom: 12px;
-        display: none;
-      }
-
-      .success.visible {
-        display: block;
-      }
-
-      .hidden {
-        display: none !important;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
-      <div class="header">
+    <div class="popup-container">
+      <header class="header">
         <div class="logo">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
         </div>
-        <div class="title">Historian</div>
-      </div>
+        <h1 class="title">Historian</h1>
+        <a href="#" class="settings-link" id="openOptions" title="Open Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </a>
+      </header>
 
-      <div id="error" class="error"></div>
-      <div id="success" class="success"></div>
+      <div id="message" class="message hidden"></div>
 
-      <div id="setupView">
-        <div class="section">
-          <div class="section-title">Configuration</div>
-          <div class="input-group">
-            <label for="serverUrl">Server URL</label>
-            <input
-              type="url"
-              id="serverUrl"
-              placeholder="https://your-historian-server.com"
-            />
+      <div id="setupView" class="view hidden">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Setup Historian</h2>
+            <p class="card-description">Connect to your Historian server to start syncing your browsing history</p>
           </div>
-          <div class="input-group">
-            <label for="apiKey">API Key</label>
-            <input type="text" id="apiKey" placeholder="Enter your API key" />
+          <div class="card-content">
+            <div class="form-group">
+              <label for="serverUrl">Server URL</label>
+              <input type="url" id="serverUrl" placeholder="https://your-historian-server.com" autocomplete="url" />
+            </div>
+            <div class="form-group">
+              <label for="apiKey">API Key</label>
+              <input type="password" id="apiKey" placeholder="Enter your API key" autocomplete="current-password" />
+            </div>
+            <button id="saveBtn" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+              Save Configuration
+            </button>
           </div>
-          <button id="saveBtn" class="btn btn-primary">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
-              />
-              <polyline points="17 21 17 13 7 13 7 21" />
-              <polyline points="7 3 7 8 15 8" />
-            </svg>
-            Save Configuration
-          </button>
         </div>
       </div>
 
-      <div id="mainView" class="hidden">
-        <div class="status-card">
-          <div class="status-row">
-            <span class="status-label">Status</span>
-            <div class="status-indicator">
-              <span id="statusText" class="status-value">Connected</span>
-              <span id="statusDot" class="indicator active"></span>
+      <div id="mainView" class="view">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pending">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value" id="pendingCount">0</span>
+              <span class="stat-label">Pending</span>
             </div>
           </div>
-          <div class="status-row">
-            <span class="status-label">Pending Uploads</span>
-            <span id="pendingCount" class="pending-count">0</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">Total Tracked</span>
-            <span id="totalTracked" class="status-value">0</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">Last Sync</span>
-            <span id="lastSync" class="status-value">-</span>
+          <div class="stat-card">
+            <div class="stat-icon synced">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value" id="totalSynced">0</span>
+              <span class="stat-label">Synced</span>
+            </div>
           </div>
         </div>
 
-        <div class="section">
-          <div class="toggle-row">
-            <span class="toggle-label">Enable Tracking</span>
-            <label class="toggle">
-              <input type="checkbox" id="trackingToggle" />
-              <span class="toggle-slider"></span>
-            </label>
+        <div class="card">
+          <div class="card-header">
+            <div class="status-row">
+              <div class="status-info">
+                <span class="status-label">Status</span>
+                <span class="status-text" id="statusText">Active</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="trackingToggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="last-sync">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              <span id="lastSync">Never synced</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <h3 class="section-title">Recent Activity</h3>
+          <div id="recentVisits" class="recent-list">
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <p>No recent visits</p>
+            </div>
           </div>
         </div>
 
         <div class="actions">
           <button id="syncBtn" class="btn btn-primary">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="23 4 23 10 17 10" />
               <polyline points="1 20 1 14 7 14" />
-              <path
-                d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
-              />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
             </svg>
-            Sync Now
-          </button>
-          <button id="clearBtn" class="btn btn-secondary">Clear</button>
-        </div>
-
-        <div class="actions">
-          <button id="settingsBtn" class="btn btn-secondary">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
-              />
-            </svg>
-            Settings
+            <span>Sync Now</span>
           </button>
         </div>
       </div>
     </div>
 
-    <script src="popup.js"></script>
+    <script type="module" src="popup.ts"></script>
   </body>
 </html>
