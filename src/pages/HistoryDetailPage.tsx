@@ -11,7 +11,6 @@ import {
   ExternalLink,
   Trash2,
   Loader2,
-  Image,
   Link as LinkIcon,
 } from "lucide-react";
 
@@ -21,7 +20,7 @@ interface HistoryDetailPageProps {
 
 function ResponsiveIframe({ html }: { html: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [modifiedHtml, setModifiedHtml] = useState(html);
+  const [modifiedHtml] = useState(html);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -58,7 +57,7 @@ function ResponsiveIframe({ html }: { html: string }) {
   );
 }
 
-export function HistoryDetailPage({ onSignOut }: HistoryDetailPageProps) {
+export function HistoryDetailPage({ onSignOut: _onSignOut }: HistoryDetailPageProps) {
   const { id } = useParams<{ id: string }>();
   const {
     data: item,
@@ -124,8 +123,6 @@ export function HistoryDetailPage({ onSignOut }: HistoryDetailPageProps) {
   const thumbnail = content.thumbnail as string;
   const mediaEmbed = content.media_embed as { content?: string };
   const mediaEmbedContent = mediaEmbed?.content;
-
-  const hasMedia = thumbnail || mediaEmbedContent;
 
   return (
     <div className="min-h-screen">

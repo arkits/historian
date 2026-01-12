@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -13,7 +12,6 @@ import {
   ShoppingCart,
   Cloud,
   Calendar,
-  Briefcase,
   Heart,
   ArrowRight,
   CheckCircle2,
@@ -454,7 +452,7 @@ export function SupportedServicesPage() {
                     </div>
 
                     <div className="space-y-3">
-                      {category.services.map((service, index) => (
+                      {category.services.map((service) => (
                         <div
                           key={service.name}
                           className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors"

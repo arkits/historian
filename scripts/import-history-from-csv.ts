@@ -19,7 +19,7 @@ interface CsvHistoryRecord {
 function parseCSV(filePath: string): CsvHistoryRecord[] {
   const content = fs.readFileSync(filePath, "utf-8");
   const lines = content.trim().split("\n");
-  const headers = lines[0]!.split(",").map((h) => h.replace(/^"|"$/g, ""));
+  lines[0]!.split(",").map((h) => h.replace(/^"|"$/g, "")); // headers
 
   const records: CsvHistoryRecord[] = [];
 

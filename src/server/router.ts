@@ -2,7 +2,7 @@ import { router, publicProcedure, protectedProcedure } from "./trpc";
 import { auth } from "./auth";
 import { db } from "@/lib/db";
 import { history, apiKey } from "@/lib/schema";
-import { eq, desc, and, lt, count, type SQL, or, gte, sql } from "drizzle-orm";
+import { eq, desc, and, lt, count, type SQL, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 
 function generateApiKey(): string {

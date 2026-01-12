@@ -1,9 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { auth } from "./auth";
 import type { Context } from "./context";
-import { db } from "@/lib/db";
-import { apiKey as apiKeyTable } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
 import {
   logInfo,
   logError,
@@ -12,9 +9,8 @@ import {
   addBreadcrumb,
   getTracer,
   SpanStatusCode,
-  startSpan,
 } from "./observability";
-import { SpanKind, context as otelContext } from "@opentelemetry/api";
+import { SpanKind } from "@opentelemetry/api";
 
 const t = initTRPC.context<Context>().create({
   errorFormatter({ shape, error }) {
@@ -87,8 +83,7 @@ const loggingMiddleware = t.middleware(({ path, type, next }) => {
   });
 });
 
-const tracingMiddleware = t.middleware(async ({ path, type, next, ctx }) => {
-  const parentSpan = ctx.traceSpan;
+const tracingMiddleware = t.middleware(async ({ path, type, next, ctx: _ctx }) => {
   const tracer = getTracer("historian");
 
   return tracer.startActiveSpan(

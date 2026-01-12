@@ -16,10 +16,6 @@ interface PageMetadata {
   ogDescription: string;
 }
 
-interface IgnoredPatterns {
-  test(url: string): boolean;
-}
-
 const IGNORED_URLS: RegExp[] = [
   /^chrome:/,
   /^chrome-extension:/,

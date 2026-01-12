@@ -21,7 +21,7 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const utils = trpc.useUtils();
-  const getSession = trpc.getSession.useQuery(undefined, {
+  trpc.getSession.useQuery(undefined, {
     retry: false,
   });
 
@@ -61,7 +61,7 @@ export function LoginPage() {
 
       await utils.getSession.invalidate();
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("An error occurred");
     } finally {
       setIsLoading(false);

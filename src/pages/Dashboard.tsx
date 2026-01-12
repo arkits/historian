@@ -6,9 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Clock,
   LogOut,
-  ArrowLeft,
   History,
-  Upload,
   Settings,
   FileText,
   Link2,
@@ -23,7 +21,7 @@ interface DashboardProps {
 
 export function Dashboard({ onSignOut }: DashboardProps) {
   const navigate = useNavigate();
-  const { data: session } = trpc.getSession.useQuery(undefined, {
+  trpc.getSession.useQuery(undefined, {
     retry: false,
   });
   const { data: user } = trpc.getUser.useQuery(undefined, {

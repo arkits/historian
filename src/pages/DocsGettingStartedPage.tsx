@@ -8,15 +8,9 @@ import {
   Download,
   Globe,
   Zap,
-  ChevronRight,
-  Terminal,
-  Settings,
-  ArrowLeft,
   Sparkles,
   Clock,
   Search,
-  Menu,
-  X,
 } from "lucide-react";
 import { DocsNavBar } from "@/components/DocsNavBar";
 import { DocsSidebar } from "@/components/DocsSidebar";
@@ -157,7 +151,7 @@ export function DocsGettingStartedPage() {
               Quick Start
             </h2>
             <div className="space-y-8">
-              {steps.map((step, index) => (
+              {steps.map((step) => (
                 <div
                   key={step.step}
                   className="flex flex-col lg:flex-row gap-6"
@@ -210,7 +204,7 @@ export function DocsGettingStartedPage() {
               What You'll Get
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <Card
                   key={feature.title}
                   className="border-border/50 bg-card/50 text-center hover:bg-card/80 transition-all"
@@ -236,7 +230,7 @@ export function DocsGettingStartedPage() {
               Pro Tips
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              {tips.map((tip, index) => (
+              {tips.map((tip) => (
                 <Card
                   key={tip.title}
                   className="border-border/50 bg-card/50 hover:bg-card/80 transition-all"

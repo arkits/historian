@@ -26,7 +26,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { NavBar } from "@/components/NavBar";
 
 interface HistoryPageProps {
@@ -263,12 +262,12 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   }, [selectedType, dateRange, navigate]);
 
   const dateQuery = trpc.getHistoryByDate.useQuery(
-    { date: dateRange?.from! },
+    { date: dateRange?.from ?? "" },
     { enabled: !!dateRange?.from && !dateRange?.to, retry: false },
   );
 
   const dateRangeQuery = trpc.getHistoryItemsByDateRange.useQuery(
-    { startDate: dateRange?.from!, endDate: dateRange?.to! },
+    { startDate: dateRange?.from ?? "", endDate: dateRange?.to ?? "" },
     { enabled: !!dateRange?.from && !!dateRange?.to, retry: false },
   );
 
@@ -456,12 +455,6 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
       </div>
     );
   }
-
-  const signOutMutation = trpc.signOut.useMutation({
-    onSuccess: () => {
-      onSignOut?.();
-    },
-  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

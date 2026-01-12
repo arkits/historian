@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ArrowLeft,
   User,
   Trash2,
   Download,
@@ -18,8 +16,6 @@ import {
   Key,
   Copy,
   Check,
-  History,
-  Settings,
   Lock,
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";

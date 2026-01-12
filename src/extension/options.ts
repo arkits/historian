@@ -159,7 +159,7 @@ async function saveConfig() {
     setTimeout(() => {
       window.location.reload();
     }, 500);
-  } catch (error) {
+  } catch {
     showMessage("Failed to save configuration", "error");
   } finally {
     if (elements.saveBtn) {
@@ -210,7 +210,7 @@ async function saveSyncSettings() {
     });
     showMessage("Sync settings saved!", "success");
     await chrome.runtime.sendMessage({ type: "SYNC_NOW" });
-  } catch (error) {
+  } catch {
     showMessage("Failed to save sync settings", "error");
   } finally {
     if (elements.saveSyncBtn) {
@@ -247,7 +247,7 @@ async function saveExcludedDomains() {
   try {
     await chrome.storage.local.set({ excludedDomains: domains });
     showMessage("Excluded domains saved!", "success");
-  } catch (error) {
+  } catch {
     showMessage("Failed to save excluded domains", "error");
   } finally {
     if (elements.saveDomainsBtn) {
@@ -286,7 +286,7 @@ async function clearPending() {
   try {
     await chrome.runtime.sendMessage({ type: "CLEAR_PENDING" });
     showMessage("Pending visits cleared!", "success");
-  } catch (error) {
+  } catch {
     showMessage("Failed to clear pending visits", "error");
   } finally {
     if (elements.clearPendingBtn) {
@@ -327,7 +327,7 @@ async function resetAll() {
     setTimeout(() => {
       window.location.reload();
     }, 1000);
-  } catch (error) {
+  } catch {
     showMessage("Failed to reset settings", "error");
   } finally {
     if (elements.resetBtn) {

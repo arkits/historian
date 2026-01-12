@@ -13,6 +13,7 @@
     "build:ext": "bun run build-extension.ts",
     "preview": "vite preview",
     "test": "vitest run tests",
+    "lint": "oxlint",
     "migrate": "bun run migrate.ts",
     "db:reset": "bun run scripts/reset-db.ts"
   },
@@ -71,6 +72,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.8",
+    "oxlint": "^1.38.0",
     "prettier": "^3.7.4",
     "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",

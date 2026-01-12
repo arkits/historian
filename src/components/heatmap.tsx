@@ -179,7 +179,7 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
               gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
             }}
           >
-            {weeks.map((week, weekIndex) =>
+            {weeks.map((week) =>
               week.map((day) => {
                 const dateStr = day.toISOString().split("T")[0] ?? "";
                 const dayData = heatmapData.get(dateStr);

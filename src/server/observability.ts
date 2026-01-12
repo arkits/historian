@@ -7,7 +7,7 @@ import {
   ATTR_SERVICE_VERSION,
 } from "@opentelemetry/semantic-conventions";
 import { SimpleSpanProcessor, type Span } from "@opentelemetry/sdk-trace-node";
-import { trace, SpanStatusCode, context, SpanKind } from "@opentelemetry/api";
+import { trace, SpanStatusCode, SpanKind } from "@opentelemetry/api";
 import { PostHog } from "posthog-node";
 
 let posthog: PostHog | null = null;
@@ -90,7 +90,7 @@ export function initObservability(config: ObservabilityConfig): void {
         [ATTR_SERVICE_NAME]: serviceName,
         [ATTR_SERVICE_VERSION]: serviceVersion,
         "deployment.environment": environment,
-      }),
+      }) as any,
       spanProcessors:
         exporters.length > 0
           ? exporters.map((exp) => new SimpleSpanProcessor(exp))
@@ -264,21 +264,23 @@ export function startSpan(
 }
 
 export function shutdownObservability(): Promise<void> {
-  return new Promise(async (resolve) => {
-    console.log("[observability] Shutting down...");
+  return new Promise((resolve) => {
+    (async () => {
+      console.log("[observability] Shutting down...");
 
-    if (posthog) {
-      await posthog.shutdown();
-      console.log("[observability] PostHog flushed");
-    }
+      if (posthog) {
+        await posthog.shutdown();
+        console.log("[observability] PostHog flushed");
+      }
 
-    if (sdk) {
-      await sdk.shutdown();
-      console.log("[observability] OpenTelemetry shutdown");
-    }
+      if (sdk) {
+        await sdk.shutdown();
+        console.log("[observability] OpenTelemetry shutdown");
+      }
 
-    isInitialized = false;
-    resolve();
+      isInitialized = false;
+      resolve();
+    })();
   });
 }
 

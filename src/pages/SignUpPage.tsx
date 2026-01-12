@@ -51,7 +51,7 @@ export function SignUpPage() {
 
       await utils.getSession.invalidate();
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("An error occurred");
     } finally {
       setIsLoading(false);

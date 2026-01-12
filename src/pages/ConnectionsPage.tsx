@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
 import {
   Card,

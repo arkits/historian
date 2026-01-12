@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,8 +16,6 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
-  Menu,
-  X,
 } from "lucide-react";
 import { DocsNavBar } from "@/components/DocsNavBar";
 import { DocsSidebar } from "@/components/DocsSidebar";

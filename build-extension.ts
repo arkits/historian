@@ -3,7 +3,6 @@ import {
   existsSync,
   mkdirSync,
   copyFileSync,
-  readFileSync,
   writeFileSync,
   rmSync,
 } from "fs";
@@ -32,7 +31,6 @@ console.log("📦 Compiling TypeScript files...\n");
 
 for (const file of tsFiles) {
   const srcPath = path.join(EXTENSION_SRC, file.src);
-  const outPath = path.join(EXTENSION_OUT, file.out);
 
   console.log(`  ${file.src} → ${file.out}`);
 

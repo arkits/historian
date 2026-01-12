@@ -64,10 +64,6 @@ function formatVisitTime(timestamp: string): string {
   return date.toLocaleDateString();
 }
 
-function getFaviconUrl(domain: string): string {
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-}
-
 function renderRecentVisits(visits: Visit[]) {
   if (!elements.recentVisits) return;
 
@@ -209,7 +205,7 @@ async function saveConfig() {
     });
     showMessage("Configuration saved!", "success");
     await loadStatus();
-  } catch (error) {
+  } catch {
     showMessage("Failed to save configuration", "error");
   } finally {
     if (elements.saveBtn) {
@@ -238,7 +234,7 @@ async function toggleTracking(enabled: boolean) {
     });
     await loadStatus();
     showMessage(enabled ? "Tracking enabled" : "Tracking paused", "info");
-  } catch (error) {
+  } catch {
     showMessage("Failed to update tracking", "error");
   }
 }

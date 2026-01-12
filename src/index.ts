@@ -139,7 +139,6 @@ const authHandler = createAuthHandler();
 const trpcHandler = createTRPCHandler();
 
 async function handleRequest(request: Request): Promise<Response> {
-  const url = new URL(request.url);
   const response = await handleExtensionRequest(request);
 
   const origin = request.headers.get("origin");
@@ -163,22 +162,6 @@ async function handleRequest(request: Request): Promise<Response> {
   return response;
 }
 
-function handleOptions(request: Request): Response {
-  const origin = request.headers.get("origin");
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Max-Age": "86400",
-      },
-    });
-  }
-  return new Response(null, { status: 204 });
-}
 
 function serveStaticFile(path: string): Response {
   try {

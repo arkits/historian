@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Server,
@@ -7,15 +5,10 @@ import {
   Database,
   Lock,
   Globe,
-  Cloud,
   Cpu,
-  ArrowRight,
   CheckCircle2,
-  Download,
   Settings,
   Shield,
-  Menu,
-  X,
 } from "lucide-react";
 import { DocsNavBar } from "@/components/DocsNavBar";
 import { DocsSidebar } from "@/components/DocsSidebar";
@@ -148,7 +141,7 @@ CREATE USER historian WITH PASSWORD 'your-secure-password';
 CREATE DATABASE historian OWNER historian;
 GRANT ALL PRIVILEGES ON DATABASE historian TO historian;
 
-\q`,
+\\q`,
       language: "sql",
     },
     {

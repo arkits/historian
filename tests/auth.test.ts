@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { betterAuth } from "better-auth";
@@ -78,8 +79,10 @@ describe("Better Auth Integration Tests", () => {
       .where(eq(user.email, email));
 
     expect(sessions.length).toBeGreaterThan(0);
-    expect(sessions[0].session.token).toBeDefined();
-    expect(sessions[0].session.expiresAt).toBeDefined();
+    const firstSession = sessions[0];
+    expect(firstSession).toBeDefined();
+    expect(firstSession?.session.token).toBeDefined();
+    expect(firstSession?.session.expiresAt).toBeDefined();
   });
 
   it("should sign out successfully", async () => {

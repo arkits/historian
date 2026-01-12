@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { HomePage } from "@/pages/HomePage";
@@ -38,29 +38,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>;
-}
-
-function AuthCallback({ onAuthSuccess }: { onAuthSuccess: () => void }) {
-  const { data: session, isLoading } = trpc.getSession.useQuery(undefined, {
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-
-  useEffect(() => {
-    if (session?.session) {
-      onAuthSuccess();
-    }
-  }, [session, onAuthSuccess]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  return <Navigate to="/dashboard" replace />;
 }
 
 export function App() {
