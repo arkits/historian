@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,6 +60,33 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [commitId, setCommitId] = useState<string | null>(null);
+  const [healthStatus, setHealthStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCommitId = async () => {
+      try {
+        const healthUrl =
+          window.location.origin === "https://historian.archit.xyz"
+            ? "https://historian-api.archit.xyz/health"
+            : "/health";
+        const response = await fetch(healthUrl);
+        if (response.ok) {
+          const data = await response.json();
+          setCommitId(data.commit);
+          setHealthStatus(data.status);
+        } else {
+          setHealthStatus("unhealthy");
+        }
+      } catch (error) {
+        console.error("Failed to fetch commit ID:", error);
+        setHealthStatus("unhealthy");
+      }
+    };
+
+    fetchCommitId();
+  }, []);
 
   const signOutMutation = trpc.signOut.useMutation({
     onSuccess: () => {
@@ -633,7 +660,43 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
               </Card>
             </div>
 
-            <div className="flex-1">{renderContent()}</div>
+            <div className="flex-1">
+              {renderContent()}
+              {(commitId || healthStatus) && (
+                <div className="mt-6 pt-6 border-t border-border/50">
+                  <div className="flex items-center justify-center gap-2">
+                    {healthStatus && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          healthStatus === "healthy"
+                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                            : "bg-red-500/10 text-red-500 border border-red-500/20"
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            healthStatus === "healthy"
+                              ? "bg-emerald-500"
+                              : "bg-red-500"
+                          }`}
+                        />
+                        {healthStatus === "healthy"
+                          ? "all systems operational"
+                          : "Unhealthy"}
+                      </span>
+                    )}
+                    {commitId && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-accent/50 text-muted-foreground border border-border/50">
+                        <span className="text-[10px] text-muted-foreground/70">
+                          Backend
+                        </span>
+                        {commitId.slice(0, 7)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>

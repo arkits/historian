@@ -9,32 +9,11 @@ import {
   Sparkles,
   ArrowRight,
   Github,
-  Twitter,
-  Mail,
 } from "lucide-react";
 import { PublicNavBar } from "@/components/PublicNavBar";
+import { Footer } from "@/components/Footer";
 
 export function AboutPage() {
-  const milestones = [
-    {
-      year: "2024",
-      title: "The Beginning",
-      description:
-        "Historian started as a personal project to unify digital footprints",
-    },
-    {
-      year: "2025",
-      title: "Open Source",
-      description:
-        "Released to the public with a growing community of contributors",
-    },
-    {
-      year: "2025",
-      title: "Major Milestone",
-      description: "Reached 10,000 active users across the globe",
-    },
-  ];
-
   const values = [
     {
       icon: Shield,
@@ -60,13 +39,6 @@ export function AboutPage() {
       description:
         "Digital memories deserve to last. Built for long-term preservation.",
     },
-  ];
-
-  const team = [
-    { name: "Alex Chen", role: "Founder & Lead Developer", avatar: "👨‍💻" },
-    { name: "Sarah Miller", role: "Product Designer", avatar: "👩‍🎨" },
-    { name: "Jordan Lee", role: "Backend Engineer", avatar: "🧑‍💻" },
-    { name: "You?", role: "Open Source Contributor", avatar: "🤝" },
   ];
 
   return (
@@ -223,87 +195,6 @@ export function AboutPage() {
           </div>
         </section>
 
-        {/* Timeline Section */}
-        <section className="py-20 px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16 animate-fade-in">
-              <h2 className="font-heading text-4xl md:text-5xl text-foreground mb-4">
-                Our <span className="text-primary">Journey</span>
-              </h2>
-            </div>
-
-            <div className="relative">
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-accent to-transparent" />
-
-              <div className="space-y-12">
-                {milestones.map((milestone, index) => (
-                  <div
-                    key={milestone.year}
-                    className="relative flex gap-6 animate-fade-in"
-                    style={{ animationDelay: `${index * 150}ms` }}
-                  >
-                    <div className="relative z-10">
-                      <div className="w-16 h-16 rounded-full bg-card border-2 border-primary flex items-center justify-center">
-                        <span className="font-heading text-xl text-primary">
-                          {milestone.year.slice(-2)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex-1 pt-3">
-                      <Card className="border-border/50 bg-card/50 hover:bg-card/80 transition-all hover:-translate-x-1">
-                        <CardContent className="p-6">
-                          <h3 className="font-heading text-2xl text-foreground mb-2">
-                            {milestone.title}
-                          </h3>
-                          <p className="text-muted-foreground">
-                            {milestone.description}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Team Section */}
-        <section className="py-20 px-6 bg-gradient-to-b from-transparent via-accent/5 to-transparent">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16 animate-fade-in">
-              <h2 className="font-heading text-4xl md:text-5xl text-foreground mb-4">
-                Meet the <span className="text-primary">Team</span>
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                The people behind Historian
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-              {team.map((member, index) => (
-                <Card
-                  key={member.name}
-                  className="group relative overflow-hidden border-border/50 bg-card/50 hover:bg-card/80 transition-all duration-300 hover:-translate-y-2 hover:raycast-shadow"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-accent/50 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform">
-                      {member.avatar}
-                    </div>
-                    <h3 className="font-heading text-xl text-foreground mb-1">
-                      {member.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {member.role}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="py-24 px-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10" />
@@ -347,87 +238,7 @@ export function AboutPage() {
         </section>
       </main>
 
-      <footer className="py-12 px-6 border-t border-border/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <Link to="/" className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🕵️</span>
-                <span className="font-heading text-2xl text-foreground">
-                  Historian
-                </span>
-              </Link>
-              <p className="text-muted-foreground text-sm max-w-sm">
-                Preserving your digital footprint for generations to come.
-                Track, search, and relive your digital memories.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-heading text-lg text-foreground mb-4">
-                Product
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    to="/about"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/supported-services"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Supported Services
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-heading text-lg text-foreground mb-4">
-                Connect
-              </h4>
-              <div className="flex gap-4">
-                <a
-                  href="https://github.com/arkits/historian"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Github className="w-5 h-5" />
-                </a>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Mail className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2025 Historian. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition-colors">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Terms
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

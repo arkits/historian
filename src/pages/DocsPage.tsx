@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { PublicNavBar } from "@/components/PublicNavBar";
+import { Footer } from "@/components/Footer";
 
 export function DocsPage() {
   const docSections = [
@@ -55,9 +56,9 @@ export function DocsPage() {
     <div className="min-h-screen">
       <PublicNavBar />
 
-      <main className="pt-24">
+      <main>
         {/* Hero Section */}
-        <section className="py-20 px-6 relative overflow-hidden">
+        <section className="pb-20 px-6 relative overflow-hidden pt-24">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/10" />
           <div className="absolute top-20 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
 
@@ -285,37 +286,7 @@ export function DocsPage() {
         </section>
       </main>
 
-      <footer className="py-12 px-6 border-t border-border/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🕵️</span>
-              <span className="font-heading text-lg text-foreground">
-                Historian
-              </span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link
-                to="/docs"
-                className="hover:text-foreground transition-colors"
-              >
-                Docs
-              </Link>
-              <a
-                href="https://github.com/arkits/historian"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
-              >
-                GitHub
-              </a>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 Historian Documentation
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
