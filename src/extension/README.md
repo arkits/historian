@@ -1,6 +1,6 @@
-# Historian Chrome Extension
+# Historian Chrome/Firefox Extension
 
-A Chrome extension that automatically tracks your web browsing history and syncs it to your Historian server.
+A browser extension that automatically tracks your web browsing history and syncs it to your Historian server. Works on both Chrome and Firefox.
 
 ## Features
 
@@ -12,7 +12,7 @@ A Chrome extension that automatically tracks your web browsing history and syncs
 
 ## Installation
 
-### From Source
+### Chrome
 
 1. Build the extension:
 
@@ -28,12 +28,34 @@ A Chrome extension that automatically tracks your web browsing history and syncs
 
 5. Select the `extension` folder
 
+### Firefox
+
+1. Build the Firefox extension:
+
+   ```bash
+   bun run build:ext:firefox
+   ```
+
+2. Open Firefox and navigate to `about:debugging`
+
+3. Click "This Firefox" in the left sidebar
+
+4. Click "Load Temporary Add-on"
+
+5. Select `extension-firefox/manifest.json`
+
+Note: Firefox loads extensions temporarily. To install permanently, you'll need to sign and distribute through AMO (addons.mozilla.org), or use the extension in development mode as shown above.
+
 ### Development Mode
 
 To watch for changes and rebuild automatically:
 
 ```bash
+# For Chrome
 bun run build:ext --watch
+
+# For Firefox
+bun run build:ext:firefox --watch
 ```
 
 ## Setup
@@ -67,7 +89,7 @@ bun run build:ext --watch
 
 1. **Page Detection**: The extension listens for page navigations and URL changes
 2. **Data Collection**: Content scripts extract page metadata (title, description, Open Graph data)
-3. **Local Storage**: Visits are stored locally in Chrome's storage API
+3. **Local Storage**: Visits are stored locally in the browser's storage API
 4. **Periodic Sync**: Every 30 seconds, pending visits are sent to your Historian server
 5. **Deduplication**: The server prevents duplicate entries based on URL and timestamp
 
@@ -82,7 +104,7 @@ bun run build:ext --watch
 
 The extension does not track:
 
-- Chrome internal pages (`chrome://`, `chrome-extension://`)
+- Browser internal pages (`chrome://`, `chrome-extension://`, `moz-extension://`)
 - Browser extension pages
 - `about:` pages
 - Data URLs and file URLs
@@ -93,8 +115,11 @@ The extension does not track:
 # Install dependencies
 bun install
 
-# Build extension
+# Build Chrome extension
 bun run build:ext
+
+# Build Firefox extension
+bun run build:ext:firefox
 
 # Build web app and extension
 bun run build
@@ -115,7 +140,7 @@ The extension uses these endpoints:
 
 1. Check your server URL is correct and the server is running
 2. Verify your API key is valid (create a new one if needed)
-3. Check Chrome's background console for errors
+3. Check the browser's background console for errors (about:debugging in Firefox)
 
 ### Visits Not Syncing
 

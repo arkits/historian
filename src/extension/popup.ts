@@ -17,6 +17,60 @@ interface Visit {
 
 const DEFAULT_SERVER_URL = "https://historian-api.archit.xyz";
 
+declare const browser: typeof chrome;
+
+const isFirefox =
+  typeof navigator !== "undefined" && /Firefox/i.test(navigator.userAgent);
+
+const extApi = isFirefox && typeof browser !== "undefined" ? browser : chrome;
+
+function sendMessage(message: Record<string, unknown>): Promise<unknown> {
+  if (isFirefox) {
+    return extApi.runtime.sendMessage(message);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.runtime.sendMessage(message, (response: unknown) => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
+async function getStorage(
+  keys: string | string[],
+): Promise<Record<string, unknown>> {
+  if (isFirefox) {
+    return extApi.storage.local.get(keys);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.get(keys, (result: Record<string, unknown>) => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function setStorage(items: Record<string, unknown>): Promise<void> {
+  if (isFirefox) {
+    return extApi.storage.local.set(items);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.set(items, () => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 const elements = {
   setupView: document.getElementById("setupView"),
   mainView: document.getElementById("mainView"),
@@ -151,21 +205,64 @@ function updateMainView(response: StatusResponse) {
 }
 
 async function loadStatus() {
+  console.log("[Popup] loadStatus called");
   try {
-    const response = (await chrome.runtime.sendMessage({
+    const response = (await sendMessage({
       type: "GET_STATUS",
     })) as StatusResponse | undefined;
+    console.log("[Popup] GET_STATUS response:", response);
 
     if (!response || typeof response !== "object") {
-      console.error("Invalid status response:", response);
-      showSetupView();
+      console.log(
+        "[Popup] Message passing failed, reading from storage directly",
+      );
+      const stored = (await getStorage([
+        "apiKey",
+        "serverUrl",
+        "enabled",
+        "pendingVisits",
+        "recentVisits",
+        "lastSyncTime",
+        "totalSynced",
+      ])) as {
+        apiKey?: string | null;
+        serverUrl?: string | null;
+        enabled?: boolean;
+        pendingVisits?: Visit[];
+        recentVisits?: Visit[];
+        lastSyncTime?: number;
+        totalSynced?: number;
+      };
+
+      const isConfigured = !!(stored.apiKey && stored.serverUrl);
+      console.log("[Popup] Direct storage check - isConfigured:", isConfigured);
+
+      if (isConfigured) {
+        const recentVisits = (stored.recentVisits || []).slice(0, 10);
+        const statusResponse: StatusResponse = {
+          isConfigured: true,
+          isEnabled: stored.enabled !== false,
+          pendingCount: (stored.pendingVisits || []).length,
+          lastSyncTime: stored.lastSyncTime || null,
+          totalSynced: stored.totalSynced || 0,
+          recentVisits,
+        };
+        showMainView();
+        updateMainView(statusResponse);
+      } else {
+        showSetupView();
+        await loadDefaultServerUrl();
+      }
       return;
     }
 
+    console.log("[Popup] isConfigured:", response.isConfigured);
     if (response.isConfigured) {
+      console.log("[Popup] Showing main view");
       showMainView();
       updateMainView(response);
     } else {
+      console.log("[Popup] Showing setup view");
       showSetupView();
       await loadDefaultServerUrl();
     }
@@ -176,7 +273,7 @@ async function loadStatus() {
 }
 
 async function loadDefaultServerUrl() {
-  const stored = (await chrome.storage.local.get(["serverUrl"])) as {
+  const stored = (await getStorage(["serverUrl"])) as {
     serverUrl?: string;
   };
   if (elements.serverUrl) {
@@ -216,7 +313,8 @@ async function saveConfig() {
   }
 
   try {
-    await chrome.runtime.sendMessage({
+    console.log("[Popup] Sending SET_CONFIG message");
+    const result = await sendMessage({
       type: "SET_CONFIG",
       payload: {
         serverUrl,
@@ -224,9 +322,11 @@ async function saveConfig() {
         enabled: true,
       },
     });
+    console.log("[Popup] SET_CONFIG result:", result);
     showMessage("Configuration saved!", "success");
     await loadStatus();
-  } catch {
+  } catch (error) {
+    console.error("[Popup] SET_CONFIG error:", error);
     showMessage("Failed to save configuration", "error");
   } finally {
     if (elements.saveBtn) {
@@ -245,7 +345,7 @@ async function saveConfig() {
 
 async function toggleTracking(enabled: boolean) {
   try {
-    await chrome.runtime.sendMessage({
+    await sendMessage({
       type: "SET_CONFIG",
       payload: {
         serverUrl: "",
@@ -273,16 +373,30 @@ async function syncNow() {
   }
 
   try {
-    const result = (await chrome.runtime.sendMessage({ type: "SYNC_NOW" })) as {
-      success: boolean;
-      synced?: number;
-      error?: string;
-    };
+    const result = (await sendMessage({
+      type: "SYNC_NOW",
+    })) as
+      | {
+          success: boolean;
+          synced?: number;
+          error?: string;
+        }
+      | undefined;
     console.log("Sync result:", result);
 
     if (!result || typeof result !== "object") {
-      console.error("Invalid sync result:", result);
-      showMessage("Sync failed: Invalid response", "error");
+      console.log(
+        "[Popup] Sync message passed but no response, checking pending visits",
+      );
+      const stored = (await getStorage(["pendingVisits"])) as {
+        pendingVisits?: Visit[];
+      };
+      if ((stored.pendingVisits || []).length === 0) {
+        showMessage("Already up to date", "info");
+      } else {
+        showMessage("Sync in progress...", "info");
+      }
+      await loadStatus();
       return;
     }
 

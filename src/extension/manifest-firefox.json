@@ -12,7 +12,7 @@
   "permissions": ["webNavigation", "storage", "tabs", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "background.js",
+    "scripts": ["background.js"],
     "type": "module"
   },
   "action": {

@@ -11,6 +11,8 @@
     "build:server": "bun build --minify --target bun src/index.ts --outfile dist/server",
     "build:ui": "vite build",
     "build:ext": "bun run build-extension.ts",
+    "build:ext:firefox": "bun run build-extension.ts --firefox",
+    "build:ext:all": "bun run build-extension.ts --all",
     "preview": "vite preview",
     "test": "vitest run tests",
     "lint": "oxlint",

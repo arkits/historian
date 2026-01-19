@@ -25,6 +25,28 @@ const IGNORED_URLS: RegExp[] = [
   /^file:/,
 ];
 
+declare const browser: typeof chrome;
+
+const isFirefox =
+  typeof navigator !== "undefined" && /Firefox/i.test(navigator.userAgent);
+
+const extApi = isFirefox && typeof browser !== "undefined" ? browser : chrome;
+
+function sendMessage(message: unknown): Promise<unknown> {
+  if (isFirefox) {
+    return extApi.runtime.sendMessage(message);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.runtime.sendMessage(message, (response: unknown) => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
 let lastUrl: string | null = null;
 let visitStartTime: Date | null = null;
 
@@ -114,7 +136,7 @@ async function reportPageVisit(): Promise<void> {
   };
 
   try {
-    await chrome.runtime.sendMessage(pageData);
+    await sendMessage(pageData);
   } catch (error) {
     console.error("Failed to report page visit:", error);
   }

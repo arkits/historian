@@ -11,6 +11,75 @@ interface Config {
 
 const DEFAULT_SERVER_URL = "https://historian-api.archit.xyz";
 
+declare const browser: typeof chrome;
+
+const isFirefox =
+  typeof navigator !== "undefined" && /Firefox/i.test(navigator.userAgent);
+
+const extApi = isFirefox && typeof browser !== "undefined" ? browser : chrome;
+
+function sendMessage(message: Record<string, unknown>): Promise<unknown> {
+  if (isFirefox) {
+    return extApi.runtime.sendMessage(message);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.runtime.sendMessage(message, (response: unknown) => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
+async function getStorage(
+  keys: string | string[],
+): Promise<Record<string, unknown>> {
+  if (isFirefox) {
+    return extApi.storage.local.get(keys);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.get(keys, (result: Record<string, unknown>) => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function setStorage(items: Record<string, unknown>): Promise<void> {
+  if (isFirefox) {
+    return extApi.storage.local.set(items);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.set(items, () => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+async function clearStorage(): Promise<void> {
+  if (isFirefox) {
+    return extApi.storage.local.clear();
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.clear(() => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 const elements = {
   serverUrl: document.getElementById("serverUrl") as HTMLInputElement | null,
   apiKey: document.getElementById("apiKey") as HTMLInputElement | null,
@@ -57,7 +126,7 @@ function showMessage(text: string, type: "success" | "error" | "info") {
 async function loadConfig() {
   console.log("Loading config...");
   try {
-    const stored = (await chrome.storage.local.get([
+    const stored = (await getStorage([
       "serverUrl",
       "apiKey",
       "enabled",
@@ -145,7 +214,7 @@ async function saveConfig() {
   }
 
   try {
-    await chrome.runtime.sendMessage({
+    await sendMessage({
       type: "SET_CONFIG",
       payload: {
         serverUrl,
@@ -201,7 +270,7 @@ async function saveSyncSettings() {
   }
 
   try {
-    await chrome.runtime.sendMessage({
+    await sendMessage({
       type: "SET_SYNC_CONFIG",
       payload: {
         syncInterval: syncInterval * 1000,
@@ -209,7 +278,7 @@ async function saveSyncSettings() {
       },
     });
     showMessage("Sync settings saved!", "success");
-    await chrome.runtime.sendMessage({ type: "SYNC_NOW" });
+    await sendMessage({ type: "SYNC_NOW" });
   } catch {
     showMessage("Failed to save sync settings", "error");
   } finally {
@@ -245,7 +314,7 @@ async function saveExcludedDomains() {
   }
 
   try {
-    await chrome.storage.local.set({ excludedDomains: domains });
+    await setStorage({ excludedDomains: domains });
     showMessage("Excluded domains saved!", "success");
   } catch {
     showMessage("Failed to save excluded domains", "error");
@@ -284,7 +353,7 @@ async function clearPending() {
   }
 
   try {
-    await chrome.runtime.sendMessage({ type: "CLEAR_PENDING" });
+    await sendMessage({ type: "CLEAR_PENDING" });
     showMessage("Pending visits cleared!", "success");
   } catch {
     showMessage("Failed to clear pending visits", "error");
@@ -322,7 +391,7 @@ async function resetAll() {
   }
 
   try {
-    await chrome.storage.local.clear();
+    await clearStorage();
     showMessage("All settings reset!", "success");
     setTimeout(() => {
       window.location.reload();

@@ -43,11 +43,50 @@ const DEFAULT_CONFIG: Config = {
   ],
 };
 
+declare const browser: typeof chrome;
+
+const isFirefox =
+  typeof navigator !== "undefined" && /Firefox/i.test(navigator.userAgent);
+
+const extApi = isFirefox && typeof browser !== "undefined" ? browser : chrome;
+
+async function getStorage(
+  keys: string | string[],
+): Promise<Record<string, unknown>> {
+  if (isFirefox) {
+    return extApi.storage.local.get(keys);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.get(keys, (result: Record<string, unknown>) => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function setStorage(items: Record<string, unknown>): Promise<void> {
+  if (isFirefox) {
+    return extApi.storage.local.set(items);
+  }
+  return new Promise((resolve, reject) => {
+    extApi.storage.local.set(items, () => {
+      if (extApi.runtime.lastError) {
+        reject(new Error(extApi.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 let config: Config = { ...DEFAULT_CONFIG };
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 
 async function loadConfig(): Promise<boolean> {
-  const stored = (await chrome.storage.local.get([
+  const stored = (await getStorage([
     "apiKey",
     "serverUrl",
     "enabled",
@@ -86,17 +125,13 @@ async function saveVisit(
     localTimestamp: Date.now(),
   };
 
-  const stored = (await chrome.storage.local.get([
-    "pendingVisits",
-    "recentVisits",
-  ])) as {
+  const stored = (await getStorage(["pendingVisits", "recentVisits"])) as {
     pendingVisits?: Visit[];
     recentVisits?: Visit[];
   };
   const pending = stored.pendingVisits || [];
   pending.push(visitWithId);
 
-  // Track recent visits locally (keep last 100 visits)
   const recentVisits = stored.recentVisits || [];
   recentVisits.push(visitWithId);
   const trimmedRecent = recentVisits
@@ -106,7 +141,7 @@ async function saveVisit(
     )
     .slice(0, 100);
 
-  await chrome.storage.local.set({
+  await setStorage({
     pendingVisits: pending.slice(-config.batchSize),
     recentVisits: trimmedRecent,
   });
@@ -123,7 +158,7 @@ async function syncWithServer(): Promise<{
     return { success: false, error: "Not configured" };
   }
 
-  const stored = (await chrome.storage.local.get(["pendingVisits"])) as {
+  const stored = (await getStorage(["pendingVisits"])) as {
     pendingVisits?: Visit[];
   };
   const visits = stored.pendingVisits || [];
@@ -163,7 +198,7 @@ async function syncWithServer(): Promise<{
       console.error("Sync failed:", errorText);
 
       if (response.status === 401) {
-        await chrome.storage.local.set({ apiKey: null });
+        await setStorage({ apiKey: null });
         config.apiKey = null;
         stopSync();
         return { success: false, error: "Unauthorized" };
@@ -180,12 +215,12 @@ async function syncWithServer(): Promise<{
       );
       const remaining = visits.filter((v) => !processedIds.has(v.id));
 
-      const syncedData = (await chrome.storage.local.get("totalSynced")) as {
+      const syncedData = (await getStorage("totalSynced")) as {
         totalSynced?: number;
       };
       const currentTotal = syncedData.totalSynced || 0;
 
-      await chrome.storage.local.set({
+      await setStorage({
         pendingVisits: remaining,
         lastSyncTime: Date.now(),
         totalSynced: currentTotal + result.imported,
@@ -210,7 +245,7 @@ async function handleNavigation(
   if (config.excludedDomains.some((domain) => details.url.startsWith(domain)))
     return;
 
-  const tab = await chrome.tabs.get(details.tabId);
+  const tab = await extApi.tabs.get(details.tabId);
   if (!tab || !tab.url) return;
 
   const url = new URL(tab.url);
@@ -227,16 +262,16 @@ async function handleNavigation(
 }
 
 async function updateBadge() {
-  const stored = (await chrome.storage.local.get(["pendingVisits"])) as {
+  const stored = (await getStorage(["pendingVisits"])) as {
     pendingVisits?: Visit[];
   };
   const count = (stored.pendingVisits || []).length;
 
-  await chrome.action.setBadgeText({
+  await extApi.action.setBadgeText({
     text: count > 0 ? count.toString() : "",
   });
 
-  await chrome.action.setBadgeBackgroundColor({
+  await extApi.action.setBadgeBackgroundColor({
     color: count > 0 ? "#3b82f6" : "#666666",
   });
 }
@@ -269,11 +304,12 @@ function handleMessage(
   _sender: chrome.runtime.MessageSender,
   sendResponse: (response: unknown) => void,
 ): boolean {
+  console.log("[Background] Received message:", message.type);
   switch (message.type) {
     case "GET_STATUS": {
       (async () => {
         try {
-          const stored = (await chrome.storage.local.get([
+          const stored = (await getStorage([
             "apiKey",
             "serverUrl",
             "enabled",
@@ -292,8 +328,6 @@ function handleMessage(
           };
 
           const pendingVisits = stored.pendingVisits || [];
-
-          // Get recent visits from local storage (all visits, not just pending)
           const allRecentVisits = stored.recentVisits || [];
           const recentVisits = allRecentVisits
             .sort(
@@ -303,9 +337,12 @@ function handleMessage(
             )
             .slice(0, 10);
 
-          // Use only locally stored totalSynced (no API call)
           const localTotalSynced = stored.totalSynced || 0;
 
+          console.log(
+            "[Background] isConfigured:",
+            !!(stored.apiKey && stored.serverUrl),
+          );
           sendResponse({
             isConfigured: !!(stored.apiKey && stored.serverUrl),
             isEnabled: stored.enabled !== false,
@@ -326,7 +363,7 @@ function handleMessage(
           });
         }
       })();
-      return true; // Indicates we will send a response asynchronously
+      return true;
     }
 
     case "SYNC_NOW": {
@@ -340,7 +377,7 @@ function handleMessage(
 
     case "CLEAR_PENDING": {
       (async () => {
-        await chrome.storage.local.set({ pendingVisits: [] });
+        await setStorage({ pendingVisits: [] });
         await updateBadge();
         sendResponse({ success: true });
       })();
@@ -351,7 +388,7 @@ function handleMessage(
       (async () => {
         const payload = message.payload as Partial<Config>;
 
-        await chrome.storage.local.set({
+        await setStorage({
           apiKey: payload.apiKey ?? config.apiKey,
           serverUrl: payload.serverUrl ?? config.serverUrl,
           enabled: payload.enabled ?? config.enabled,
@@ -382,7 +419,7 @@ function handleMessage(
           batchSize: number;
         };
 
-        await chrome.storage.local.set({
+        await setStorage({
           syncInterval: payload.syncInterval,
           batchSize: payload.batchSize,
         });
@@ -400,7 +437,7 @@ function handleMessage(
 
     case "GET_PENDING": {
       (async () => {
-        const pending = (await chrome.storage.local.get(["pendingVisits"])) as {
+        const pending = (await getStorage(["pendingVisits"])) as {
           pendingVisits?: Visit[];
         };
         sendResponse({ visits: pending.pendingVisits || [] });
@@ -453,9 +490,9 @@ async function handleContentMessage(
 async function init() {
   const isEnabled = await loadConfig();
 
-  chrome.webNavigation.onCommitted.addListener(handleNavigation);
-  chrome.runtime.onMessage.addListener(handleContentMessage);
-  chrome.runtime.onMessage.addListener(handleMessage);
+  extApi.webNavigation.onCommitted.addListener(handleNavigation);
+  extApi.runtime.onMessage.addListener(handleContentMessage);
+  extApi.runtime.onMessage.addListener(handleMessage);
 
   await updateBadge();
 
