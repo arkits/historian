@@ -15,6 +15,8 @@ interface Visit {
   visitTime: string;
 }
 
+const DEFAULT_SERVER_URL = "https://historian-api.archit.xyz";
+
 const elements = {
   setupView: document.getElementById("setupView"),
   mainView: document.getElementById("mainView"),
@@ -108,6 +110,46 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
+function showSetupView() {
+  elements.setupView?.classList.remove("hidden");
+  elements.mainView?.classList.add("hidden");
+}
+
+function showMainView() {
+  elements.setupView?.classList.add("hidden");
+  elements.mainView?.classList.remove("hidden");
+}
+
+function updateMainView(response: StatusResponse) {
+  if (elements.trackingToggle) {
+    elements.trackingToggle.checked = response.isEnabled ?? false;
+  }
+
+  if (elements.pendingCount) {
+    elements.pendingCount.textContent = (response.pendingCount ?? 0).toString();
+  }
+
+  if (elements.totalSynced) {
+    elements.totalSynced.textContent = (
+      response.totalSynced ?? 0
+    ).toLocaleString();
+  }
+
+  if (elements.lastSync) {
+    elements.lastSync.textContent = formatTime(response.lastSyncTime ?? null);
+  }
+
+  if (elements.statusText) {
+    const isEnabled = response.isEnabled ?? false;
+    elements.statusText.textContent = isEnabled ? "Active" : "Paused";
+    elements.statusText.style.color = isEnabled
+      ? "oklch(0.6 0.15 160)"
+      : "oklch(0.65 0.04 50)";
+  }
+
+  renderRecentVisits(response.recentVisits || []);
+}
+
 async function loadStatus() {
   try {
     const response = (await chrome.runtime.sendMessage({
@@ -116,50 +158,29 @@ async function loadStatus() {
 
     if (!response || typeof response !== "object") {
       console.error("Invalid status response:", response);
-      // Show setup view if no response
-      elements.setupView?.classList.remove("hidden");
-      elements.mainView?.classList.add("hidden");
+      showSetupView();
       return;
     }
 
     if (response.isConfigured) {
-      elements.setupView?.classList.add("hidden");
-      elements.mainView?.classList.remove("hidden");
-
-      if (elements.trackingToggle) {
-        elements.trackingToggle.checked = response.isEnabled ?? false;
-      }
-
-      if (elements.pendingCount) {
-        elements.pendingCount.textContent = (response.pendingCount ?? 0).toString();
-      }
-
-      if (elements.totalSynced) {
-        elements.totalSynced.textContent = (response.totalSynced ?? 0).toLocaleString();
-      }
-
-      if (elements.lastSync) {
-        elements.lastSync.textContent = formatTime(response.lastSyncTime ?? null);
-      }
-
-      if (elements.statusText) {
-        const isEnabled = response.isEnabled ?? false;
-        elements.statusText.textContent = isEnabled ? "Active" : "Paused";
-        elements.statusText.style.color = isEnabled
-          ? "oklch(0.6 0.15 160)"
-          : "oklch(0.65 0.04 50)";
-      }
-
-      renderRecentVisits(response.recentVisits || []);
+      showMainView();
+      updateMainView(response);
     } else {
-      elements.setupView?.classList.remove("hidden");
-      elements.mainView?.classList.add("hidden");
+      showSetupView();
+      await loadDefaultServerUrl();
     }
   } catch (error) {
     console.error("Failed to load status:", error);
-    // Show setup view on error
-    elements.setupView?.classList.remove("hidden");
-    elements.mainView?.classList.add("hidden");
+    showSetupView();
+  }
+}
+
+async function loadDefaultServerUrl() {
+  const stored = (await chrome.storage.local.get(["serverUrl"])) as {
+    serverUrl?: string;
+  };
+  if (elements.serverUrl) {
+    elements.serverUrl.value = stored.serverUrl || DEFAULT_SERVER_URL;
   }
 }
 

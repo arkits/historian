@@ -9,6 +9,8 @@ interface Config {
   excludedDomains: string[];
 }
 
+const DEFAULT_SERVER_URL = "https://historian-api.archit.xyz";
+
 interface Visit {
   id: string;
   url: string;
@@ -24,7 +26,7 @@ interface Visit {
 
 const DEFAULT_CONFIG: Config = {
   apiKey: null,
-  serverUrl: null,
+  serverUrl: DEFAULT_SERVER_URL,
   enabled: true,
   trackContent: true,
   autoSync: true,
@@ -290,13 +292,14 @@ function handleMessage(
           };
 
           const pendingVisits = stored.pendingVisits || [];
-          
+
           // Get recent visits from local storage (all visits, not just pending)
           const allRecentVisits = stored.recentVisits || [];
           const recentVisits = allRecentVisits
             .sort(
               (a, b) =>
-                new Date(b.visitTime).getTime() - new Date(a.visitTime).getTime(),
+                new Date(b.visitTime).getTime() -
+                new Date(a.visitTime).getTime(),
             )
             .slice(0, 10);
 
