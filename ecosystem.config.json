@@ -2,7 +2,7 @@
   "apps": [
     {
       "name": "historian-backend",
-      "script": "bun",
+      "script": "/home/arkits/.bun/bin/bun",
       "args": "start",
       "cwd": "/opt/software/historian",
       "env": {
