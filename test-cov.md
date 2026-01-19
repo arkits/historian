@@ -2,7 +2,7 @@
 - [x] Create tests/unit/server/router.test.ts
 - [x] Create tests/unit/server/extension.test.ts
 - [x] Fix existing lint issues
-- [ ] Run all tests and fix failing tests
+- [x] Run all tests and fix failing tests
 - [ ] Create tests/unit/server/trpc.test.ts
 - [ ] Create tests/unit/server/handler.test.ts
 - [ ] Create tests/unit/server/context.test.ts
