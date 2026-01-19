@@ -40,7 +40,7 @@ export function ForgotPasswordPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          email: `${email}@example.com`,
+          email: email,
           redirectTo: `${window.location.origin}/reset-password`,
         }),
       });
@@ -94,7 +94,7 @@ export function ForgotPasswordPage() {
               Forgot Password
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Enter your username to receive a password reset link
+              Enter your email to receive a password reset link
             </CardDescription>
           </div>
         </CardHeader>
@@ -121,13 +121,13 @@ export function ForgotPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-foreground">
-                  Username
+                  Email
                 </Label>
                 <div className="relative">
                   <Input
                     id="email"
-                    type="text"
-                    placeholder="Enter your username"
+                    type="email"
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
