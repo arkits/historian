@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { eq } from "drizzle-orm";
 import {
   user,
   session,
@@ -10,9 +11,12 @@ import {
   history,
 } from "@/lib/schema";
 
-const TEST_DATABASE_URL =
-  process.env.TEST_DATABASE_URL ||
-  "postgresql://postgres:postgres@localhost:5432/historian_test";
+function getTestDatabaseUrl(): string {
+  return (
+    process.env.TEST_DATABASE_URL ||
+    "postgresql://postgres:postgres@localhost:5432/historian_test"
+  );
+}
 
 let testPool: Pool | null = null;
 
@@ -22,7 +26,7 @@ export async function createTestPool(): Promise<Pool> {
   }
 
   testPool = new Pool({
-    connectionString: TEST_DATABASE_URL,
+    connectionString: getTestDatabaseUrl(),
     max: 5,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
@@ -46,12 +50,13 @@ export async function seedTestUser(
   db: ReturnType<typeof drizzle>,
   overrides?: Partial<typeof user.$inferInsert>,
 ) {
-  const testUserId = `test_user_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const randomSuffix = Math.random().toString(36).substring(7);
+  const testUserId = `test_user_${Date.now()}_${randomSuffix}`;
 
   await db.insert(user).values({
     id: testUserId,
     name: overrides?.name || "Test User",
-    email: overrides?.email || `test_${Date.now()}@example.com`,
+    email: overrides?.email || `test_${Date.now()}_${randomSuffix}@example.com`,
     emailVerified: false,
     image: null,
     createdAt: new Date().toISOString(),
@@ -156,17 +161,11 @@ export async function cleanupUserData(
   db: ReturnType<typeof drizzle>,
   userId: string,
 ) {
-  await db
-    .delete(history)
-    .where((history, { eq }) => eq(history.userId, userId));
-  await db.delete(apiKey).where((apiKey, { eq }) => eq(apiKey.userId, userId));
-  await db
-    .delete(session)
-    .where((session, { eq }) => eq(session.userId, userId));
-  await db
-    .delete(account)
-    .where((account, { eq }) => eq(account.userId, userId));
-  await db.delete(user).where((user, { eq }) => eq(user.id, userId));
+  await db.delete(history).where(eq(history.userId, userId));
+  await db.delete(apiKey).where(eq(apiKey.userId, userId));
+  await db.delete(session).where(eq(session.userId, userId));
+  await db.delete(account).where(eq(account.userId, userId));
+  await db.delete(user).where(eq(user.id, userId));
 }
 
 export async function cleanupAllTestData(db: ReturnType<typeof drizzle>) {

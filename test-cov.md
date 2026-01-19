@@ -11,6 +11,6 @@
 - [x] Create tests/integration/history-flow.test.ts
 - [x] Create tests/integration/extension-integration.test.ts
 - [x] Enhance tests/integration/auth.test.ts
-- [ ] Create tests/setup/test-db.ts
+- [x] Create tests/setup/test-db.ts
 - [x] Create tests/setup/test-helpers.ts
 - [x] Update vitest.config.ts with coverage config
