@@ -6,7 +6,7 @@
 - [x] Create tests/unit/server/trpc.test.ts
 - [x] Create tests/unit/server/handler.test.ts
 - [x] Create tests/unit/server/context.test.ts
-- [ ] Create tests/unit/lib/email.test.ts
+- [x] Create tests/unit/lib/email.test.ts
 - [ ] Create tests/integration/api-keys.test.ts
 - [ ] Create tests/integration/history-flow.test.ts
 - [ ] Create tests/integration/extension-integration.test.ts
