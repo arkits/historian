@@ -4,7 +4,6 @@ import {
   combineSimilarHistoryItems,
   formatTimeRange,
   type HistoryItem,
-  type HistoryItemContent,
 } from "@/lib/history-utils";
 
 describe("history-utils", () => {

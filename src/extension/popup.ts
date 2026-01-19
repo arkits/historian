@@ -56,21 +56,6 @@ async function getStorage(
   });
 }
 
-async function setStorage(items: Record<string, unknown>): Promise<void> {
-  if (isFirefox) {
-    return extApi.storage.local.set(items);
-  }
-  return new Promise((resolve, reject) => {
-    extApi.storage.local.set(items, () => {
-      if (extApi.runtime.lastError) {
-        reject(new Error(extApi.runtime.lastError.message));
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
 const elements = {
   setupView: document.getElementById("setupView"),
   mainView: document.getElementById("mainView"),

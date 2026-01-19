@@ -12,3 +12,16 @@
 - Fixed linting issues (removed unused imports, fixed duplicate code in history-utils.test.ts)
 - Updated PRD to mark task as complete
 
+## 2024-01-XX - Fix Existing Lint Issues
+
+- Fixed all 10 lint warnings:
+  - Removed unused import 'ArrowLeft' from ResetPasswordPage.tsx
+  - Removed unnecessary escape characters in history-utils.ts regex patterns (4 instances)
+  - Removed unused imports 'ArrowLeft' and 'CheckCircle' from AddHistoryPage.tsx
+  - Removed unused import 'trpc' from ForgotPasswordPage.tsx
+  - Removed unused function 'setStorage' from extension/popup.ts
+  - Removed unused import 'HistoryItemContent' from tests/unit/lib/history-utils.test.ts
+- All lint checks now pass with 0 warnings and 0 errors
+- All unit tests continue to pass (90 tests passing)
+- Updated PRD to mark task as complete
+

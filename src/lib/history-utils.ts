@@ -80,8 +80,8 @@ export function areItemsSimilar(
     }
 
     if (domain1 && domain2 && domain1 === domain2) {
-      const path1 = normalized1.replace(/^[^\/]+\/[^\/]*/, "");
-      const path2 = normalized2.replace(/^[^\/]+\/[^\/]*/, "");
+      const path1 = normalized1.replace(/^[^/]+\/[^/]*/, "");
+      const path2 = normalized2.replace(/^[^/]+\/[^/]*/, "");
 
       if (path1 === path2 && path1.length > 0) {
         return true;
