@@ -15,7 +15,7 @@ import { ArrowLeft } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +43,7 @@ export function LoginPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          email: `${username}@example.com`,
+          email: email,
           password,
         }),
       });
@@ -109,15 +109,15 @@ export function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-foreground">
-                Username
+              <Label htmlFor="email" className="text-foreground">
+                Email
               </Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
               />

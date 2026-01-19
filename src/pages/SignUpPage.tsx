@@ -15,7 +15,8 @@ import { ArrowLeft } from "lucide-react";
 
 export function SignUpPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,8 +37,8 @@ export function SignUpPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: username,
-          email: `${username}@example.com`,
+          name: name,
+          email: email,
           password,
         }),
       });
@@ -99,15 +100,29 @@ export function SignUpPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-foreground">
-                Username
+              <Label htmlFor="name" className="text-foreground">
+                Name
               </Label>
               <Input
-                id="username"
+                id="name"
                 type="text"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
               />
