@@ -12,6 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { getApiUrl } from "@/lib/api-url";
 
 export function SignUpPage() {
   const navigate = useNavigate();
@@ -29,11 +30,7 @@ export function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const apiBase =
-        window.location.origin === "https://historian.archit.xyz"
-          ? "https://historian-api.archit.xyz/api"
-          : "";
-      const response = await fetch(`${apiBase}/auth/sign-up/email`, {
+      const response = await fetch(getApiUrl("/auth/sign-up/email"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

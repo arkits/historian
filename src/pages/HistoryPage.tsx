@@ -181,12 +181,19 @@ function HistoryCard({ item }: { item: HistoryItem }) {
   );
 }
 
-function CombinedHistoryCard({ combined }: { combined: CombinedHistoryItem }) {
+function CombinedHistoryCard({
+  combined,
+  isExpanded,
+  onToggle,
+}: {
+  combined: CombinedHistoryItem;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
   const firstItem = combined.items[0];
   if (!firstItem) return null;
 
   const { time: firstTime } = formatDate(combined.earliestTime);
-  const content = firstItem.content;
   const title = combined.title;
   const url = combined.url;
   const favicon = combined.favicon;
@@ -194,82 +201,228 @@ function CombinedHistoryCard({ combined }: { combined: CombinedHistoryItem }) {
   const timeRange = formatTimeRange(combined.earliestTime, combined.latestTime);
   const [thumbnailError, setThumbnailError] = useState(false);
 
+  const sortedItems = [...combined.items].sort(
+    (a, b) =>
+      new Date(b.timelineTime).getTime() - new Date(a.timelineTime).getTime(),
+  );
+
   return (
-    <Link to={`/history/${firstItem.id}`} className="block group">
-      <Card className="border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 overflow-hidden relative py-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
+    <div className="relative">
+      <div onClick={onToggle} className="block group cursor-pointer">
+        <Card
+          className={`border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 overflow-hidden relative py-0 ${
+            isExpanded ? "ring-2 ring-primary/30" : ""
+          }`}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
 
-        <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
-          <div className="relative flex flex-col items-center flex-shrink-0 self-center">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:from-primary/30 group-hover:to-primary/20 group-hover:border-primary/30 transition-all duration-300 flex-shrink-0 overflow-hidden shadow-sm">
-              {favicon ? (
-                <img
-                  src={favicon}
-                  alt=""
-                  className="w-5 h-5 rounded"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      parent.innerHTML = `<span>${getTypeIcon(combined.type)}</span>`;
-                    }
-                  }}
-                />
-              ) : (
-                <span className="text-lg">{getTypeIcon(combined.type)}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-md flex items-center gap-1.5 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300">
-                <Hash className="w-3 h-3" />
-                {combined.type.toLowerCase()}
-              </span>
-              <span className="text-xs text-muted-foreground/80 flex items-center gap-1.5 font-medium">
-                <Clock className="w-3 h-3" />
-                {firstTime}
-              </span>
-              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-md font-medium border border-primary/30">
-                {combined.count} {combined.count === 1 ? "visit" : "visits"} ·{" "}
-                {timeRange}
-              </span>
+          <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
+            <div className="relative flex flex-col items-center flex-shrink-0 self-center">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:from-primary/30 group-hover:to-primary/20 group-hover:border-primary/30 transition-all duration-300 flex-shrink-0 overflow-hidden shadow-sm">
+                {favicon ? (
+                  <img
+                    src={favicon}
+                    alt=""
+                    className="w-5 h-5 rounded"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `<span>${getTypeIcon(combined.type)}</span>`;
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="text-lg">{getTypeIcon(combined.type)}</span>
+                )}
+              </div>
             </div>
 
-            <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary/90 transition-colors duration-300 line-clamp-2">
-              {title}
-            </h3>
-
-            {url && (
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <ExternalLink className="w-3 h-3 text-muted-foreground/60" />
-                <span className="text-xs text-muted-foreground/70 truncate max-w-md">
-                  {url.length > 50 ? `${url.substring(0, 50)}...` : url}
+            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-md flex items-center gap-1.5 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300">
+                  <Hash className="w-3 h-3" />
+                  {combined.type.toLowerCase()}
+                </span>
+                <span className="text-xs text-muted-foreground/80 flex items-center gap-1.5 font-medium">
+                  <Clock className="w-3 h-3" />
+                  {firstTime}
+                </span>
+                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-md font-medium border border-primary/30">
+                  {combined.count} {combined.count === 1 ? "visit" : "visits"} ·{" "}
+                  {timeRange}
                 </span>
               </div>
-            )}
-          </div>
 
-          <div className="w-24 h-full rounded-lg flex-shrink-0 overflow-hidden border border-border/30 group-hover:border-primary/30 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-primary/10 bg-muted/30">
-            {thumbnail && !thumbnailError ? (
-              <img
-                src={thumbnail}
-                alt=""
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                onError={() => setThumbnailError(true)}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
-                <div className="text-2xl opacity-50">
-                  {getTypeIcon(combined.type)}
+              <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary/90 transition-colors duration-300 line-clamp-2">
+                {title}
+              </h3>
+
+              {url && (
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <ExternalLink className="w-3 h-3 text-muted-foreground/60" />
+                  <span className="text-xs text-muted-foreground/70 truncate max-w-md">
+                    {url.length > 50 ? `${url.substring(0, 50)}...` : url}
+                  </span>
                 </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+              )}
+
+              {combined.count > 1 && (
+                <div className="flex items-center gap-1 mt-1">
+                  <div className="flex -space-x-2">
+                    {sortedItems.slice(0, 3).map((item, idx) => {
+                      const itemFavicon = item.content.favicon as
+                        | string
+                        | undefined;
+                      return (
+                        <div
+                          key={item.id}
+                          className="w-5 h-5 rounded-full bg-primary/20 border border-background flex items-center justify-center overflow-hidden"
+                          style={{ zIndex: 3 - idx }}
+                        >
+                          {itemFavicon ? (
+                            <img
+                              src={itemFavicon}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[8px]">
+                              {getTypeIcon(item.type)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {combined.count > 3 && (
+                      <div className="w-5 h-5 rounded-full bg-muted border border-background flex items-center justify-center text-[8px] font-medium text-muted-foreground">
+                        +{combined.count - 3}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground/60">
+                    {isExpanded ? "Click to collapse" : "Click to expand"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-24 h-full rounded-lg flex-shrink-0 overflow-hidden border border-border/30 group-hover:border-primary/30 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-primary/10 bg-muted/30">
+              {thumbnail && !thumbnailError ? (
+                <img
+                  src={thumbnail}
+                  alt=""
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={() => setThumbnailError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                  <div className="text-2xl opacity-50">
+                    {getTypeIcon(combined.type)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {isExpanded && (
+        <div className="mt-2 space-y-2 pl-4 border-l-2 border-primary/20 ml-5">
+          {sortedItems.map((item, idx) => {
+            const { time } = formatDate(item.timelineTime);
+            const itemContent = item.content;
+            const itemTitle =
+              (itemContent.title as string) ||
+              (itemContent.name as string) ||
+              (itemContent.url as string) ||
+              "Unknown";
+            const itemUrl = itemContent.url as string | undefined;
+            const itemFavicon = itemContent.favicon as string | undefined;
+            const itemThumbnail = itemContent.thumbnail as string | undefined;
+            const [thumbError, setThumbError] = useState(false);
+
+            return (
+              <Link
+                key={item.id}
+                to={`/history/${item.id}`}
+                className="block group"
+              >
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm transition-all duration-200 cursor-pointer hover:border-primary/40 hover:shadow-md overflow-hidden relative py-0 ml-4">
+                  <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
+                    <div className="flex items-center gap-2 text-primary/40 text-xs font-mono">
+                      #{idx + 1}
+                    </div>
+
+                    <div className="relative flex flex-col items-center flex-shrink-0 self-center">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-primary/10 border border-primary/20 flex-shrink-0 overflow-hidden">
+                        {itemFavicon ? (
+                          <img
+                            src={itemFavicon}
+                            alt=""
+                            className="w-4 h-4 rounded"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              const parent = e.currentTarget.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `<span>${getTypeIcon(item.type)}</span>`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <span>{getTypeIcon(item.type)}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground/80 flex items-center gap-1 font-medium">
+                          <Clock className="w-3 h-3" />
+                          {time}
+                        </span>
+                      </div>
+
+                      <h4 className="font-medium text-foreground text-xs leading-tight group-hover:text-primary/90 transition-colors duration-200 line-clamp-1">
+                        {itemTitle}
+                      </h4>
+
+                      {itemUrl && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/50" />
+                          <span className="text-[10px] text-muted-foreground/60 truncate max-w-xs">
+                            {itemUrl.length > 40
+                              ? `${itemUrl.substring(0, 40)}...`
+                              : itemUrl}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="w-16 h-full rounded flex-shrink-0 overflow-hidden border border-border/20 bg-muted/30">
+                      {itemThumbnail && !thumbError ? (
+                        <img
+                          src={itemThumbnail}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={() => setThumbError(true)}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/50">
+                          <span className="text-lg opacity-50">
+                            {getTypeIcon(item.type)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -325,7 +478,8 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   );
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [combineSimilar, setCombineSimilar] = useState(false);
+  const [combineSimilar, setCombineSimilar] = useState(true);
+  const [expandedStacks, setExpandedStacks] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pageSize = 50;
 
@@ -476,6 +630,18 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleClearSearch = useCallback(() => setSearchQuery(""), []);
+
+  const toggleStack = useCallback((stackId: string) => {
+    setExpandedStacks((prev) => {
+      const next = new Set(prev);
+      if (next.has(stackId)) {
+        next.delete(stackId);
+      } else {
+        next.add(stackId);
+      }
+      return next;
+    });
+  }, []);
 
   const isDateFilter = !!dateRange?.from;
   const isLoadingSingleDate =
@@ -747,6 +913,8 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
                                 <CombinedHistoryCard
                                   key={combined.id}
                                   combined={combined}
+                                  isExpanded={expandedStacks.has(combined.id)}
+                                  onToggle={() => toggleStack(combined.id)}
                                 />
                               ))
                             : group.items.map((item) => (

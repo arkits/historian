@@ -12,6 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { ArrowLeft, Mail } from "lucide-react";
+import { getApiUrl } from "@/lib/api-url";
 
 export function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -28,11 +29,7 @@ export function ForgotPasswordPage() {
 
     try {
       const origin = window.location.origin;
-      const apiBase =
-        origin === "https://historian.archit.xyz"
-          ? "https://historian-api.archit.xyz/api"
-          : "";
-      const response = await fetch(`${apiBase}/auth/request-password-reset`, {
+      const response = await fetch(getApiUrl("/auth/request-password-reset"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

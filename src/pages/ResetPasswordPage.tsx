@@ -11,6 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { ArrowLeft, Lock, CheckCircle, XCircle } from "lucide-react";
+import { getApiUrl } from "@/lib/api-url";
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -55,15 +56,11 @@ export function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const apiBase =
-        window.location.origin === "https://historian.archit.xyz"
-          ? "https://historian-api.archit.xyz/api"
-          : "";
-      const response = await fetch(`${apiBase}/auth/reset-password`, {
+      const response = await fetch(getApiUrl("/auth/reset-password"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Origin: "https://historian.archit.xyz",
+          Origin: window.location.origin,
         },
         credentials: "include",
         body: JSON.stringify({

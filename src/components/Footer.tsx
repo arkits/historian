@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Github, Twitter, Mail } from "lucide-react";
+import { getApiUrl } from "@/lib/api-url";
 
 interface HealthResponse {
   status: string;
@@ -15,12 +16,7 @@ interface FooterProps {
 }
 
 function getHealthUrl() {
-  if (typeof window !== "undefined") {
-    return window.location.origin === "https://historian.archit.xyz"
-      ? "https://historian-api.archit.xyz/health"
-      : "/health";
-  }
-  return "/health";
+  return getApiUrl("/health");
 }
 
 export function Footer({ variant = "simple" }: FooterProps) {
@@ -140,7 +136,9 @@ export function Footer({ variant = "simple" }: FooterProps) {
                           : "bg-red-500"
                       }`}
                     />
-                    {healthStatus === "healthy" ? "all systems operational" : "Unhealthy"}
+                    {healthStatus === "healthy"
+                      ? "all systems operational"
+                      : "Unhealthy"}
                   </span>
                 )}
                 {commitId && (
@@ -177,7 +175,9 @@ export function Footer({ variant = "simple" }: FooterProps) {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">🕵️</span>
-          <span className="font-heading text-lg text-foreground">Historian</span>
+          <span className="font-heading text-lg text-foreground">
+            Historian
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -194,7 +194,9 @@ export function Footer({ variant = "simple" }: FooterProps) {
                     healthStatus === "healthy" ? "bg-emerald-500" : "bg-red-500"
                   }`}
                 />
-                {healthStatus === "healthy" ? "all systems operational" : "Unhealthy"}
+                {healthStatus === "healthy"
+                  ? "all systems operational"
+                  : "Unhealthy"}
               </span>
             )}
             {commitId && (

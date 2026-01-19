@@ -81,6 +81,24 @@ const isProduction = process.env.NODE_ENV === "production";
 
 function createAuthHandler() {
   return async (req: Request) => {
+    const origin = req.headers.get("origin");
+
+    if (
+      req.method === "OPTIONS" &&
+      origin &&
+      ALLOWED_ORIGINS.includes(origin)
+    ) {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": origin,
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
+    }
+
     try {
       const url = new URL(req.url);
       const pathname = url.pathname;
@@ -139,19 +157,34 @@ function createAuthHandler() {
         return new Response("Not found", { status: 404 });
       }
 
+      const responseHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        responseHeaders["Access-Control-Allow-Origin"] = origin;
+        responseHeaders["Access-Control-Allow-Credentials"] = "true";
+      }
+
       return new Response(JSON.stringify(data), {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: responseHeaders,
       });
     } catch (error) {
       logError(error as Error, { handler: "auth" });
+      const errorHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        errorHeaders["Access-Control-Allow-Origin"] = origin;
+        errorHeaders["Access-Control-Allow-Credentials"] = "true";
+      }
       return new Response(
         JSON.stringify({
           error: error instanceof Error ? error.message : "Auth error",
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: errorHeaders,
         },
       );
     }

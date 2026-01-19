@@ -19,6 +19,7 @@ import {
   Lock,
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
+import { getApiUrl } from "@/lib/api-url";
 
 interface SettingsPageProps {
   onSignOut?: () => void;
@@ -67,11 +68,7 @@ export function SettingsPage({ onSignOut }: SettingsPageProps) {
   useEffect(() => {
     const fetchCommitId = async () => {
       try {
-        const healthUrl =
-          window.location.origin === "https://historian.archit.xyz"
-            ? "https://historian-api.archit.xyz/health"
-            : "/health";
-        const response = await fetch(healthUrl);
+        const response = await fetch(getApiUrl("/health"));
         if (response.ok) {
           const data = await response.json();
           setCommitId(data.commit);
