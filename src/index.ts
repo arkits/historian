@@ -50,7 +50,10 @@ function createHealthHandler(): Response {
     environment: process.env.NODE_ENV || "development",
   };
   return new Response(JSON.stringify(health), {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
   });
 }
 
