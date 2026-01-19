@@ -10,7 +10,7 @@
 - [x] Create tests/integration/api-keys.test.ts
 - [x] Create tests/integration/history-flow.test.ts
 - [x] Create tests/integration/extension-integration.test.ts
-- [ ] Enhance tests/integration/auth.test.ts
+- [x] Enhance tests/integration/auth.test.ts
 - [ ] Create tests/setup/test-db.ts
 - [ ] Create tests/setup/test-helpers.ts
 - [ ] Update vitest.config.ts with coverage config
