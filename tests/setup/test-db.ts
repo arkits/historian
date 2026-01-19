@@ -2,6 +2,7 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
 import {
   user,
   session,
@@ -50,7 +51,7 @@ export async function seedTestUser(
   db: ReturnType<typeof drizzle>,
   overrides?: Partial<typeof user.$inferInsert>,
 ) {
-  const randomSuffix = Math.random().toString(36).substring(7);
+  const randomSuffix = randomUUID().replace(/-/g, "").substring(0, 8);
   const testUserId = `test_user_${Date.now()}_${randomSuffix}`;
 
   await db.insert(user).values({
@@ -71,8 +72,8 @@ export async function seedTestSession(
   db: ReturnType<typeof drizzle>,
   userId: string,
 ) {
-  const sessionId = `test_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-  const token = `test_token_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const sessionId = `test_session_${Date.now()}_${randomUUID().replace(/-/g, "").substring(0, 8)}`;
+  const token = `test_token_${Date.now()}_${randomUUID().replace(/-/g, "").substring(0, 8)}`;
 
   await db.insert(session).values({
     id: sessionId,
@@ -93,7 +94,7 @@ export async function seedTestApiKey(
   userId: string,
   name = "Test API Key",
 ) {
-  const key = `hist_test_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const key = `hist_test_${Date.now()}_${randomUUID().replace(/-/g, "").substring(0, 8)}`;
 
   const [result] = await db
     .insert(apiKey)
