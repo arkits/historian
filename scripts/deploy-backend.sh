@@ -4,8 +4,6 @@ set -e
 
 cd /opt/software/historian/
 
-mkdir -p logs
-
 echo ">>> pulling latest code"
 git pull
 
@@ -15,12 +13,6 @@ bun install
 echo ">>> running migrations"
 bun run migrate
 
-echo ">>> killing previously running server"
-if [ -f /opt/software/historian/historian.pid ]; then
-    kill $(cat /opt/software/historian/historian.pid) 2>/dev/null || true
-    rm /opt/software/historian/historian.pid
-fi
-
-echo ">>> restarting server"
-bun start > logs/historian.log 2>&1 &
-echo $! > /opt/software/historian/historian.pid
+echo ">>> restarting server with PM2"
+pm2 restart historian-backend || pm2 start ecosystem.config.json
+pm2 save
