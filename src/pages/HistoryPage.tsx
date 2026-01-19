@@ -27,25 +27,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { NavBar } from "@/components/NavBar";
+import {
+  combineSimilarHistoryItems,
+  formatTimeRange,
+  type CombinedHistoryItem,
+  type HistoryItem,
+} from "@/lib/history-utils";
 
 interface HistoryPageProps {
   onSignOut?: () => void;
 }
 
-interface HistoryItem {
-  id: string;
-  createdAt: string;
-  timelineTime: string;
-  type: string;
-  contentId: string;
-  content: Record<string, unknown>;
-  searchContent: string | null;
-  userId: string;
-}
-
 interface HistoryGroup {
   date: string;
   items: HistoryItem[];
+  combinedItems?: CombinedHistoryItem[];
 }
 
 function formatDate(dateStr: string): { date: string; time: string } {
@@ -101,7 +97,7 @@ function HistoryCard({ item }: { item: HistoryItem }) {
       <Card className="border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 overflow-hidden relative py-0">
         {/* Subtle gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
-        
+
         <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
           {/* Left side: Icon with timeline connector */}
           <div className="relative flex flex-col items-center flex-shrink-0 self-center">
@@ -173,7 +169,101 @@ function HistoryCard({ item }: { item: HistoryItem }) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
-                <div className="text-2xl opacity-50">{getTypeIcon(item.type)}</div>
+                <div className="text-2xl opacity-50">
+                  {getTypeIcon(item.type)}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+function CombinedHistoryCard({ combined }: { combined: CombinedHistoryItem }) {
+  const firstItem = combined.items[0];
+  if (!firstItem) return null;
+
+  const { time: firstTime } = formatDate(combined.earliestTime);
+  const content = firstItem.content;
+  const title = combined.title;
+  const url = combined.url;
+  const favicon = combined.favicon;
+  const thumbnail = combined.thumbnail;
+  const timeRange = formatTimeRange(combined.earliestTime, combined.latestTime);
+  const [thumbnailError, setThumbnailError] = useState(false);
+
+  return (
+    <Link to={`/history/${firstItem.id}`} className="block group">
+      <Card className="border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 overflow-hidden relative py-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
+
+        <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
+          <div className="relative flex flex-col items-center flex-shrink-0 self-center">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:from-primary/30 group-hover:to-primary/20 group-hover:border-primary/30 transition-all duration-300 flex-shrink-0 overflow-hidden shadow-sm">
+              {favicon ? (
+                <img
+                  src={favicon}
+                  alt=""
+                  className="w-5 h-5 rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<span>${getTypeIcon(combined.type)}</span>`;
+                    }
+                  }}
+                />
+              ) : (
+                <span className="text-lg">{getTypeIcon(combined.type)}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-md flex items-center gap-1.5 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300">
+                <Hash className="w-3 h-3" />
+                {combined.type.toLowerCase()}
+              </span>
+              <span className="text-xs text-muted-foreground/80 flex items-center gap-1.5 font-medium">
+                <Clock className="w-3 h-3" />
+                {firstTime}
+              </span>
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-md font-medium border border-primary/30">
+                {combined.count} {combined.count === 1 ? "visit" : "visits"} ·{" "}
+                {timeRange}
+              </span>
+            </div>
+
+            <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary/90 transition-colors duration-300 line-clamp-2">
+              {title}
+            </h3>
+
+            {url && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <ExternalLink className="w-3 h-3 text-muted-foreground/60" />
+                <span className="text-xs text-muted-foreground/70 truncate max-w-md">
+                  {url.length > 50 ? `${url.substring(0, 50)}...` : url}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="w-24 h-full rounded-lg flex-shrink-0 overflow-hidden border border-border/30 group-hover:border-primary/30 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-primary/10 bg-muted/30">
+            {thumbnail && !thumbnailError ? (
+              <img
+                src={thumbnail}
+                alt=""
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={() => setThumbnailError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                <div className="text-2xl opacity-50">
+                  {getTypeIcon(combined.type)}
+                </div>
               </div>
             )}
           </div>
@@ -235,6 +325,7 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   );
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [combineSimilar, setCombineSimilar] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pageSize = 50;
 
@@ -336,6 +427,32 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   }, [allItems, searchQuery]);
 
   const groupedItems = useMemo(() => {
+    if (combineSimilar) {
+      const combined = combineSimilarHistoryItems(filteredItems);
+      const groups: Record<
+        string,
+        { items: HistoryItem[]; combined: CombinedHistoryItem[] }
+      > = {};
+
+      combined.forEach((c) => {
+        const date = new Date(c.earliestTime).toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        });
+        if (!groups[date]) {
+          groups[date] = { items: [], combined: [] };
+        }
+        groups[date].combined.push(c);
+      });
+
+      return Object.entries(groups).map(([date, group]) => ({
+        date,
+        items: group.items,
+        combinedItems: group.combined,
+      })) as HistoryGroup[];
+    }
+
     const groups: Record<string, HistoryItem[]> = {};
     filteredItems.forEach((item) => {
       const date = new Date(item.timelineTime).toLocaleDateString("en-US", {
@@ -350,7 +467,7 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
       date,
       items,
     })) as HistoryGroup[];
-  }, [filteredItems]);
+  }, [filteredItems, combineSimilar]);
 
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -543,6 +660,30 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
                   ))}
                 </SelectContent>
               </Select>
+              <button
+                onClick={() => setCombineSimilar(!combineSimilar)}
+                className={`flex items-center gap-2 px-3 rounded-md border h-9 transition-colors ${
+                  combineSimilar
+                    ? "bg-primary/10 border-primary/20 text-primary"
+                    : "bg-card/50 border-border/50 text-muted-foreground hover:text-foreground hover:border-border"
+                }`}
+                title="Combine similar history items"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  />
+                </svg>
+                <span className="text-xs font-medium">Combine</span>
+              </button>
             </div>
           </div>
 
@@ -601,9 +742,16 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
                       <div key={group.date}>
                         <GroupHeader group={group} />
                         <div className="space-y-4 mt-4">
-                          {group.items.map((item) => (
-                            <HistoryCard key={item.id} item={item} />
-                          ))}
+                          {combineSimilar && group.combinedItems
+                            ? group.combinedItems.map((combined) => (
+                                <CombinedHistoryCard
+                                  key={combined.id}
+                                  combined={combined}
+                                />
+                              ))
+                            : group.items.map((item) => (
+                                <HistoryCard key={item.id} item={item} />
+                              ))}
                         </div>
                       </div>
                     ))}
@@ -620,15 +768,17 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
 
                 {!hasNextPage && !isDateFilter && filteredItems.length > 0 && (
                   <p className="text-center text-xs text-muted-foreground py-4">
-                    You've reached the end of your history (
-                    {filteredItems.length.toLocaleString()} items)
+                    {combineSimilar
+                      ? `Showing ${groupedItems.reduce((acc, g) => acc + (g.combinedItems?.length || 0), 0)} combined entries from ${filteredItems.length.toLocaleString()} visits`
+                      : `You've reached the end of your history (${filteredItems.length.toLocaleString()} items)`}
                   </p>
                 )}
 
                 {isDateFilter && filteredItems.length > 0 && (
                   <p className="text-center text-xs text-muted-foreground py-4">
-                    Showing {filteredItems.length.toLocaleString()} item
-                    {filteredItems.length === 1 ? "" : "s"} for selected date
+                    {combineSimilar
+                      ? `Showing ${groupedItems.reduce((acc, g) => acc + (g.combinedItems?.length || 0), 0)} combined entries for selected date`
+                      : `Showing ${filteredItems.length.toLocaleString()} item${filteredItems.length === 1 ? "" : "s"} for selected date`}
                   </p>
                 )}
               </div>

@@ -87,6 +87,9 @@ const elements = {
   statusText: document.getElementById("statusText"),
   recentVisits: document.getElementById("recentVisits"),
   message: document.getElementById("message"),
+  dashboardLink: document.getElementById(
+    "dashboardLink",
+  ) as HTMLHeadingElement | null,
 };
 
 function showMessage(text: string, type: "success" | "error" | "info") {
@@ -438,6 +441,9 @@ elements.trackingToggle?.addEventListener("change", (e) =>
   toggleTracking((e.target as HTMLInputElement).checked),
 );
 elements.syncBtn?.addEventListener("click", syncNow);
+elements.dashboardLink?.addEventListener("click", () => {
+  extApi.tabs.create({ url: "https://historian.archit.xyz/dashboard" });
+});
 
 loadStatus();
 

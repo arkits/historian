@@ -84,10 +84,13 @@ export const history = pgTable(
   "history",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    createdAt: timestamp("createdAt", { mode: "string" })
+    createdAt: timestamp("createdAt", { mode: "string", withTimezone: true })
       .notNull()
       .defaultNow(),
-    timelineTime: timestamp("timelineTime", { mode: "string" }).notNull(),
+    timelineTime: timestamp("timelineTime", {
+      mode: "string",
+      withTimezone: true,
+    }).notNull(),
     type: text("type").notNull(),
     contentId: text("contentId").notNull(),
     content: jsonb("content").notNull(),

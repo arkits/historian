@@ -11,6 +11,7 @@ import {
   FileText,
   Link2,
   BookOpen,
+  Plus,
 } from "lucide-react";
 import { ActivityHeatmap } from "@/components/heatmap";
 import { useMemo } from "react";
@@ -87,6 +88,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/add">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add
+              </Button>
+            </Link>
             <Link to="/history">
               <Button
                 variant="ghost"

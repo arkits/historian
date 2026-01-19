@@ -22,6 +22,7 @@ import { DocsSelfHostingPage } from "@/pages/DocsSelfHostingPage";
 import { Dashboard } from "@/pages/Dashboard";
 import { HistoryPage } from "@/pages/HistoryPage";
 import { HistoryDetailPage } from "@/pages/HistoryDetailPage";
+import { AddHistoryPage } from "@/pages/AddHistoryPage";
 import { ImportPage } from "@/pages/ImportPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { ConnectionsPage } from "@/pages/ConnectionsPage";
@@ -106,6 +107,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <HistoryDetailPage onSignOut={handleSignOut} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add"
+          element={
+            <ProtectedRoute>
+              <AddHistoryPage onSignOut={handleSignOut} />
             </ProtectedRoute>
           }
         />

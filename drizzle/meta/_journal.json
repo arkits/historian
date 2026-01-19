@@ -8,6 +8,13 @@
       "when": 1767663784613,
       "tag": "0000_wide_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768803417912,
+      "tag": "0001_nostalgic_energizer",
+      "breakpoints": true
     }
   ]
 }

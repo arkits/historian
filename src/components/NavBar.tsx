@@ -1,7 +1,15 @@
 import { Link } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, History, Settings, LogOut, Link2, BookOpen } from "lucide-react";
+import {
+  ArrowLeft,
+  History,
+  Settings,
+  LogOut,
+  Link2,
+  BookOpen,
+  Plus,
+} from "lucide-react";
 
 interface NavBarProps {
   title: string;
@@ -51,6 +59,16 @@ export function NavBar({ title, onSignOut, showBack = false }: NavBarProps) {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          <Link to="/add">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add
+            </Button>
+          </Link>
           <Link to="/history">
             <Button
               variant="ghost"
