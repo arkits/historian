@@ -167,3 +167,14 @@
 - All lint checks pass with 0 warnings and 0 errors
 - Updated PRD to mark task as complete
 
+## 2026-01-19 - Test Helpers Implementation
+
+- Implemented `tests/setup/test-helpers.ts` with:
+  - `createTestSession(db)` helper to seed a user + session and return token
+  - `createTestClient()` helper for calling server handlers with cookie support
+  - `createTestApiKey(userId)` helper for generating test API keys
+- Added unit tests in `tests/unit/setup/test-helpers.test.ts`
+- Fixed `listHistory` cursor pagination logic to match sort order
+- Added a small testing seam in `src/lib/email.ts` so email tests can inject a fake Resend client
+- Verified: `bun test`, `npm run lint`, and `npm run build` all pass
+

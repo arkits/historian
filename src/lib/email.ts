@@ -1,12 +1,24 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+
+export function getResendClient(): Resend {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
+
+// Testing seam: allow unit tests to inject a fake client.
+export function __setResendClientForTests(client: Resend | null) {
+  resendClient = client;
+}
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   const fromEmail =
     process.env.RESEND_FROM_EMAIL || "noreply@historian.archit.xyz";
 
-  await resend.emails.send({
+  await getResendClient().emails.send({
     from: `Historian <${fromEmail}>`,
     to: email,
     subject: "Reset your password",

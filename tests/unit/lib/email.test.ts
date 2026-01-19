@@ -1,32 +1,19 @@
 /// <reference types="vitest/globals" />
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// Mock Resend module - must be before any imports
-// Use vi.hoisted to define the mock function that can be accessed in both mock and tests
-const { mockSendFn } = vi.hoisted(() => {
-  return {
-    mockSendFn: vi.fn().mockResolvedValue({ id: "test-email-id" }),
-  };
-});
+import { sendPasswordResetEmail, __setResendClientForTests } from "@/lib/email";
 
-vi.mock("resend", () => {
-  return {
-    Resend: vi.fn().mockImplementation(() => ({
-      emails: {
-        send: mockSendFn,
-      },
-    })),
-  };
-});
-
-// Import after mocking
-import { sendPasswordResetEmail } from "@/lib/email";
+let mockSendFn: ReturnType<typeof vi.fn>;
 
 describe("email", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSendFn.mockClear();
-    mockSendFn.mockResolvedValue({ id: "test-email-id" });
+    mockSendFn = vi.fn().mockResolvedValue({ id: "test-email-id" });
+    __setResendClientForTests({
+      emails: {
+        send: mockSendFn,
+      },
+    } as any);
   });
 
   describe("sendPasswordResetEmail", () => {
