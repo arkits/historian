@@ -240,6 +240,7 @@ const routes: Record<string, any> = {
 
 if (SERVE_WEBUI) {
   if (isProduction) {
+    routes["/auth/*"] = authHandler;
     routes["/*"] = async (request: Request) => {
       const url = new URL(request.url);
       const staticResponse = serveStaticAsset(url.pathname);
