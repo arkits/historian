@@ -14,7 +14,7 @@
     "build:ext:firefox": "bun run build-extension.ts --firefox",
     "build:ext:all": "bun run build-extension.ts --all",
     "preview": "vite preview",
-    "test": "vitest run tests",
+    "test": "bun test",
     "lint": "oxlint",
     "migrate": "bun run migrate.ts",
     "db:reset": "bun run scripts/reset-db.ts"

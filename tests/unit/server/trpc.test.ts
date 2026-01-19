@@ -155,9 +155,7 @@ describe("tRPC Tests", () => {
         );
         // If we have error tracking, verify it
         if (hasErrorCall) {
-          const errorCall = calls.find(
-            (call: any[]) => call[3] === false,
-          );
+          const errorCall = calls.find((call: any[]) => call[3] === false);
           expect(errorCall[4]).toMatchObject({
             error: expect.any(String),
           });
@@ -238,17 +236,11 @@ describe("tRPC Tests", () => {
       // Create a test user and session
       const email = `test_${Date.now()}@example.com`;
       const password = "testpassword123";
-      const mockSignUpRequest = new Request(
-        "http://localhost:3000/api/auth/sign-up/email",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: "Test User", email, password }),
-        },
-      );
-      await auth.handler(mockSignUpRequest);
+      await auth.api.signUpEmail({
+        body: { name: "Test User", email, password },
+      });
 
-      const mockSignInRequest = new Request(
+      const signInRequest = new Request(
         "http://localhost:3000/api/auth/sign-in/email",
         {
           method: "POST",
@@ -257,7 +249,7 @@ describe("tRPC Tests", () => {
         },
       );
 
-      const signInResponse = await auth.handler(mockSignInRequest);
+      const signInResponse = await auth.handler(signInRequest);
       const setCookieHeaders = signInResponse.headers.getSetCookie();
       const headers = new Headers();
 
@@ -333,17 +325,11 @@ describe("tRPC Tests", () => {
       // Create a test user and session
       const email = `test_${Date.now()}@example.com`;
       const password = "testpassword123";
-      const mockSignUpRequest = new Request(
-        "http://localhost:3000/api/auth/sign-up/email",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: "Test User", email, password }),
-        },
-      );
-      await auth.handler(mockSignUpRequest);
+      await auth.api.signUpEmail({
+        body: { name: "Test User", email, password },
+      });
 
-      const mockSignInRequest = new Request(
+      const signInRequest = new Request(
         "http://localhost:3000/api/auth/sign-in/email",
         {
           method: "POST",
@@ -352,7 +338,7 @@ describe("tRPC Tests", () => {
         },
       );
 
-      const signInResponse = await auth.handler(mockSignInRequest);
+      const signInResponse = await auth.handler(signInRequest);
       const setCookieHeaders = signInResponse.headers.getSetCookie();
       const headers = new Headers();
 
@@ -402,17 +388,11 @@ describe("tRPC Tests", () => {
       // Create a test user and session
       const email = `test_${Date.now()}@example.com`;
       const password = "testpassword123";
-      const mockSignUpRequest = new Request(
-        "http://localhost:3000/api/auth/sign-up/email",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: "Test User", email, password }),
-        },
-      );
-      await auth.handler(mockSignUpRequest);
+      await auth.api.signUpEmail({
+        body: { name: "Test User", email, password },
+      });
 
-      const mockSignInRequest = new Request(
+      const signInRequest = new Request(
         "http://localhost:3000/api/auth/sign-in/email",
         {
           method: "POST",
@@ -421,7 +401,7 @@ describe("tRPC Tests", () => {
         },
       );
 
-      const signInResponse = await auth.handler(mockSignInRequest);
+      const signInResponse = await auth.handler(signInRequest);
       const setCookieHeaders = signInResponse.headers.getSetCookie();
       const headers = new Headers();
 

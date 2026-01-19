@@ -2,18 +2,29 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { user, session, account, verification, history, apiKey } from "@/lib/schema";
+import {
+  user,
+  session,
+  account,
+  verification,
+  history,
+  apiKey,
+} from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { appRouter } from "@/server/router";
 import { createContext } from "@/server/context";
 import { auth } from "@/server/auth";
 
-const databaseUrl = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/historian2";
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  "postgresql://postgres:postgres@localhost:5432/historian2";
 
 function randomId(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
-
 
 describe("Router Tests", () => {
   let pool: Pool;
@@ -38,13 +49,9 @@ describe("Router Tests", () => {
     // Create a test user
     const email = `test_${randomId()}@example.com`;
     const password = "testpassword123";
-    const mockSignUpRequest = new Request("http://localhost:3000/api/auth/sign-up/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "Test User", email, password }),
-    });
-    const signUpResponse = await auth.handler(mockSignUpRequest);
-    const signUpResult = (await signUpResponse.json()) as any;
+    const signUpResult = (await auth.api.signUpEmail({
+      body: { name: "Test User", email, password },
+    })) as any;
 
     testUser = {
       id: signUpResult.user.id,
@@ -52,26 +59,29 @@ describe("Router Tests", () => {
       name: signUpResult.user.name,
     };
 
-    // Sign in to create a session - use the same auth instance as the router
-    const mockRequest = new Request("http://localhost:3000/api/auth/sign-in/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    // Sign in to create a session - use handler to get cookies
+    const signInRequest = new Request(
+      "http://localhost:3000/api/auth/sign-in/email",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      },
+    );
+    const signInResponse = await auth.handler(signInRequest);
 
-    const signInResponse = await auth.handler(mockRequest);
-    
     // Extract cookies from response
     const setCookieHeaders = signInResponse.headers.getSetCookie();
     const headers = new Headers();
-    
-    // Set all cookies from the response
+
     for (const cookie of setCookieHeaders) {
-      // Extract cookie name and value
       const [nameValue] = cookie.split(";");
       if (nameValue) {
         const existingCookies = headers.get("cookie") || "";
-        headers.set("cookie", existingCookies ? `${existingCookies}; ${nameValue}` : nameValue);
+        headers.set(
+          "cookie",
+          existingCookies ? `${existingCookies}; ${nameValue}` : nameValue,
+        );
       }
     }
 
@@ -213,13 +223,13 @@ describe("Router Tests", () => {
     it("should only return user's own history", async () => {
       // Create another user
       const email2 = `test_${randomId()}@example.com`;
-      const mockSignUpRequest = new Request("http://localhost:3000/api/auth/sign-up/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Test User 2", email: email2, password: "testpassword123" }),
-      });
-      const signUpResponse = await auth.handler(mockSignUpRequest);
-      const signUpResult2 = (await signUpResponse.json()) as any;
+      const signUpResult2 = (await auth.api.signUpEmail({
+        body: {
+          name: "Test User 2",
+          email: email2,
+          password: "testpassword123",
+        },
+      })) as any;
 
       // Create history for both users
       await db.insert(history).values([
@@ -334,13 +344,13 @@ describe("Router Tests", () => {
     it("should return null for another user's history", async () => {
       // Create another user
       const email2 = `test_${randomId()}@example.com`;
-      const mockSignUpRequest = new Request("http://localhost:3000/api/auth/sign-up/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Test User 2", email: email2, password: "testpassword123" }),
-      });
-      const signUpResponse = await auth.handler(mockSignUpRequest);
-      const signUpResult2 = (await signUpResponse.json()) as any;
+      const signUpResult2 = (await auth.api.signUpEmail({
+        body: {
+          name: "Test User 2",
+          email: email2,
+          password: "testpassword123",
+        },
+      })) as any;
 
       const timelineTime = new Date().toISOString();
       const [inserted] = await db
@@ -721,13 +731,13 @@ describe("Router Tests", () => {
     it("should only return user's own API keys", async () => {
       // Create another user
       const email2 = `test_${randomId()}@example.com`;
-      const mockSignUpRequest = new Request("http://localhost:3000/api/auth/sign-up/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Test User 2", email: email2, password: "testpassword123" }),
-      });
-      const signUpResponse = await auth.handler(mockSignUpRequest);
-      const signUpResult2 = (await signUpResponse.json()) as any;
+      const signUpResult2 = (await auth.api.signUpEmail({
+        body: {
+          name: "Test User 2",
+          email: email2,
+          password: "testpassword123",
+        },
+      })) as any;
 
       await db.insert(apiKey).values([
         {
@@ -801,7 +811,10 @@ describe("Router Tests", () => {
         .returning();
 
       const caller = await createCallerWithHeaders(testSession.headers);
-      const result = await caller.toggleApiKey({ id: inserted.id, isActive: false });
+      const result = await caller.toggleApiKey({
+        id: inserted.id,
+        isActive: false,
+      });
 
       expect(result.success).toBe(true);
 
@@ -825,11 +838,17 @@ describe("Router Tests", () => {
       expect(result.success).toBe(true);
 
       // Verify password was changed by trying to sign in with new password
-      const mockSignInRequest = new Request("http://localhost:3000/api/auth/sign-in/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: testUser.email, password: "newpassword123" }),
-      });
+      const mockSignInRequest = new Request(
+        "http://localhost:3000/api/auth/sign-in/email",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: testUser.email,
+            password: "newpassword123",
+          }),
+        },
+      );
       const signInResponse = await auth.handler(mockSignInRequest);
       expect(signInResponse.status).toBe(200);
     });
