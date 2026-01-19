@@ -112,6 +112,26 @@ function createAuthHandler() {
         data = await auth.api.signOut({ headers });
       } else if (pathname === "/auth/get-session" && req.method === "GET") {
         data = await auth.api.getSession({ headers, query: {} as any });
+      } else if (
+        pathname === "/auth/request-password-reset" &&
+        req.method === "POST"
+      ) {
+        data = await auth.api.requestPasswordReset({
+          body: {
+            email: body.email,
+            redirectTo: body.redirectTo,
+          },
+          headers,
+        });
+        console.log("[AUTH] requestPasswordReset result:", data);
+      } else if (pathname === "/auth/reset-password" && req.method === "POST") {
+        data = await auth.api.resetPassword({
+          body: {
+            newPassword: body.newPassword,
+            token: body.token,
+          },
+          headers,
+        });
       } else {
         return new Response("Not found", { status: 404 });
       }
@@ -161,7 +181,6 @@ async function handleRequest(request: Request): Promise<Response> {
 
   return response;
 }
-
 
 function serveStaticFile(path: string): Response {
   try {

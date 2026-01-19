@@ -76,6 +76,8 @@ export const verification = pgTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expiresAt", { mode: "string" }).notNull(),
+  createdAt: timestamp("createdAt", { mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt", { mode: "string" }).notNull().defaultNow(),
 });
 
 export const history = pgTable(

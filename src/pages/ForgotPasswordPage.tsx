@@ -27,15 +27,16 @@ export function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
+      const origin = window.location.origin;
       const apiBase =
-        window.location.origin === "https://historian.archit.xyz"
+        origin === "https://historian.archit.xyz"
           ? "https://historian-api.archit.xyz/api"
           : "";
-      const response = await fetch(`${apiBase}/auth/forgot-password`, {
+      const response = await fetch(`${apiBase}/auth/request-password-reset`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Origin: "https://historian.archit.xyz",
+          Origin: origin,
         },
         credentials: "include",
         body: JSON.stringify({
