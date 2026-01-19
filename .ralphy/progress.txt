@@ -178,3 +178,16 @@
 - Added a small testing seam in `src/lib/email.ts` so email tests can inject a fake Resend client
 - Verified: `bun test`, `npm run lint`, and `npm run build` all pass
 
+## 2026-01-19 - Coverage Configuration Update
+
+- Installed `@vitest/coverage-v8` package to enable coverage functionality
+- Verified coverage configuration in `vitest.config.ts` is working correctly
+- Coverage config includes:
+  - Provider: v8
+  - Reporters: text, json, html
+  - Coverage thresholds: 80% for lines, functions, branches, and statements
+  - Proper exclusions for node_modules, tests, config files, and extension code
+- Fixed linting issue in `tests/unit/setup/test-db.test.ts` (removed unused variable)
+- Verified: `bun test --coverage`, `npm run lint`, and `npm run build` all pass
+- Updated PRD to mark task as complete
+

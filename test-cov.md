@@ -13,4 +13,4 @@
 - [x] Enhance tests/integration/auth.test.ts
 - [ ] Create tests/setup/test-db.ts
 - [x] Create tests/setup/test-helpers.ts
-- [ ] Update vitest.config.ts with coverage config
+- [x] Update vitest.config.ts with coverage config
