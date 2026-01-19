@@ -126,6 +126,9 @@ export const appRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      if (input.length === 0) {
+        return { imported: 0 };
+      }
       const values = input.map((item) => ({
         userId,
         timelineTime: item.timelineTime,

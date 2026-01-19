@@ -8,7 +8,7 @@
 - [x] Create tests/unit/server/context.test.ts
 - [x] Create tests/unit/lib/email.test.ts
 - [x] Create tests/integration/api-keys.test.ts
-- [ ] Create tests/integration/history-flow.test.ts
+- [x] Create tests/integration/history-flow.test.ts
 - [ ] Create tests/integration/extension-integration.test.ts
 - [ ] Enhance tests/integration/auth.test.ts
 - [ ] Create tests/setup/test-db.ts

@@ -111,10 +111,7 @@ export async function seedTestHistoryItem(
   userId: string,
   overrides?: Partial<typeof history.$inferInsert>,
 ) {
-  const id = `test_history_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-  await db.insert(history).values({
-    id,
+  const [result] = await db.insert(history).values({
     userId,
     timelineTime: new Date().toISOString(),
     type: "page",
@@ -127,9 +124,9 @@ export async function seedTestHistoryItem(
     searchContent: "test page example",
     createdAt: new Date().toISOString(),
     ...overrides,
-  });
+  }).returning();
 
-  return id;
+  return result.id;
 }
 
 export async function seedTestHistoryItems(
