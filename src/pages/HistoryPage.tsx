@@ -181,6 +181,100 @@ function HistoryCard({ item }: { item: HistoryItem }) {
   );
 }
 
+function ExpandedStackItem({
+  item,
+  index,
+}: {
+  item: HistoryItem;
+  index: number;
+}) {
+  const { time } = formatDate(item.timelineTime);
+  const itemContent = item.content;
+  const itemTitle =
+    (itemContent.title as string) ||
+    (itemContent.name as string) ||
+    (itemContent.url as string) ||
+    "Unknown";
+  const itemUrl = itemContent.url as string | undefined;
+  const itemFavicon = itemContent.favicon as string | undefined;
+  const itemThumbnail = itemContent.thumbnail as string | undefined;
+  const [thumbError, setThumbError] = useState(false);
+
+  return (
+    <Link key={item.id} to={`/history/${item.id}`} className="block group">
+      <Card className="border-border/30 bg-card/60 backdrop-blur-sm transition-all duration-200 cursor-pointer hover:border-primary/40 hover:shadow-md overflow-hidden relative py-0 ml-4">
+        <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
+          <div className="flex items-center gap-2 text-primary/40 text-xs font-mono">
+            #{index + 1}
+          </div>
+
+          <div className="relative flex flex-col items-center flex-shrink-0 self-center">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-primary/10 border border-primary/20 flex-shrink-0 overflow-hidden">
+              {itemFavicon ? (
+                <img
+                  src={itemFavicon}
+                  alt=""
+                  className="w-4 h-4 rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<span>${getTypeIcon(item.type)}</span>`;
+                    }
+                  }}
+                />
+              ) : (
+                <span>{getTypeIcon(item.type)}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground/80 flex items-center gap-1 font-medium">
+                <Clock className="w-3 h-3" />
+                {time}
+              </span>
+            </div>
+
+            <h4 className="font-medium text-foreground text-xs leading-tight group-hover:text-primary/90 transition-colors duration-200 line-clamp-1">
+              {itemTitle}
+            </h4>
+
+            {itemUrl && (
+              <div className="flex items-center gap-1 mt-0.5">
+                <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/50" />
+                <span className="text-[10px] text-muted-foreground/60 truncate max-w-xs">
+                  {itemUrl.length > 40
+                    ? `${itemUrl.substring(0, 40)}...`
+                    : itemUrl}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="w-16 h-full rounded flex-shrink-0 overflow-hidden border border-border/20 bg-muted/30">
+            {itemThumbnail && !thumbError ? (
+              <img
+                src={itemThumbnail}
+                alt=""
+                className="w-full h-full object-cover"
+                onError={() => setThumbError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-muted/50">
+                <span className="text-lg opacity-50">
+                  {getTypeIcon(item.type)}
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 function CombinedHistoryCard({
   combined,
   isExpanded,
@@ -329,103 +423,14 @@ function CombinedHistoryCard({
 
       {isExpanded && (
         <div className="mt-2 space-y-2 pl-4 border-l-2 border-primary/20 ml-5">
-          {sortedItems.map((item, idx) => {
-            const { time } = formatDate(item.timelineTime);
-            const itemContent = item.content;
-            const itemTitle =
-              (itemContent.title as string) ||
-              (itemContent.name as string) ||
-              (itemContent.url as string) ||
-              "Unknown";
-            const itemUrl = itemContent.url as string | undefined;
-            const itemFavicon = itemContent.favicon as string | undefined;
-            const itemThumbnail = itemContent.thumbnail as string | undefined;
-            const [thumbError, setThumbError] = useState(false);
-
-            return (
-              <Link
-                key={item.id}
-                to={`/history/${item.id}`}
-                className="block group"
-              >
-                <Card className="border-border/30 bg-card/60 backdrop-blur-sm transition-all duration-200 cursor-pointer hover:border-primary/40 hover:shadow-md overflow-hidden relative py-0 ml-4">
-                  <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
-                    <div className="flex items-center gap-2 text-primary/40 text-xs font-mono">
-                      #{idx + 1}
-                    </div>
-
-                    <div className="relative flex flex-col items-center flex-shrink-0 self-center">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-primary/10 border border-primary/20 flex-shrink-0 overflow-hidden">
-                        {itemFavicon ? (
-                          <img
-                            src={itemFavicon}
-                            alt=""
-                            className="w-4 h-4 rounded"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              const parent = e.currentTarget.parentElement;
-                              if (parent) {
-                                parent.innerHTML = `<span>${getTypeIcon(item.type)}</span>`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <span>{getTypeIcon(item.type)}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-muted-foreground/80 flex items-center gap-1 font-medium">
-                          <Clock className="w-3 h-3" />
-                          {time}
-                        </span>
-                      </div>
-
-                      <h4 className="font-medium text-foreground text-xs leading-tight group-hover:text-primary/90 transition-colors duration-200 line-clamp-1">
-                        {itemTitle}
-                      </h4>
-
-                      {itemUrl && (
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/50" />
-                          <span className="text-[10px] text-muted-foreground/60 truncate max-w-xs">
-                            {itemUrl.length > 40
-                              ? `${itemUrl.substring(0, 40)}...`
-                              : itemUrl}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="w-16 h-full rounded flex-shrink-0 overflow-hidden border border-border/20 bg-muted/30">
-                      {itemThumbnail && !thumbError ? (
-                        <img
-                          src={itemThumbnail}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={() => setThumbError(true)}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                          <span className="text-lg opacity-50">
-                            {getTypeIcon(item.type)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+          {sortedItems.map((item, idx) => (
+            <ExpandedStackItem key={item.id} item={item} index={idx} />
+          ))}
         </div>
       )}
     </div>
   );
 }
-
 function GroupHeader({ group }: { group: HistoryGroup }) {
   return (
     <div className="flex items-center gap-4 py-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md -mx-6 px-6">

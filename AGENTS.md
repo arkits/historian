@@ -2,13 +2,13 @@
 
 ## Overview
 
-- Full-stack web application using Bun runtime
-- React 19 frontend with TypeScript
-- tRPC for type-safe API communication
-- Drizzle ORM with PostgreSQL database
-- better-auth for authentication
-- Tailwind CSS with shadcn/ui components
-- Vitest for testing
+* Full-stack web application using Bun runtime
+* React 19 frontend with TypeScript
+* tRPC for type-safe API communication
+* Drizzle ORM with PostgreSQL database
+* better-auth for authentication
+* Tailwind CSS with shadcn/ui components
+* Vitest for testing
 
 ## Development Commands
 
@@ -23,34 +23,41 @@
 
 ## Testing
 
-- Framework: **Vitest**
-- Test location: `tests/` directory
-- Run tests: `bun test`
+* Framework: **Vitest**
+* Test location: `tests/` directory
+* Run tests: `bun test`
 
-## [Chrome Extension](./src/extension/README.md)
+## [Browser Extension](./src/extension/README.md)
 
 Companion Chrome extension that submits user's browser history.
 
-- Run `bun run build:ext`
+* Run `bun run build:ext`
 
 ## Debugging
 
-- Use Playwright MCP to browse the UI on http://localhost:3000/dashboard . Use credentials for testing: username `arkits` / password `admin123`
+* Use Playwright MCP to browse the UI on http://localhost:3000/dashboard . Use credentials for testing: username `arkits` / password `admin123`
 
 ## Database
 
-- **ORM**: Drizzle ORM
-- **Database**: PostgreSQL
-- **Migrations**: Stored in `drizzle/` directory
-- Run migrations: `bun run migrate`
-- Reset database: `bun run db:reset`
-
-## Building
-
-- Build script: `build.ts`
-- Output: `dist/` directory
-- Command: `bun run build`
+* **ORM**: Drizzle ORM
+* **Database**: PostgreSQL
+* **Migrations**: Stored in `drizzle/` directory
+* Run migrations: `bun run migrate`
+* Reset database: `bun run db:reset`
+* Ensure you update migration files for production deployment
 
 ## Development Workflow
 
-- You must execute `bun run build` and `bun run test` ; and ensure that there are no build issues and that all tests pass.
+* You must execute `bun run build` and `bun run test` ; and ensure that there are no build issues and that all tests pass.
+
+## Deployment
+
+* Production deployment
+  * Frontend: http://historian.archit.xyz/
+  * Backend API: http://historian-api.archit.xyz/
+
+* Refer to `./scripts/deploy-backend.sh`
+
+* Production debugging details
+  * `ssh arkits@agnee`
+  * Directory - `/opt/software/historian`
