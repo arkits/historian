@@ -4,6 +4,8 @@ import { trpc } from "@/client/trpc";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { SignUpPage } from "@/pages/SignUpPage";
+import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { AboutPage } from "@/pages/AboutPage";
 import { SupportedServicesPage } from "@/pages/SupportedServicesPage";
 import { DocsPage } from "@/pages/DocsPage";
@@ -53,6 +55,8 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/supported-services" element={<SupportedServicesPage />} />
         <Route path="/docs" element={<DocsPage />} />

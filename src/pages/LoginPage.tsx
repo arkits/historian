@@ -135,6 +135,14 @@ export function LoginPage() {
                 required
                 className="bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
               />
+              <div className="text-right">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             {error && (
