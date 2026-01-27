@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -54,44 +54,30 @@ interface TooltipProps {
 
 function Tooltip({ day, children, onDayClick }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-
-  const updatePosition = (e: React.MouseEvent) => {
-    const tooltip = tooltipRef.current;
-    if (!tooltip) return;
-
-    // Position tooltip closer to cursor with smaller offset
-    const x = e.clientX + 8;
-    const y = e.clientY - 8;
-
-    tooltip.style.left = `${x}px`;
-    tooltip.style.top = `${y}px`;
-  };
 
   return (
     <div
-      className="relative inline-block w-full h-full"
-      onMouseEnter={(e) => {
-        setIsVisible(true);
-        updatePosition(e);
-      }}
+      className="relative inline-block w-full h-full group"
+      onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
-      onMouseMove={updatePosition}
       onClick={() => onDayClick?.(day.date)}
     >
       {children}
-      <div
-        ref={tooltipRef}
-        className="fixed z-50 px-3 py-1.5 text-xs bg-popover text-popover-foreground border border-border rounded-md shadow-md pointer-events-none opacity-0 transition-opacity"
-        style={{
-          opacity: isVisible ? 1 : 0,
-        }}
-      >
-        <div className="font-medium">
-          {day.count} {day.count === 1 ? "entry" : "entries"}
+      {isVisible && (
+        <div
+          className="absolute z-50 px-3 py-1.5 text-xs bg-popover text-popover-foreground border border-border rounded-md shadow-md pointer-events-none whitespace-nowrap"
+          style={{
+            bottom: "calc(100% + 6px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        >
+          <div className="font-medium">
+            {day.count} {day.count === 1 ? "entry" : "entries"}
+          </div>
+          <div className="text-muted-foreground">{formatDate(day.date)}</div>
         </div>
-        <div className="text-muted-foreground">{formatDate(day.date)}</div>
-      </div>
+      )}
     </div>
   );
 }
@@ -113,69 +99,39 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const days: Date[] = [];
+    // Calculate the start date (365 days ago)
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 364);
+
+    // Build a set of dates in our range for quick lookup
     const dateStrSet = new Set<string>();
-    for (let i = 364; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      days.push(date);
-      // Store date string in YYYY-MM-DD format
+    for (let i = 0; i <= 364; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       dateStrSet.add(`${year}-${month}-${day}`);
     }
 
-    // Group days into weeks, ensuring each week starts on Sunday (day 0)
+    // Find the Sunday of the week containing startDate
+    const firstSunday = new Date(startDate);
+    firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
+
+    // Build calendar weeks from firstSunday until we pass today
     const weeksArr: Date[][] = [];
-    let currentWeek: Date[] = [];
+    let currentSunday = new Date(firstSunday);
 
-    days.forEach((day) => {
-      const dayOfWeek = day.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      
-      // If this is a Sunday (day 0) and we have a week in progress, start a new week
-      if (dayOfWeek === 0 && currentWeek.length > 0) {
-        // Pad the previous week to start on Sunday
-        while (currentWeek.length < 7) {
-          const prevDate = new Date(currentWeek[0]!);
-          prevDate.setDate(prevDate.getDate() - 1);
-          currentWeek.unshift(prevDate);
-        }
-        weeksArr.push(currentWeek);
-        currentWeek = [];
+    while (currentSunday <= today) {
+      const week: Date[] = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentSunday);
+        date.setDate(date.getDate() + i);
+        week.push(date);
       }
-      
-      currentWeek.push(day);
-      
-      // If we've completed a full week (Sunday to Saturday), add it
-      if (currentWeek.length === 7 && currentWeek[0]!.getDay() === 0) {
-        weeksArr.push(currentWeek);
-        currentWeek = [];
-      }
-    });
-
-    // Add the last incomplete week and pad it to start on Sunday
-    if (currentWeek.length > 0) {
-      // Find the first day of the week (Sunday) for the first day in currentWeek
-      const firstDay = currentWeek[0]!;
-      const firstDayOfWeek = firstDay.getDay();
-      
-      // Prepend days to make the week start on Sunday
-      for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-        const prevDate = new Date(firstDay);
-        prevDate.setDate(prevDate.getDate() - (i + 1));
-        currentWeek.unshift(prevDate);
-      }
-      
-      // Pad to 7 days if needed
-      while (currentWeek.length < 7) {
-        const lastDate = currentWeek[currentWeek.length - 1]!;
-        const nextDate = new Date(lastDate);
-        nextDate.setDate(nextDate.getDate() + 1);
-        currentWeek.push(nextDate);
-      }
-      
-      weeksArr.push(currentWeek);
+      weeksArr.push(week);
+      // Move to next Sunday
+      currentSunday.setDate(currentSunday.getDate() + 7);
     }
 
     const monthMap: { month: string; weekIndex: number }[] = [];
@@ -196,35 +152,53 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-heading text-base text-foreground">Activity</h3>
+        <div className="flex items-center justify-end mb-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-[1px] bg-muted/40" />
-              <div className="w-3 h-3 rounded-[1px] bg-primary/30" />
-              <div className="w-3 h-3 rounded-[1px] bg-primary/50" />
-              <div className="w-3 h-3 rounded-[1px] bg-primary/70" />
-              <div className="w-3 h-3 rounded-[1px] bg-primary" />
+            <div className="flex gap-0.5">
+              <div className="w-2.5 h-2.5 rounded-sm bg-muted/40" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-primary/30" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-primary/50" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-primary/70" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-primary" />
             </div>
             <span>More</span>
           </div>
         </div>
 
         <div className="w-full">
+          {/* Month labels row */}
           <div
-            className="grid"
+            className="grid mb-1"
+            style={{
+              gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
+            }}
+          >
+            {weeks.map((week, weekIndex) => {
+              const label = monthLabels.find((m) => m.weekIndex === weekIndex);
+              return (
+                <div
+                  key={weekIndex}
+                  className="text-[10px] text-muted-foreground truncate"
+                >
+                  {label?.month ?? ""}
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            className="grid gap-[2px]"
             style={{
               gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
               gridTemplateRows: "repeat(7, minmax(0, 1fr))",
             }}
           >
             {/* Transpose: iterate by day of week (row: 0=Sunday, 1=Monday, etc.), then by week (column) */}
-            {/* Since weeks are now aligned to start on Sunday, week[0] is Sunday, week[1] is Monday, etc. */}
             {[0, 1, 2, 3, 4, 5, 6].map((dayOfWeekIndex) =>
               weeks.map((week, weekIndex) => {
                 const day = week[dayOfWeekIndex];
-                if (!day) return null;
+                if (!day) return <div key={`${weekIndex}-${dayOfWeekIndex}`} />;
                 
                 // Format date consistently using local date (YYYY-MM-DD)
                 const year = day.getFullYear();
@@ -232,15 +206,13 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
                 const date = String(day.getDate()).padStart(2, "0");
                 const dateStr = `${year}-${month}-${date}`;
                 
-                // Only show data for days within our 365-day range
-                const isInRange = days.some((d) => {
-                  const dYear = d.getFullYear();
-                  const dMonth = String(d.getMonth() + 1).padStart(2, "0");
-                  const dDate = String(d.getDate()).padStart(2, "0");
-                  return `${dYear}-${dMonth}-${dDate}` === dateStr;
-                });
+                // Only show boxes for days within our 365-day range
+                const isInRange = dateRangeSet.has(dateStr);
+                if (!isInRange) {
+                  return <div key={`${weekIndex}-${dayOfWeekIndex}`} />;
+                }
                 
-                const dayData = isInRange ? heatmapData.get(dateStr) : undefined;
+                const dayData = heatmapData.get(dateStr);
                 const count = dayData?.count ?? 0;
                 const colorClass = getLevelColor(count, maxCount);
 
@@ -252,7 +224,7 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
                   >
                     <div
                       className={cn(
-                        "aspect-square rounded-[1px] transition-all duration-150 hover:ring-1 hover:ring-primary/60 cursor-pointer",
+                        "aspect-square rounded-sm transition-all duration-150 hover:ring-1 hover:ring-primary/60 cursor-pointer",
                         colorClass,
                       )}
                     />
@@ -260,21 +232,6 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
                 );
               }),
             )}
-          </div>
-
-          <div className="flex mt-1 relative h-4 w-full">
-            {monthLabels.map(({ month, weekIndex }) => (
-              <div
-                key={`${month}-${weekIndex}`}
-                className="text-[10px] text-muted-foreground absolute"
-                style={{
-                  left: `${(weekIndex / weeks.length) * 100}%`,
-                  transform: "translateX(-50%)",
-                }}
-              >
-                {month}
-              </div>
-            ))}
           </div>
         </div>
       </CardContent>
