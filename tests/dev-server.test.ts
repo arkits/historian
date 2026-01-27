@@ -1,4 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { createServer, shutdownObservability } from "@/server/server";
+import type { Server } from "bun";
 
 const BACKEND_URL = "http://localhost:3000";
 const FRONTEND_URL = "http://localhost:5173";
@@ -24,13 +26,32 @@ async function fetchWithTimeout(
 }
 
 describe("Development Server Setup", () => {
+  let server: Server;
+
+  beforeAll(async () => {
+    server = createServer({
+      port: 3000,
+      serveWebUI: false,
+      environment: "test",
+    });
+    // Wait a bit for server to be ready
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  });
+
+  afterAll(async () => {
+    await shutdownObservability();
+    server.stop();
+    // Wait a bit for server to stop
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  });
+
   describe("Backend Server", () => {
     it("should have health endpoint responding", async () => {
       const response = await fetchWithTimeout(`${BACKEND_URL}/health`);
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data.status).toBe("healthy");
-      expect(data.environment).toBe("development");
+      expect(data.environment).toBe("test");
     });
 
     it("should handle auth sign-up", async () => {
@@ -255,11 +276,11 @@ describe("Development Server Setup", () => {
   });
 
   describe("Server Configuration", () => {
-    it("should have health endpoint with development environment", async () => {
+    it("should have health endpoint with test environment", async () => {
       const response = await fetchWithTimeout(`${BACKEND_URL}/health`);
       expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data.environment).toBe("development");
+      expect(data.environment).toBe("test");
     });
   });
 });
