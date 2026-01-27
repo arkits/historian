@@ -17,6 +17,16 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, "index.html"),
       },
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('/react/') || id.includes('/react-dom/')) {
+              return 'vendor-react';
+            }
+            return 'vendor';
+          }
+        },
+      },
     },
   },
   css: {
