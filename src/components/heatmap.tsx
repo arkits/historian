@@ -60,8 +60,9 @@ function Tooltip({ day, children, onDayClick }: TooltipProps) {
     const tooltip = tooltipRef.current;
     if (!tooltip) return;
 
-    const x = e.clientX + 12;
-    const y = e.clientY + 12;
+    // Position tooltip closer to cursor with smaller offset
+    const x = e.clientX + 8;
+    const y = e.clientY - 8;
 
     tooltip.style.left = `${x}px`;
     tooltip.style.top = `${y}px`;
@@ -108,34 +109,72 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
     return Math.max(...data.map((d) => d.count), 1);
   }, [data]);
 
-  const { weeks, monthLabels } = useMemo(() => {
+  const { weeks, monthLabels, dateRangeSet } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const days: Date[] = [];
+    const dateStrSet = new Set<string>();
     for (let i = 364; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       days.push(date);
+      // Store date string in YYYY-MM-DD format
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      dateStrSet.add(`${year}-${month}-${day}`);
     }
 
+    // Group days into weeks, ensuring each week starts on Sunday (day 0)
     const weeksArr: Date[][] = [];
     let currentWeek: Date[] = [];
 
     days.forEach((day) => {
+      const dayOfWeek = day.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // If this is a Sunday (day 0) and we have a week in progress, start a new week
+      if (dayOfWeek === 0 && currentWeek.length > 0) {
+        // Pad the previous week to start on Sunday
+        while (currentWeek.length < 7) {
+          const prevDate = new Date(currentWeek[0]!);
+          prevDate.setDate(prevDate.getDate() - 1);
+          currentWeek.unshift(prevDate);
+        }
+        weeksArr.push(currentWeek);
+        currentWeek = [];
+      }
+      
       currentWeek.push(day);
-      if (currentWeek.length === 7) {
+      
+      // If we've completed a full week (Sunday to Saturday), add it
+      if (currentWeek.length === 7 && currentWeek[0]!.getDay() === 0) {
         weeksArr.push(currentWeek);
         currentWeek = [];
       }
     });
 
+    // Add the last incomplete week and pad it to start on Sunday
     if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        const prevDate = new Date(currentWeek[0]!);
-        prevDate.setDate(prevDate.getDate() - 1);
+      // Find the first day of the week (Sunday) for the first day in currentWeek
+      const firstDay = currentWeek[0]!;
+      const firstDayOfWeek = firstDay.getDay();
+      
+      // Prepend days to make the week start on Sunday
+      for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+        const prevDate = new Date(firstDay);
+        prevDate.setDate(prevDate.getDate() - (i + 1));
         currentWeek.unshift(prevDate);
       }
+      
+      // Pad to 7 days if needed
+      while (currentWeek.length < 7) {
+        const lastDate = currentWeek[currentWeek.length - 1]!;
+        const nextDate = new Date(lastDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+        currentWeek.push(nextDate);
+      }
+      
       weeksArr.push(currentWeek);
     }
 
@@ -151,7 +190,7 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
       }
     });
 
-    return { weeks: weeksArr, monthLabels: monthMap };
+    return { weeks: weeksArr, monthLabels: monthMap, dateRangeSet: dateStrSet };
   }, []);
 
   return (
@@ -177,18 +216,37 @@ export function ActivityHeatmap({ data, className, onDayClick }: HeatmapProps) {
             className="grid"
             style={{
               gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`,
+              gridTemplateRows: "repeat(7, minmax(0, 1fr))",
             }}
           >
-            {weeks.map((week) =>
-              week.map((day) => {
-                const dateStr = day.toISOString().split("T")[0] ?? "";
-                const dayData = heatmapData.get(dateStr);
+            {/* Transpose: iterate by day of week (row: 0=Sunday, 1=Monday, etc.), then by week (column) */}
+            {/* Since weeks are now aligned to start on Sunday, week[0] is Sunday, week[1] is Monday, etc. */}
+            {[0, 1, 2, 3, 4, 5, 6].map((dayOfWeekIndex) =>
+              weeks.map((week, weekIndex) => {
+                const day = week[dayOfWeekIndex];
+                if (!day) return null;
+                
+                // Format date consistently using local date (YYYY-MM-DD)
+                const year = day.getFullYear();
+                const month = String(day.getMonth() + 1).padStart(2, "0");
+                const date = String(day.getDate()).padStart(2, "0");
+                const dateStr = `${year}-${month}-${date}`;
+                
+                // Only show data for days within our 365-day range
+                const isInRange = days.some((d) => {
+                  const dYear = d.getFullYear();
+                  const dMonth = String(d.getMonth() + 1).padStart(2, "0");
+                  const dDate = String(d.getDate()).padStart(2, "0");
+                  return `${dYear}-${dMonth}-${dDate}` === dateStr;
+                });
+                
+                const dayData = isInRange ? heatmapData.get(dateStr) : undefined;
                 const count = dayData?.count ?? 0;
                 const colorClass = getLevelColor(count, maxCount);
 
                 return (
                   <Tooltip
-                    key={dateStr}
+                    key={`${weekIndex}-${dayOfWeekIndex}`}
                     day={{ date: dateStr, count }}
                     onDayClick={onDayClick}
                   >

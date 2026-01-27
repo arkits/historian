@@ -1,5 +1,5 @@
-/// <reference types="vitest/globals" />
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "bun:test";
+import { randomUUID } from "crypto";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { betterAuth } from "better-auth";
@@ -16,7 +16,7 @@ const TEST_DATABASE_URL =
   "postgresql://postgres:postgres@localhost:5432/historian2";
 
 function randomId(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return randomUUID().replace(/-/g, "").substring(0, 16);
 }
 
 describe("Authentication Integration Tests", () => {
