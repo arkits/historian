@@ -60,7 +60,6 @@ describe("Authentication Integration Tests", () => {
 
   afterAll(async () => {
     await cleanupAllTestData(db);
-    await closeTestPool();
     await pool.end();
   });
 

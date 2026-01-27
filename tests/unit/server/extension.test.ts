@@ -14,15 +14,14 @@ import { eq } from "drizzle-orm";
 import { handleExtensionRequest } from "@/server/extension";
 import { auth } from "@/server/auth";
 
+import { randomUUID } from "crypto";
+
 const databaseUrl =
   process.env.DATABASE_URL ||
   "postgresql://postgres:postgres@localhost:5432/historian2";
 
 function randomId(): string {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
+  return randomUUID().replace(/-/g, "").substring(0, 16);
 }
 
 describe("Extension Tests", () => {

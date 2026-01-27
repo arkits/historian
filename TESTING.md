@@ -155,7 +155,7 @@ Complete lifecycle test: Create history → List with pagination → Filter by d
 | Test                                  | Description         | Expected Result  |
 | ------------------------------------- | ------------------- | ---------------- |
 | `isIgnored_chromeUrls_returnsTrue`    | chrome:// URLs      | true             |
-| `isIgnored_normalUrls_returnsFalse`   | https://example.com | false            |
+| `isIgnored_normalUrls_returnsFalse`   | `https://example.com` | false            |
 | `getPageMetadata_extractsMetaTags`    | HTML with meta tags | Extracted values |
 | `shouldTrack_ignoredUrl_returnsFalse` | Ignored URL         | false            |
 

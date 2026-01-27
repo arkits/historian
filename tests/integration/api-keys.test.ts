@@ -15,6 +15,8 @@ import {
   closeTestPool,
 } from "../setup/test-db";
 
+import { randomUUID } from "crypto";
+
 const TEST_DATABASE_URL =
   process.env.DATABASE_URL ||
   "postgresql://postgres:postgres@localhost:5432/historian2";
@@ -58,7 +60,7 @@ describe("API Keys Integration Tests", () => {
     await cleanupAllTestData(db);
 
     // Create a test user and session
-    const email = `test_${Date.now()}_${Math.random().toString(36).substring(7)}@example.com`;
+    const email = `test_${Date.now()}_${randomUUID().substring(0, 8)}@example.com`;
     const password = "testpassword123";
 
     // Sign up using auth API

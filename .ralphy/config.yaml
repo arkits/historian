@@ -18,9 +18,9 @@ commands:
 # These are injected into every prompt
 rules: []
   # Examples:
-  - "Ensure all tests are passing before committing"
-  - "Ensure there are no linting errors before committing"
-  - "Ensure build command is successful before committing"
+  # - "Ensure all tests are passing before committing"
+  # - "Ensure there are no linting errors before committing"
+  # - "Ensure build command is successful before committing"
 
 # Boundaries - files/folders the AI should not modify
 boundaries:
