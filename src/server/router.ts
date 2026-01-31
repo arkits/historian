@@ -2,7 +2,7 @@ import { router, publicProcedure, protectedProcedure } from "./trpc";
 import { auth } from "./auth";
 import { db } from "@/lib/db";
 import { history, apiKey } from "@/lib/schema";
-import { eq, desc, and, lt, count, type SQL, gte, sql } from "drizzle-orm";
+import { eq, desc, and, or, lt, count, type SQL, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 
 function generateApiKey(): string {
@@ -56,10 +56,19 @@ export const appRouter = router({
         condition = and(condition, eq(history.type, type)) as SQL;
       }
       if (cursor) {
+        // Match the ORDER BY (timelineTime desc, id desc):
+        // fetch rows "after" cursor using:
+        // timelineTime < cursor.timelineTime OR
+        // (timelineTime = cursor.timelineTime AND id < cursor.id)
         condition = and(
           condition,
-          lt(history.id, cursor.id),
-          lt(history.timelineTime, cursor.timelineTime),
+          or(
+            lt(history.timelineTime, cursor.timelineTime),
+            and(
+              eq(history.timelineTime, cursor.timelineTime),
+              lt(history.id, cursor.id),
+            ),
+          ),
         ) as SQL;
       }
 
@@ -126,6 +135,9 @@ export const appRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      if (input.length === 0) {
+        return { imported: 0 };
+      }
       const values = input.map((item) => ({
         userId,
         timelineTime: item.timelineTime,

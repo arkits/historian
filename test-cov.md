@@ -1,0 +1,16 @@
+## Tasks
+- [x] Create tests/unit/server/router.test.ts
+- [x] Create tests/unit/server/extension.test.ts
+- [x] Fix existing lint issues
+- [x] Run all tests and fix failing tests
+- [x] Create tests/unit/server/trpc.test.ts
+- [x] Create tests/unit/server/handler.test.ts
+- [x] Create tests/unit/server/context.test.ts
+- [x] Create tests/unit/lib/email.test.ts
+- [x] Create tests/integration/api-keys.test.ts
+- [x] Create tests/integration/history-flow.test.ts
+- [x] Create tests/integration/extension-integration.test.ts
+- [x] Enhance tests/integration/auth.test.ts
+- [x] Create tests/setup/test-db.ts
+- [x] Create tests/setup/test-helpers.ts
+- [x] Update vitest.config.ts with coverage config

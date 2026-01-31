@@ -10,7 +10,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { ArrowLeft, Lock, CheckCircle, XCircle } from "lucide-react";
+import { Lock, CheckCircle, XCircle } from "lucide-react";
 import { getApiUrl } from "@/lib/api-url";
 
 export function ResetPasswordPage() {

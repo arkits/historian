@@ -2,6 +2,8 @@
 
 set -e
 
+export PATH="/home/arkits/.bun/bin:$PATH"
+
 cd /opt/software/historian/
 
 echo ">>> pulling latest code"

@@ -99,3 +99,26 @@
     animation: none !important;
   }
 }
+
+/* History timeline styles */
+.history-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.35 0.04 35 / 0.5) transparent;
+}
+
+.history-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-scroll-container::-webkit-scrollbar-thumb {
+  background: oklch(0.35 0.04 35 / 0.5);
+  border-radius: 3px;
+}
+
+.history-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.35 0.04 35 / 0.7);
+}

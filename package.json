@@ -14,7 +14,7 @@
     "build:ext:firefox": "bun run build-extension.ts --firefox",
     "build:ext:all": "bun run build-extension.ts --all",
     "preview": "vite preview",
-    "test": "vitest run tests",
+    "test": "bun test",
     "lint": "oxlint",
     "migrate": "bun run migrate.ts",
     "db:reset": "bun run scripts/reset-db.ts"
@@ -73,6 +73,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^3.0.0",
     "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.8",
     "oxlint": "^1.38.0",

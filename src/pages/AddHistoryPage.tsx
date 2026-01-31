@@ -19,10 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft,
   Plus,
   Loader2,
-  CheckCircle,
   AlertCircle,
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
