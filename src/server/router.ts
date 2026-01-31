@@ -1,8 +1,13 @@
 import { router, publicProcedure, protectedProcedure } from "./trpc";
 import { auth } from "./auth";
 import { db } from "@/lib/db";
-import { history, apiKey } from "@/lib/schema";
+import { history, apiKey, account } from "@/lib/schema";
 import { eq, desc, and, lt, count, type SQL, gte, sql } from "drizzle-orm";
+import {
+  getValidAccessToken,
+  hasYoutubeScope,
+  fetchLikedVideos,
+} from "./youtube";
 import { z } from "zod";
 
 function generateApiKey(): string {
@@ -393,6 +398,111 @@ export const appRouter = router({
       });
       return { success: true };
     }),
+
+  getYoutubeConnection: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const [googleAccount] = await db
+      .select()
+      .from(account)
+      .where(
+        and(
+          eq(account.userId, userId),
+          eq(account.providerId, "google"),
+        ),
+      );
+    const connected =
+      !!googleAccount &&
+      hasYoutubeScope(googleAccount.scope) &&
+      !!googleAccount.refreshToken;
+    return {
+      connected,
+      email: connected ? undefined : undefined,
+    };
+  }),
+
+  syncYoutubeHistory: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    if (!clientId || !clientSecret) {
+      throw new Error("YouTube sync is not configured (missing Google credentials)");
+    }
+
+    const [googleAccount] = await db
+      .select()
+      .from(account)
+      .where(
+        and(
+          eq(account.userId, userId),
+          eq(account.providerId, "google"),
+        ),
+      );
+
+    if (!googleAccount || !hasYoutubeScope(googleAccount.scope)) {
+      return { synced: 0, error: "not_connected" as const };
+    }
+
+    const { accessToken, account: maybeUpdatedAccount } =
+      await getValidAccessToken(
+        googleAccount as Parameters<typeof getValidAccessToken>[0],
+        clientId,
+        clientSecret,
+      );
+
+    if (
+      maybeUpdatedAccount.accessToken !== googleAccount.accessToken ||
+      maybeUpdatedAccount.accessTokenExpiresAt !==
+        googleAccount.accessTokenExpiresAt
+    ) {
+      await db
+        .update(account)
+        .set({
+          accessToken: maybeUpdatedAccount.accessToken,
+          accessTokenExpiresAt: maybeUpdatedAccount.accessTokenExpiresAt,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(account.id, googleAccount.id));
+    }
+
+    const items = await fetchLikedVideos(accessToken);
+    if (items.length === 0) {
+      return { synced: 0 };
+    }
+
+    const values = items.map((item) => ({
+      userId,
+      timelineTime: item.timelineTime,
+      type: item.type,
+      contentId: item.contentId,
+      content: item.content as Record<string, unknown>,
+      searchContent: item.searchContent,
+    }));
+    await db
+      .insert(history)
+      .values(values)
+      .onConflictDoNothing({
+        target: [
+          history.contentId,
+          history.userId,
+          history.type,
+          history.timelineTime,
+        ],
+      });
+    return { synced: values.length };
+  }),
+
+  disconnectYoutube: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    await db
+      .delete(account)
+      .where(
+        and(
+          eq(account.userId, userId),
+          eq(account.providerId, "google"),
+        ),
+      );
+    return { success: true };
+  }),
 });
 
 export type AppRouter = typeof appRouter;

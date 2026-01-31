@@ -21,6 +21,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
+import { trpc } from "@/client/trpc";
+import { getApiUrl } from "@/lib/api-url";
 
 interface ConnectionsPageProps {
   onSignOut?: () => void;
@@ -38,7 +40,23 @@ interface ServiceConnection {
   lastSynced?: string;
 }
 
+const YOUTUBE_READONLY_SCOPE =
+  "https://www.googleapis.com/auth/youtube.readonly";
+
 export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
+  const utils = trpc.useUtils();
+  const { data: youtubeConnection } = trpc.getYoutubeConnection.useQuery();
+  const syncYoutubeMutation = trpc.syncYoutubeHistory.useMutation({
+    onSuccess: () => {
+      utils.getYoutubeConnection.invalidate();
+    },
+  });
+  const disconnectYoutubeMutation = trpc.disconnectYoutube.useMutation({
+    onSuccess: () => {
+      utils.getYoutubeConnection.invalidate();
+    },
+  });
+
   const [connections, setConnections] = useState<ServiceConnection[]>([
     {
       id: "reddit",
@@ -59,7 +77,7 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
     {
       id: "youtube",
       name: "YouTube",
-      description: "Import your watch history and saved videos",
+      description: "Import your liked videos (connect with Google)",
       icon: <Play className="w-6 h-6" />,
       color: "#FF0000",
       status: "disconnected",
@@ -87,18 +105,49 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
   const [newApiKeyName, setNewApiKeyName] = useState("");
   const [newApiKey, setNewApiKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [youtubeLastSynced, setYoutubeLastSynced] = useState<string | null>(
+    null,
+  );
 
   const handleConnect = (id: string) => {
-    setConnections((prev) =>
-      prev.map((conn) =>
-        conn.id === id
-          ? { ...conn, status: "connected" as ConnectionStatus }
-          : conn,
-      ),
-    );
+    if (id !== "youtube") {
+      setConnections((prev) =>
+        prev.map((conn) =>
+          conn.id === id
+            ? { ...conn, status: "connected" as ConnectionStatus }
+            : conn,
+        ),
+      );
+      return;
+    }
+    const token = localStorage.getItem("auth-token");
+    const callbackURL = `${window.location.origin}/dashboard/connections`;
+    fetch(getApiUrl("/api/auth/link-social"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        provider: "google",
+        scopes: [YOUTUBE_READONLY_SCOPE],
+        callbackURL,
+        disableRedirect: true,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data: { url?: string }) => {
+        if (data?.url) window.location.href = data.url;
+      })
+      .catch(() => {});
   };
 
   const handleDisconnect = (id: string) => {
+    if (id === "youtube") {
+      disconnectYoutubeMutation.mutate(undefined);
+      return;
+    }
     setConnections((prev) =>
       prev.map((conn) =>
         conn.id === id
@@ -106,6 +155,16 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
           : conn,
       ),
     );
+  };
+
+  const handleSyncYoutube = () => {
+    syncYoutubeMutation.mutate(undefined, {
+      onSuccess: (result) => {
+        if ("synced" in result && result.synced > 0) {
+          setYoutubeLastSynced(new Date().toISOString());
+        }
+      },
+    });
   };
 
   const handleCreateApiKey = () => {
@@ -136,97 +195,145 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            {connections.map((connection) => (
-              <Card
-                key={connection.id}
-                className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow hover:border-primary/30 transition-all duration-300"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center"
-                        style={{
-                          backgroundColor: `${connection.color}20`,
-                          color: connection.color,
-                        }}
-                      >
-                        {connection.icon}
-                      </div>
-                      <div>
-                        <CardTitle className="font-heading text-xl text-foreground">
-                          {connection.name}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                          {connection.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <div
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-                        connection.status === "connected"
-                          ? "bg-green-500/10 text-green-500"
-                          : connection.status === "pending"
-                            ? "bg-yellow-500/10 text-yellow-500"
-                            : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {connection.status === "connected" ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          Connected
-                        </>
-                      ) : connection.status === "pending" ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Pending
-                        </>
-                      ) : (
-                        <>
-                          <Link2 className="w-3.5 h-3.5" />
-                          Not connected
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {connection.status === "connected" ? (
-                    <div className="space-y-4">
-                      {connection.lastSynced && (
-                        <p className="text-sm text-muted-foreground">
-                          Last synced:{" "}
-                          {new Date(connection.lastSynced).toLocaleDateString()}
-                        </p>
-                      )}
-                      <div className="flex gap-3">
-                        <Button
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => handleDisconnect(connection.id)}
+            {connections.map((connection) => {
+              const isYoutube = connection.id === "youtube";
+              const status: ConnectionStatus = isYoutube
+                ? youtubeConnection?.connected
+                  ? "connected"
+                  : "disconnected"
+                : connection.status;
+              const lastSynced = isYoutube
+                ? youtubeLastSynced ?? connection.lastSynced
+                : connection.lastSynced;
+              return (
+                <Card
+                  key={connection.id}
+                  className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow hover:border-primary/30 transition-all duration-300"
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center"
+                          style={{
+                            backgroundColor: `${connection.color}20`,
+                            color: connection.color,
+                          }}
                         >
-                          <X className="w-4 h-4 mr-2" />
-                          Disconnect
-                        </Button>
-                        <Button variant="default" className="flex-1">
-                          <Loader2 className="w-4 h-4 mr-2" />
-                          Sync Now
-                        </Button>
+                          {connection.icon}
+                        </div>
+                        <div>
+                          <CardTitle className="font-heading text-xl text-foreground">
+                            {connection.name}
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            {connection.description}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                          status === "connected"
+                            ? "bg-green-500/10 text-green-500"
+                            : status === "pending"
+                              ? "bg-yellow-500/10 text-yellow-500"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {status === "connected" ? (
+                          <>
+                            <Check className="w-3.5 h-3.5" />
+                            Connected
+                          </>
+                        ) : status === "pending" ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            Pending
+                          </>
+                        ) : (
+                          <>
+                            <Link2 className="w-3.5 h-3.5" />
+                            Not connected
+                          </>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <Button
-                      className="w-full"
-                      style={{ backgroundColor: connection.color }}
-                      onClick={() => handleConnect(connection.id)}
-                    >
-                      <Link2 className="w-4 h-4 mr-2" />
-                      Connect {connection.name}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent>
+                    {status === "connected" ? (
+                      <div className="space-y-4">
+                        {lastSynced && (
+                          <p className="text-sm text-muted-foreground">
+                            Last synced:{" "}
+                            {new Date(lastSynced).toLocaleDateString()}
+                          </p>
+                        )}
+                        {isYoutube && syncYoutubeMutation.isError && (
+                          <p className="text-sm text-destructive">
+                            {syncYoutubeMutation.error.message}
+                          </p>
+                        )}
+                        {isYoutube &&
+                          syncYoutubeMutation.data &&
+                          "error" in syncYoutubeMutation.data &&
+                          syncYoutubeMutation.data.error === "not_connected" && (
+                            <p className="text-sm text-muted-foreground">
+                              Reconnect to sync.
+                            </p>
+                          )}
+                        <div className="flex gap-3">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => handleDisconnect(connection.id)}
+                            disabled={
+                              isYoutube && disconnectYoutubeMutation.isPending
+                            }
+                          >
+                            {isYoutube &&
+                            disconnectYoutubeMutation.isPending ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <X className="w-4 h-4 mr-2" />
+                            )}
+                            Disconnect
+                          </Button>
+                          {isYoutube ? (
+                            <Button
+                              variant="default"
+                              className="flex-1"
+                              onClick={handleSyncYoutube}
+                              disabled={syncYoutubeMutation.isPending}
+                            >
+                              {syncYoutubeMutation.isPending ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Loader2 className="w-4 h-4 mr-2" />
+                              )}
+                              Sync Now
+                            </Button>
+                          ) : (
+                            <Button variant="default" className="flex-1">
+                              <Loader2 className="w-4 h-4 mr-2" />
+                              Sync Now
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        style={{ backgroundColor: connection.color }}
+                        onClick={() => handleConnect(connection.id)}
+                      >
+                        <Link2 className="w-4 h-4 mr-2" />
+                        Connect {connection.name}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </main>

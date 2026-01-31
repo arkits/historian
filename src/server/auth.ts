@@ -25,6 +25,20 @@ export const auth = betterAuth({
       await sendPasswordResetEmail(user.email, url);
     },
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      accessType: "offline",
+      prompt: "select_account consent",
+    },
+  },
   trustedOrigins: [
     "http://localhost:3000",
     "http://localhost:5173",
