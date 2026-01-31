@@ -14,11 +14,12 @@ import {
 import {
   Search,
   X,
-  Clock,
-  Hash,
   Filter,
   ExternalLink,
   CalendarIcon,
+  ChevronDown,
+  ChevronUp,
+  Layers,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -85,99 +86,104 @@ function HistoryCard({ item }: { item: HistoryItem }) {
     (content.name as string) ||
     (content.url as string) ||
     "Unknown";
-  const subtitle =
-    (content.description as string) || (content.url as string) || "";
   const url = content.url as string;
   const favicon = content.favicon as string;
   const thumbnail = content.thumbnail as string;
   const [thumbnailError, setThumbnailError] = useState(false);
 
+  // Extract domain from URL for display
+  const domain = url ? new URL(url).hostname.replace("www.", "") : "";
+
   return (
-    <Link to={`/history/${item.id}`} className="block group">
-      <Card className="border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 overflow-hidden relative py-0">
-        {/* Subtle gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
+    <div className="relative flex gap-4 group">
+      {/* Timeline connector */}
+      <div className="relative flex flex-col items-center">
+        {/* Timestamp */}
+        <div className="w-16 text-right pr-3 flex-shrink-0">
+          <span className="text-[11px] font-mono text-muted-foreground/70 tracking-tight">
+            {time}
+          </span>
+        </div>
+      </div>
 
-        <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
-          {/* Left side: Icon with timeline connector */}
-          <div className="relative flex flex-col items-center flex-shrink-0 self-center">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:from-primary/30 group-hover:to-primary/20 group-hover:border-primary/30 transition-all duration-300 flex-shrink-0 overflow-hidden shadow-sm">
-              {favicon ? (
-                <img
-                  src={favicon}
-                  alt=""
-                  className="w-5 h-5 rounded"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      parent.innerHTML = `<span>${getTypeIcon(item.type)}</span>`;
-                    }
-                  }}
-                />
-              ) : (
-                <span className="text-lg">{getTypeIcon(item.type)}</span>
-              )}
-            </div>
-          </div>
+      {/* Timeline dot */}
+      <div className="relative flex flex-col items-center flex-shrink-0">
+        <div className="w-2.5 h-2.5 rounded-full bg-primary/60 ring-4 ring-background group-hover:bg-primary group-hover:ring-primary/20 transition-all duration-300 z-10" />
+        <div className="absolute top-3 w-px h-[calc(100%+1rem)] bg-gradient-to-b from-border/60 to-border/20" />
+      </div>
 
-          {/* Center: Content */}
-          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
-            {/* Meta info row */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-md flex items-center gap-1.5 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300">
-                <Hash className="w-3 h-3" />
-                {item.type.toLowerCase()}
-              </span>
-              <span className="text-xs text-muted-foreground/80 flex items-center gap-1.5 font-medium">
-                <Clock className="w-3 h-3" />
-                {time}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary/90 transition-colors duration-300 line-clamp-2">
-              {title}
-            </h3>
-
-            {/* Subtitle/Description */}
-            {subtitle && subtitle !== title && (
-              <p className="text-xs text-muted-foreground/90 leading-relaxed line-clamp-2 group-hover:text-muted-foreground transition-colors duration-300">
-                {subtitle}
-              </p>
-            )}
-
-            {/* URL preview (if available and different from title/subtitle) */}
-            {url && !subtitle.includes(url) && !title.includes(url) && (
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <ExternalLink className="w-3 h-3 text-muted-foreground/60" />
-                <span className="text-xs text-muted-foreground/70 truncate max-w-md">
-                  {url.length > 50 ? `${url.substring(0, 50)}...` : url}
-                </span>
+      {/* Card content */}
+      <Link to={`/history/${item.id}`} className="flex-1 min-w-0 pb-4">
+        <Card className="border-border/30 bg-card/80 backdrop-blur-sm transition-all duration-300 cursor-pointer hover:border-primary/40 hover:bg-card/95 hover:shadow-xl hover:shadow-primary/5 overflow-hidden relative">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              {/* Favicon column */}
+              <div className="flex items-center justify-center w-14 bg-muted/30 border-r border-border/20 flex-shrink-0">
+                {favicon ? (
+                  <img
+                    src={favicon}
+                    alt=""
+                    className="w-6 h-6 rounded"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `<span class="text-xl">${getTypeIcon(item.type)}</span>`;
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="text-xl">{getTypeIcon(item.type)}</span>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Right side: Thumbnail - Full Height */}
-          <div className="w-24 h-full rounded-lg flex-shrink-0 overflow-hidden border border-border/30 group-hover:border-primary/30 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-primary/10 bg-muted/30">
-            {thumbnail && !thumbnailError ? (
-              <img
-                src={thumbnail}
-                alt=""
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                onError={() => setThumbnailError(true)}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
-                <div className="text-2xl opacity-50">
-                  {getTypeIcon(item.type)}
+              {/* Content */}
+              <div className="flex-1 min-w-0 px-4 py-3">
+                {/* Type badge */}
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
+                    {item.type}
+                  </span>
                 </div>
+
+                {/* Title */}
+                <h3 className="text-sm font-medium text-foreground leading-snug group-hover:text-primary transition-colors duration-300 line-clamp-2 mb-1">
+                  {title}
+                </h3>
+
+                {/* Domain */}
+                {domain && (
+                  <div className="flex items-center gap-1.5">
+                    <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
+                    <span className="text-xs text-muted-foreground/60 truncate">
+                      {domain}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+
+              {/* Thumbnail */}
+              <div className="w-20 flex-shrink-0 overflow-hidden bg-muted/20">
+                {thumbnail && !thumbnailError ? (
+                  <img
+                    src={thumbnail}
+                    alt=""
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={() => setThumbnailError(true)}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-2xl opacity-30">
+                      {getTypeIcon(item.type)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    </div>
   );
 }
 
@@ -197,80 +203,57 @@ function ExpandedStackItem({
     "Unknown";
   const itemUrl = itemContent.url as string | undefined;
   const itemFavicon = itemContent.favicon as string | undefined;
-  const itemThumbnail = itemContent.thumbnail as string | undefined;
   const [thumbError, setThumbError] = useState(false);
+  void thumbError;
+  void setThumbError;
+
+  const domain = itemUrl ? new URL(itemUrl).hostname.replace("www.", "") : "";
 
   return (
     <Link key={item.id} to={`/history/${item.id}`} className="block group">
-      <Card className="border-border/30 bg-card/60 backdrop-blur-sm transition-all duration-200 cursor-pointer hover:border-primary/40 hover:shadow-md overflow-hidden relative py-0 ml-4">
-        <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
-          <div className="flex items-center gap-2 text-primary/40 text-xs font-mono">
-            #{index + 1}
-          </div>
+      <div className="flex items-center gap-3 py-2 px-3 rounded-lg bg-card/40 border border-border/20 hover:border-primary/30 hover:bg-card/60 transition-all duration-200">
+        {/* Index */}
+        <span className="text-[10px] font-mono text-muted-foreground/50 w-5">
+          {String(index + 1).padStart(2, "0")}
+        </span>
 
-          <div className="relative flex flex-col items-center flex-shrink-0 self-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-primary/10 border border-primary/20 flex-shrink-0 overflow-hidden">
-              {itemFavicon ? (
-                <img
-                  src={itemFavicon}
-                  alt=""
-                  className="w-4 h-4 rounded"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      parent.innerHTML = `<span>${getTypeIcon(item.type)}</span>`;
-                    }
-                  }}
-                />
-              ) : (
-                <span>{getTypeIcon(item.type)}</span>
-              )}
-            </div>
-          </div>
+        {/* Favicon */}
+        <div className="w-6 h-6 rounded flex items-center justify-center bg-muted/30 flex-shrink-0 overflow-hidden">
+          {itemFavicon ? (
+            <img
+              src={itemFavicon}
+              alt=""
+              className="w-4 h-4 rounded"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.innerHTML = `<span class="text-xs">${getTypeIcon(item.type)}</span>`;
+                }
+              }}
+            />
+          ) : (
+            <span className="text-xs">{getTypeIcon(item.type)}</span>
+          )}
+        </div>
 
-          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground/80 flex items-center gap-1 font-medium">
-                <Clock className="w-3 h-3" />
-                {time}
-              </span>
-            </div>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-medium text-foreground/90 group-hover:text-primary transition-colors line-clamp-1">
+            {itemTitle}
+          </h4>
+          {domain && (
+            <span className="text-[10px] text-muted-foreground/50">
+              {domain}
+            </span>
+          )}
+        </div>
 
-            <h4 className="font-medium text-foreground text-xs leading-tight group-hover:text-primary/90 transition-colors duration-200 line-clamp-1">
-              {itemTitle}
-            </h4>
-
-            {itemUrl && (
-              <div className="flex items-center gap-1 mt-0.5">
-                <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/50" />
-                <span className="text-[10px] text-muted-foreground/60 truncate max-w-xs">
-                  {itemUrl.length > 40
-                    ? `${itemUrl.substring(0, 40)}...`
-                    : itemUrl}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="w-16 h-full rounded flex-shrink-0 overflow-hidden border border-border/20 bg-muted/30">
-            {itemThumbnail && !thumbError ? (
-              <img
-                src={itemThumbnail}
-                alt=""
-                className="w-full h-full object-cover"
-                onError={() => setThumbError(true)}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                <span className="text-lg opacity-50">
-                  {getTypeIcon(item.type)}
-                </span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        {/* Time */}
+        <span className="text-[10px] font-mono text-muted-foreground/60 flex-shrink-0">
+          {time}
+        </span>
+      </div>
     </Link>
   );
 }
@@ -300,170 +283,240 @@ function CombinedHistoryCard({
       new Date(b.timelineTime).getTime() - new Date(a.timelineTime).getTime(),
   );
 
+  const domain = url ? new URL(url).hostname.replace("www.", "") : "";
+
   return (
-    <div className="relative">
-      <div onClick={onToggle} className="block group cursor-pointer">
-        <Card
-          className={`border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 overflow-hidden relative py-0 ${
-            isExpanded ? "ring-2 ring-primary/30" : ""
-          }`}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/3 group-hover:to-primary/0 transition-all duration-300 pointer-events-none" />
-
-          <CardContent className="py-2 px-3 flex items-stretch gap-3 relative z-10">
-            <div className="relative flex flex-col items-center flex-shrink-0 self-center">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:from-primary/30 group-hover:to-primary/20 group-hover:border-primary/30 transition-all duration-300 flex-shrink-0 overflow-hidden shadow-sm">
-                {favicon ? (
-                  <img
-                    src={favicon}
-                    alt=""
-                    className="w-5 h-5 rounded"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      const parent = e.currentTarget.parentElement;
-                      if (parent) {
-                        parent.innerHTML = `<span>${getTypeIcon(combined.type)}</span>`;
-                      }
-                    }}
-                  />
-                ) : (
-                  <span className="text-lg">{getTypeIcon(combined.type)}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded-md flex items-center gap-1.5 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-300">
-                  <Hash className="w-3 h-3" />
-                  {combined.type.toLowerCase()}
-                </span>
-                <span className="text-xs text-muted-foreground/80 flex items-center gap-1.5 font-medium">
-                  <Clock className="w-3 h-3" />
-                  {firstTime}
-                </span>
-                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-md font-medium border border-primary/30">
-                  {combined.count} {combined.count === 1 ? "visit" : "visits"} ·{" "}
-                  {timeRange}
-                </span>
-              </div>
-
-              <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary/90 transition-colors duration-300 line-clamp-2">
-                {title}
-              </h3>
-
-              {url && (
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <ExternalLink className="w-3 h-3 text-muted-foreground/60" />
-                  <span className="text-xs text-muted-foreground/70 truncate max-w-md">
-                    {url.length > 50 ? `${url.substring(0, 50)}...` : url}
-                  </span>
-                </div>
-              )}
-
-              {combined.count > 1 && (
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="flex -space-x-2">
-                    {sortedItems.slice(0, 3).map((item, idx) => {
-                      const itemFavicon = item.content.favicon as
-                        | string
-                        | undefined;
-                      return (
-                        <div
-                          key={item.id}
-                          className="w-5 h-5 rounded-full bg-primary/20 border border-background flex items-center justify-center overflow-hidden"
-                          style={{ zIndex: 3 - idx }}
-                        >
-                          {itemFavicon ? (
-                            <img
-                              src={itemFavicon}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-[8px]">
-                              {getTypeIcon(item.type)}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {combined.count > 3 && (
-                      <div className="w-5 h-5 rounded-full bg-muted border border-background flex items-center justify-center text-[8px] font-medium text-muted-foreground">
-                        +{combined.count - 3}
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground/60">
-                    {isExpanded ? "Click to collapse" : "Click to expand"}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="w-24 h-full rounded-lg flex-shrink-0 overflow-hidden border border-border/30 group-hover:border-primary/30 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-primary/10 bg-muted/30">
-              {thumbnail && !thumbnailError ? (
-                <img
-                  src={thumbnail}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={() => setThumbnailError(true)}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
-                  <div className="text-2xl opacity-50">
-                    {getTypeIcon(combined.type)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="relative flex gap-4 group/main">
+      {/* Timeline connector */}
+      <div className="relative flex flex-col items-center">
+        {/* Timestamp */}
+        <div className="w-16 text-right pr-3 flex-shrink-0">
+          <span className="text-[11px] font-mono text-muted-foreground/70 tracking-tight">
+            {firstTime}
+          </span>
+        </div>
       </div>
 
-      {isExpanded && (
-        <div className="mt-2 space-y-2 pl-4 border-l-2 border-primary/20 ml-5">
-          {sortedItems.map((item, idx) => (
-            <ExpandedStackItem key={item.id} item={item} index={idx} />
-          ))}
+      {/* Timeline dot - stacked indicator */}
+      <div className="relative flex flex-col items-center flex-shrink-0">
+        <div className="relative">
+          {/* Stacked dot effect for multiple visits */}
+          {combined.count > 1 && (
+            <>
+              <div className="absolute -top-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-primary/20 ring-2 ring-background" />
+              <div className="absolute -top-1 -left-1 w-4.5 h-4.5 rounded-full bg-primary/10 ring-2 ring-background" />
+            </>
+          )}
+          <div className="relative w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-background group-hover/main:ring-primary/20 transition-all duration-300 z-10" />
         </div>
-      )}
+        <div className="absolute top-3 w-px h-[calc(100%+1rem)] bg-gradient-to-b from-border/60 to-border/20" />
+      </div>
+
+      {/* Card content */}
+      <div className="flex-1 min-w-0 pb-4">
+        <div onClick={onToggle} className="cursor-pointer">
+          <Card
+            className={`border-border/30 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card/95 hover:shadow-xl hover:shadow-primary/5 overflow-hidden relative ${
+              isExpanded ? "ring-1 ring-primary/40 border-primary/40" : ""
+            }`}
+          >
+            <CardContent className="p-0">
+              <div className="flex items-stretch">
+                {/* Favicon column */}
+                <div className="flex items-center justify-center w-14 bg-muted/30 border-r border-border/20 flex-shrink-0">
+                  {favicon ? (
+                    <img
+                      src={favicon}
+                      alt=""
+                      className="w-6 h-6 rounded"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `<span class="text-xl">${getTypeIcon(combined.type)}</span>`;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <span className="text-xl">
+                      {getTypeIcon(combined.type)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0 px-4 py-3">
+                  {/* Type and visit count badges */}
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
+                      {combined.type}
+                    </span>
+                    <span className="text-[10px] font-medium text-foreground/70 bg-foreground/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <Layers className="w-3 h-3" />
+                      {combined.count} {combined.count === 1 ? "visit" : "visits"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground/60">
+                      {timeRange}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-sm font-medium text-foreground leading-snug group-hover/main:text-primary transition-colors duration-300 line-clamp-2 mb-1">
+                    {title}
+                  </h3>
+
+                  {/* Domain */}
+                  {domain && (
+                    <div className="flex items-center gap-1.5">
+                      <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
+                      <span className="text-xs text-muted-foreground/60 truncate">
+                        {domain}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Expand indicator */}
+                  {combined.count > 1 && (
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/20">
+                      <div className="flex -space-x-1.5">
+                        {sortedItems.slice(0, 4).map((item, idx) => {
+                          const itemFavicon = item.content.favicon as
+                            | string
+                            | undefined;
+                          return (
+                            <div
+                              key={item.id}
+                              className="w-5 h-5 rounded-full bg-muted/60 border-2 border-card flex items-center justify-center overflow-hidden"
+                              style={{ zIndex: 4 - idx }}
+                            >
+                              {itemFavicon ? (
+                                <img
+                                  src={itemFavicon}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-[8px]">
+                                  {getTypeIcon(item.type)}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {combined.count > 4 && (
+                          <div className="w-5 h-5 rounded-full bg-muted border-2 border-card flex items-center justify-center text-[8px] font-medium text-muted-foreground">
+                            +{combined.count - 4}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+                        {isExpanded ? (
+                          <>
+                            <ChevronUp className="w-3 h-3" /> Collapse
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-3 h-3" /> View all visits
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Thumbnail */}
+                <div className="w-20 flex-shrink-0 overflow-hidden bg-muted/20">
+                  {thumbnail && !thumbnailError ? (
+                    <img
+                      src={thumbnail}
+                      alt=""
+                      className="w-full h-full object-cover group-hover/main:scale-105 transition-transform duration-500"
+                      onError={() => setThumbnailError(true)}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-2xl opacity-30">
+                        {getTypeIcon(combined.type)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Expanded items */}
+        {isExpanded && (
+          <div className="mt-3 ml-3 space-y-1.5 pl-3 border-l border-primary/30">
+            {sortedItems.map((item, idx) => (
+              <ExpandedStackItem key={item.id} item={item} index={idx} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 function GroupHeader({ group }: { group: HistoryGroup }) {
   return (
-    <div className="flex items-center gap-4 py-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md -mx-6 px-6">
-      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-border/30" />
-      <span
-        className="text-sm font-semibold text-foreground/90 whitespace-nowrap px-4 py-1.5 bg-gradient-to-r from-primary/10 via-primary/15 to-primary/10 backdrop-blur-sm rounded-lg border border-primary/20 shadow-sm"
-        style={{ fontFamily: "Nunito, sans-serif" }}
-      >
-        {group.date}
-      </span>
-      <div className="flex-1 h-px bg-gradient-to-l from-transparent via-border/60 to-border/30" />
+    <div className="flex items-center gap-6 py-6 sticky top-0 z-20 bg-background/95 backdrop-blur-md -mx-6 px-6">
+      {/* Left decorative line */}
+      <div className="flex-1 flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full bg-primary/40" />
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/40 via-border/40 to-transparent" />
+      </div>
+
+      {/* Date badge */}
+      <div className="relative">
+        <span className="text-xs font-medium uppercase tracking-widest text-foreground/80 whitespace-nowrap px-4 py-2 bg-card/80 backdrop-blur-sm rounded border border-border/40 shadow-sm">
+          {group.date}
+        </span>
+      </div>
+
+      {/* Right decorative line */}
+      <div className="flex-1 flex items-center gap-2">
+        <div className="flex-1 h-px bg-gradient-to-l from-primary/40 via-border/40 to-transparent" />
+        <div className="w-2 h-2 rounded-full bg-primary/40" />
+      </div>
     </div>
   );
 }
 
 function TimelineSkeleton() {
   return (
-    <Card className="border-border/40 bg-card/90 backdrop-blur-xl py-0">
-      <CardContent className="py-2 px-3 flex items-stretch gap-3">
-        <div className="relative flex flex-col items-center flex-shrink-0 self-center">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 animate-pulse flex-shrink-0" />
-        </div>
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-1">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-14 bg-primary/10 rounded-md animate-pulse" />
-            <div className="h-4 w-10 bg-primary/10 rounded animate-pulse" />
-          </div>
-          <div className="h-4 w-3/4 bg-primary/10 rounded animate-pulse" />
-          <div className="h-3 w-full bg-primary/10 rounded animate-pulse" />
-        </div>
-        <div className="w-24 h-full rounded-lg bg-primary/10 animate-pulse flex-shrink-0" />
-      </CardContent>
-    </Card>
+    <div className="relative flex gap-4">
+      {/* Timestamp skeleton */}
+      <div className="w-16 text-right pr-3 flex-shrink-0">
+        <div className="h-3 w-10 bg-muted/40 rounded animate-pulse ml-auto" />
+      </div>
+
+      {/* Timeline dot skeleton */}
+      <div className="relative flex flex-col items-center flex-shrink-0">
+        <div className="w-2.5 h-2.5 rounded-full bg-muted/40 animate-pulse ring-4 ring-background" />
+        <div className="absolute top-3 w-px h-[calc(100%+1rem)] bg-border/20" />
+      </div>
+
+      {/* Card skeleton */}
+      <div className="flex-1 min-w-0 pb-4">
+        <Card className="border-border/30 bg-card/60 overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              <div className="w-14 bg-muted/20 animate-pulse" />
+              <div className="flex-1 px-4 py-3 space-y-2">
+                <div className="flex gap-2">
+                  <div className="h-4 w-12 bg-muted/30 rounded animate-pulse" />
+                  <div className="h-4 w-16 bg-muted/30 rounded animate-pulse" />
+                </div>
+                <div className="h-4 w-3/4 bg-muted/30 rounded animate-pulse" />
+                <div className="h-3 w-1/3 bg-muted/20 rounded animate-pulse" />
+              </div>
+              <div className="w-20 bg-muted/20 animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
 
