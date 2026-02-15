@@ -42,6 +42,7 @@ interface ServiceConnection {
 
 const YOUTUBE_READONLY_SCOPE =
   "https://www.googleapis.com/auth/youtube.readonly";
+const SPOTIFY_RECENTLY_PLAYED_SCOPE = "user-read-recently-played";
 
 export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
   const utils = trpc.useUtils();
@@ -54,6 +55,17 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
   const disconnectYoutubeMutation = trpc.disconnectYoutube.useMutation({
     onSuccess: () => {
       utils.getYoutubeConnection.invalidate();
+    },
+  });
+  const { data: spotifyConnection } = trpc.getSpotifyConnection.useQuery();
+  const syncSpotifyMutation = trpc.syncSpotifyHistory.useMutation({
+    onSuccess: () => {
+      utils.getSpotifyConnection.invalidate();
+    },
+  });
+  const disconnectSpotifyMutation = trpc.disconnectSpotify.useMutation({
+    onSuccess: () => {
+      utils.getSpotifyConnection.invalidate();
     },
   });
 
@@ -69,7 +81,7 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
     {
       id: "spotify",
       name: "Spotify",
-      description: "Sync your listening history and playlists",
+      description: "Sync your recently played tracks",
       icon: <Music className="w-6 h-6" />,
       color: "#1DB954",
       status: "disconnected",
@@ -108,44 +120,121 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
   const [youtubeLastSynced, setYoutubeLastSynced] = useState<string | null>(
     null,
   );
+  const [youtubeConnectError, setYoutubeConnectError] = useState<string | null>(
+    null,
+  );
+  const [youtubeConnectPending, setYoutubeConnectPending] = useState(false);
+  const [spotifyLastSynced, setSpotifyLastSynced] = useState<string | null>(
+    null,
+  );
+  const [spotifyConnectError, setSpotifyConnectError] = useState<string | null>(
+    null,
+  );
+  const [spotifyConnectPending, setSpotifyConnectPending] = useState(false);
 
-  const handleConnect = (id: string) => {
-    if (id !== "youtube") {
-      setConnections((prev) =>
-        prev.map((conn) =>
-          conn.id === id
-            ? { ...conn, status: "connected" as ConnectionStatus }
-            : conn,
-        ),
-      );
+  const startSocialConnect = ({
+    provider,
+    scopes,
+    setError,
+    setPending,
+  }: {
+    provider: string;
+    scopes: string[];
+    setError: (value: string | null) => void;
+    setPending: (value: boolean) => void;
+  }) => {
+    setError(null);
+    setPending(true);
+    const token = localStorage.getItem("auth-token");
+    if (!token) {
+      setError("Please sign in again.");
+      setPending(false);
       return;
     }
-    const token = localStorage.getItem("auth-token");
+    const base = getApiUrl("");
+    const linkSocialUrl = base
+      ? `${base.replace(/\/$/, "")}/api/auth/link-social`
+      : `${window.location.origin}/api/auth/link-social`;
     const callbackURL = `${window.location.origin}/dashboard/connections`;
-    fetch(getApiUrl("/api/auth/link-social"), {
+    fetch(linkSocialUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Authorization: `Bearer ${token}`,
       },
       credentials: "include",
       body: JSON.stringify({
-        provider: "google",
-        scopes: [YOUTUBE_READONLY_SCOPE],
+        provider,
+        scopes,
         callbackURL,
         disableRedirect: true,
       }),
     })
-      .then((res) => res.json())
-      .then((data: { url?: string }) => {
-        if (data?.url) window.location.href = data.url;
+      .then(async (res) => {
+        const data = (await res.json().catch(() => ({}))) as {
+          url?: string;
+          message?: string;
+          redirect?: boolean;
+        };
+        if (!res.ok) {
+          setError(data?.message ?? "Could not start connection");
+          setPending(false);
+          return;
+        }
+        if (data?.url) {
+          window.location.href = data.url;
+          return;
+        }
+        if (data?.redirect === false) {
+          setError("Already linked. Try syncing instead.");
+        } else {
+          setError("No redirect URL received.");
+        }
+        setPending(false);
       })
-      .catch(() => {});
+      .catch((err) => {
+        setError(
+          err?.message ?? "Could not start connection. Please try again.",
+        );
+        setPending(false);
+      });
+  };
+
+  const handleConnect = (id: string) => {
+    if (id === "youtube") {
+      startSocialConnect({
+        provider: "google",
+        scopes: [YOUTUBE_READONLY_SCOPE],
+        setError: setYoutubeConnectError,
+        setPending: setYoutubeConnectPending,
+      });
+      return;
+    }
+    if (id === "spotify") {
+      startSocialConnect({
+        provider: "spotify",
+        scopes: [SPOTIFY_RECENTLY_PLAYED_SCOPE],
+        setError: setSpotifyConnectError,
+        setPending: setSpotifyConnectPending,
+      });
+      return;
+    }
+    setConnections((prev) =>
+      prev.map((conn) =>
+        conn.id === id
+          ? { ...conn, status: "connected" as ConnectionStatus }
+          : conn,
+      ),
+    );
   };
 
   const handleDisconnect = (id: string) => {
     if (id === "youtube") {
       disconnectYoutubeMutation.mutate(undefined);
+      return;
+    }
+    if (id === "spotify") {
+      disconnectSpotifyMutation.mutate(undefined);
       return;
     }
     setConnections((prev) =>
@@ -162,6 +251,16 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
       onSuccess: (result) => {
         if ("synced" in result && result.synced > 0) {
           setYoutubeLastSynced(new Date().toISOString());
+        }
+      },
+    });
+  };
+
+  const handleSyncSpotify = () => {
+    syncSpotifyMutation.mutate(undefined, {
+      onSuccess: (result) => {
+        if ("synced" in result && result.synced > 0) {
+          setSpotifyLastSynced(new Date().toISOString());
         }
       },
     });
@@ -197,14 +296,28 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
           <div className="grid gap-6 md:grid-cols-2">
             {connections.map((connection) => {
               const isYoutube = connection.id === "youtube";
+              const isSpotify = connection.id === "spotify";
               const status: ConnectionStatus = isYoutube
-                ? youtubeConnection?.connected
-                  ? "connected"
-                  : "disconnected"
-                : connection.status;
+                ? youtubeConnectPending
+                  ? "pending"
+                  : youtubeConnection?.connected
+                    ? "connected"
+                    : "disconnected"
+                : isSpotify
+                  ? spotifyConnectPending
+                    ? "pending"
+                    : spotifyConnection?.connected
+                      ? "connected"
+                      : "disconnected"
+                  : connection.status;
               const lastSynced = isYoutube
                 ? youtubeLastSynced ?? connection.lastSynced
+                : isSpotify
+                  ? spotifyLastSynced ?? connection.lastSynced
                 : connection.lastSynced;
+              const disconnectPending =
+                (isYoutube && disconnectYoutubeMutation.isPending) ||
+                (isSpotify && disconnectSpotifyMutation.isPending);
               return (
                 <Card
                   key={connection.id}
@@ -273,10 +386,23 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
                             {syncYoutubeMutation.error.message}
                           </p>
                         )}
+                        {isSpotify && syncSpotifyMutation.isError && (
+                          <p className="text-sm text-destructive">
+                            {syncSpotifyMutation.error.message}
+                          </p>
+                        )}
                         {isYoutube &&
                           syncYoutubeMutation.data &&
                           "error" in syncYoutubeMutation.data &&
                           syncYoutubeMutation.data.error === "not_connected" && (
+                            <p className="text-sm text-muted-foreground">
+                              Reconnect to sync.
+                            </p>
+                          )}
+                        {isSpotify &&
+                          syncSpotifyMutation.data &&
+                          "error" in syncSpotifyMutation.data &&
+                          syncSpotifyMutation.data.error === "not_connected" && (
                             <p className="text-sm text-muted-foreground">
                               Reconnect to sync.
                             </p>
@@ -286,12 +412,9 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
                             variant="outline"
                             className="flex-1"
                             onClick={() => handleDisconnect(connection.id)}
-                            disabled={
-                              isYoutube && disconnectYoutubeMutation.isPending
-                            }
+                            disabled={disconnectPending}
                           >
-                            {isYoutube &&
-                            disconnectYoutubeMutation.isPending ? (
+                            {disconnectPending ? (
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             ) : (
                               <X className="w-4 h-4 mr-2" />
@@ -312,6 +435,20 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
                               )}
                               Sync Now
                             </Button>
+                          ) : isSpotify ? (
+                            <Button
+                              variant="default"
+                              className="flex-1"
+                              onClick={handleSyncSpotify}
+                              disabled={syncSpotifyMutation.isPending}
+                            >
+                              {syncSpotifyMutation.isPending ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Loader2 className="w-4 h-4 mr-2" />
+                              )}
+                              Sync Now
+                            </Button>
                           ) : (
                             <Button variant="default" className="flex-1">
                               <Loader2 className="w-4 h-4 mr-2" />
@@ -321,14 +458,36 @@ export function ConnectionsPage({ onSignOut }: ConnectionsPageProps) {
                         </div>
                       </div>
                     ) : (
-                      <Button
-                        className="w-full"
-                        style={{ backgroundColor: connection.color }}
-                        onClick={() => handleConnect(connection.id)}
-                      >
-                        <Link2 className="w-4 h-4 mr-2" />
-                        Connect {connection.name}
-                      </Button>
+                      <div className="space-y-2">
+                        {isYoutube && youtubeConnectError && (
+                          <p className="text-sm text-destructive">
+                            {youtubeConnectError}
+                          </p>
+                        )}
+                        {isSpotify && spotifyConnectError && (
+                          <p className="text-sm text-destructive">
+                            {spotifyConnectError}
+                          </p>
+                        )}
+                        <Button
+                          data-testid={isYoutube ? "connect-youtube" : undefined}
+                          className="w-full"
+                          style={{ backgroundColor: connection.color }}
+                          onClick={() => handleConnect(connection.id)}
+                          disabled={
+                            (isYoutube && youtubeConnectPending) ||
+                            (isSpotify && spotifyConnectPending)
+                          }
+                        >
+                          {(isYoutube && youtubeConnectPending) ||
+                          (isSpotify && spotifyConnectPending) ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Link2 className="w-4 h-4 mr-2" />
+                          )}
+                          Connect {connection.name}
+                        </Button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>

@@ -28,7 +28,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ["google"],
+      trustedProviders: ["google", "spotify"],
     },
   },
   socialProviders: {
@@ -37,6 +37,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       accessType: "offline",
       prompt: "select_account consent",
+    },
+    spotify: {
+      clientId: process.env.SPOTIFY_CLIENT_ID ?? "",
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET ?? "",
+      scope: ["user-read-recently-played"],
     },
   },
   trustedOrigins: [

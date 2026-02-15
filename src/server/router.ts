@@ -8,6 +8,23 @@ import {
   hasYoutubeScope,
   fetchLikedVideos,
 } from "./youtube";
+import {
+  fetchRecentlyPlayed,
+  getValidSpotifyAccessToken,
+  hasSpotifyScope,
+} from "./spotify";
+import {
+  buildLastfmAuthUrl,
+  fetchRecentTracks as fetchLastfmRecentTracks,
+  getLastfmAuthToken,
+  getLastfmSession,
+} from "./lastfm";
+import {
+  buildLastfmAuthUrl,
+  fetchRecentTracks as fetchLastfmRecentTracks,
+  getLastfmAuthToken,
+  getLastfmSession,
+} from "./lastfm";
 import { z } from "zod";
 
 function generateApiKey(): string {
@@ -233,6 +250,97 @@ export const appRouter = router({
         count: Number(r.count),
       }));
     }),
+
+  getActivityByWeek: protectedProcedure
+    .input(z.object({ weeks: z.number().min(1).max(52).default(12) }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const result = await db
+        .select({
+          weekStart: sql<string>`DATE_TRUNC('week', ${history.timelineTime})::date`,
+          count: count(history.id),
+        })
+        .from(history)
+        .where(eq(history.userId, userId))
+        .groupBy(sql`DATE_TRUNC('week', ${history.timelineTime})::date`)
+        .orderBy(sql`DATE_TRUNC('week', ${history.timelineTime})::date`);
+
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - input.weeks * 7);
+      const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+      const weekStr = (w: unknown) =>
+        typeof w === "string"
+          ? w.slice(0, 10)
+          : w instanceof Date
+            ? w.toISOString().slice(0, 10)
+            : String(w).slice(0, 10);
+      return result
+        .filter((r) => weekStr(r.weekStart) >= cutoffStr)
+        .slice(-input.weeks)
+        .map((r) => ({
+          weekStart: weekStr(r.weekStart),
+          count: Number(r.count),
+        }));
+    }),
+
+  getRecentActivitySummary: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const now = new Date();
+    const startOfThisWeek = new Date(now);
+    startOfThisWeek.setDate(now.getDate() - now.getDay());
+    startOfThisWeek.setHours(0, 0, 0, 0);
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+    const [thisWeekResult, lastWeekResult, todayResult] = await Promise.all([
+      db
+        .select({ count: count(history.id) })
+        .from(history)
+        .where(
+          and(
+            eq(history.userId, userId),
+            gte(history.timelineTime, startOfThisWeek.toISOString()),
+          ),
+        ),
+      db
+        .select({ count: count(history.id) })
+        .from(history)
+        .where(
+          and(
+            eq(history.userId, userId),
+            gte(history.timelineTime, startOfLastWeek.toISOString()),
+            lt(history.timelineTime, startOfThisWeek.toISOString()),
+          ),
+        ),
+      db
+        .select({ count: count(history.id) })
+        .from(history)
+        .where(
+          and(
+            eq(history.userId, userId),
+            gte(
+              history.timelineTime,
+              new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
+            ),
+            lt(
+              history.timelineTime,
+              new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate() + 1,
+              ).toISOString(),
+            ),
+          ),
+        ),
+    ]);
+
+    return {
+      thisWeekCount: Number(thisWeekResult[0]?.count ?? 0),
+      lastWeekCount: Number(lastWeekResult[0]?.count ?? 0),
+      todayCount: Number(todayResult[0]?.count ?? 0),
+    };
+  }),
 
   getRecentVisits: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(20).default(10) }))
@@ -499,6 +607,115 @@ export const appRouter = router({
         and(
           eq(account.userId, userId),
           eq(account.providerId, "google"),
+        ),
+      );
+    return { success: true };
+  }),
+
+  getSpotifyConnection: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const [spotifyAccount] = await db
+      .select()
+      .from(account)
+      .where(
+        and(
+          eq(account.userId, userId),
+          eq(account.providerId, "spotify"),
+        ),
+      );
+    const connected =
+      !!spotifyAccount &&
+      hasSpotifyScope(spotifyAccount.scope) &&
+      !!spotifyAccount.refreshToken;
+    return {
+      connected,
+      email: connected ? undefined : undefined,
+    };
+  }),
+
+  syncSpotifyHistory: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    if (!clientId || !clientSecret) {
+      throw new Error(
+        "Spotify sync is not configured (missing Spotify credentials)",
+      );
+    }
+
+    const [spotifyAccount] = await db
+      .select()
+      .from(account)
+      .where(
+        and(
+          eq(account.userId, userId),
+          eq(account.providerId, "spotify"),
+        ),
+      );
+
+    if (!spotifyAccount || !hasSpotifyScope(spotifyAccount.scope)) {
+      return { synced: 0, error: "not_connected" as const };
+    }
+
+    const { accessToken, account: maybeUpdatedAccount } =
+      await getValidSpotifyAccessToken(
+        spotifyAccount as Parameters<typeof getValidSpotifyAccessToken>[0],
+        clientId,
+        clientSecret,
+      );
+
+    if (
+      maybeUpdatedAccount.accessToken !== spotifyAccount.accessToken ||
+      maybeUpdatedAccount.accessTokenExpiresAt !==
+        spotifyAccount.accessTokenExpiresAt ||
+      maybeUpdatedAccount.refreshToken !== spotifyAccount.refreshToken
+    ) {
+      await db
+        .update(account)
+        .set({
+          accessToken: maybeUpdatedAccount.accessToken,
+          accessTokenExpiresAt: maybeUpdatedAccount.accessTokenExpiresAt,
+          refreshToken: maybeUpdatedAccount.refreshToken,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(account.id, spotifyAccount.id));
+    }
+
+    const items = await fetchRecentlyPlayed(accessToken);
+    if (items.length === 0) {
+      return { synced: 0 };
+    }
+
+    const values = items.map((item) => ({
+      userId,
+      timelineTime: item.timelineTime,
+      type: item.type,
+      contentId: item.contentId,
+      content: item.content as Record<string, unknown>,
+      searchContent: item.searchContent,
+    }));
+    await db
+      .insert(history)
+      .values(values)
+      .onConflictDoNothing({
+        target: [
+          history.contentId,
+          history.userId,
+          history.type,
+          history.timelineTime,
+        ],
+      });
+    return { synced: values.length };
+  }),
+
+  disconnectSpotify: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    await db
+      .delete(account)
+      .where(
+        and(
+          eq(account.userId, userId),
+          eq(account.providerId, "spotify"),
         ),
       );
     return { success: true };

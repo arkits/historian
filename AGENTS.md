@@ -35,7 +35,7 @@ Companion Chrome extension that submits user's browser history.
 
 ## Debugging
 
-* Use Playwright MCP to browse the UI on http://localhost:3000/dashboard . Use credentials for testing: username `arkits` / password `admin123`
+* Use Playwright MCP to browse the UI on http://localhost:3000/dashboard . Use credentials for testing: username `architrox796@gmail.com` / password `xwu!pjz4tud9dtx*RYF`
 
 ## Database
 

@@ -203,7 +203,13 @@ export function createTRPCHandler() {
         return new Response(null, { status: 204 });
       }
       try {
-        const authHeader = req.headers.get("x-better-auth-token");
+        const authHeader =
+          req.headers.get("x-better-auth-token") ??
+          (() => {
+            const auth = req.headers.get("Authorization");
+            if (auth?.startsWith("Bearer ")) return auth.slice(7);
+            return null;
+          })();
         let authReq = req;
         if (authHeader) {
           const headers = new Headers(req.headers);

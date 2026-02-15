@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { trpc } from "@/client/trpc";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,14 @@ import {
   Link2,
   BookOpen,
   Plus,
+  CalendarDays,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from "lucide-react";
 import { ActivityHeatmap } from "@/components/heatmap";
-import { useMemo } from "react";
+import { WeeklyActivityChart } from "@/components/WeeklyActivityChart";
+import { RecentActivity } from "@/components/RecentActivity";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -32,6 +37,18 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const { data: stats } = trpc.getHistoryStats.useQuery(undefined, {
     retry: false,
   });
+  const { data: activitySummary } = trpc.getRecentActivitySummary.useQuery(
+    undefined,
+    { retry: false },
+  );
+  const { data: weeklyData } = trpc.getActivityByWeek.useQuery(
+    { weeks: 12 },
+    { retry: false },
+  );
+  const { data: recentVisits } = trpc.getRecentVisits.useQuery(
+    { limit: 8 },
+    { retry: false },
+  );
 
   const today = useMemo(() => {
     const d = new Date();
@@ -162,7 +179,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           </div>
 
           <div
-            className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-scale-in"
+            className="grid gap-6 grid-cols-2 lg:grid-cols-4 animate-scale-in"
             style={{ animationDelay: "100ms" }}
           >
             <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
@@ -174,23 +191,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   <div>
                     <p className="text-sm text-muted-foreground">Total Items</p>
                     <p className="font-medium text-foreground text-lg">
-                      {stats?.totalCount || 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Types</p>
-                    <p className="font-medium text-foreground text-lg">
-                      {stats?.byType?.length || 0}
+                      {(stats?.totalCount ?? 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -204,9 +205,58 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     <History className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Latest Type</p>
+                    <p className="text-sm text-muted-foreground">Content Types</p>
                     <p className="font-medium text-foreground text-lg">
-                      {stats?.byType?.[0]?.type || "None"}
+                      {stats?.byType?.length ?? 0}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">This Week</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground text-lg">
+                        {activitySummary?.thisWeekCount ?? 0}
+                      </p>
+                      {activitySummary != null &&
+                        activitySummary.lastWeekCount > 0 && (
+                          <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                            {activitySummary.thisWeekCount >
+                            activitySummary.lastWeekCount ? (
+                              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+                            ) : activitySummary.thisWeekCount <
+                                activitySummary.lastWeekCount ? (
+                              <TrendingDown className="w-3.5 h-3.5 text-amber-500" />
+                            ) : (
+                              <Minus className="w-3.5 h-3.5" />
+                            )}
+                            {activitySummary.lastWeekCount} last week
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <CalendarDays className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Today</p>
+                    <p className="font-medium text-foreground text-lg">
+                      {activitySummary?.todayCount ?? 0}
                     </p>
                   </div>
                 </div>
@@ -215,23 +265,41 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           </div>
 
           <div
-            className="mt-8 animate-fade-in"
+            className="mt-8 grid gap-6 lg:grid-cols-3 animate-fade-in"
             style={{ animationDelay: "200ms" }}
           >
-            <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow">
-              <CardHeader>
-                <CardTitle className="font-heading text-2xl text-foreground">
-                  Activity Timeline
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ActivityHeatmap
-                  data={formattedHeatmapData}
-                  onDayClick={handleDayClick}
-                />
-              </CardContent>
-            </Card>
+            <div className="lg:col-span-2">
+              <Card className="border-border/50 bg-card/80 backdrop-blur-xl raycast-shadow h-full">
+                <CardHeader>
+                  <CardTitle className="font-heading text-2xl text-foreground">
+                    Activity Timeline
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ActivityHeatmap
+                    data={formattedHeatmapData}
+                    onDayClick={handleDayClick}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex flex-col gap-6">
+              <RecentActivity
+                visits={recentVisits ?? []}
+                limit={8}
+                className="flex-1 min-h-0"
+              />
+            </div>
           </div>
+
+          {weeklyData && weeklyData.length >= 0 && (
+            <div
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: "300ms" }}
+            >
+              <WeeklyActivityChart data={weeklyData} />
+            </div>
+          )}
 
           {stats?.byType && stats.byType.length > 0 && (
             <div
