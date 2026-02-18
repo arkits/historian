@@ -2,7 +2,18 @@ import { router, publicProcedure, protectedProcedure } from "./trpc";
 import { auth } from "./auth";
 import { db } from "@/lib/db";
 import { history, apiKey, account } from "@/lib/schema";
-import { eq, desc, and, lt, count, type SQL, gte, sql } from "drizzle-orm";
+import {
+  eq,
+  desc,
+  and,
+  lt,
+  count,
+  type SQL,
+  gte,
+  sql,
+  or,
+  ilike,
+} from "drizzle-orm";
 import {
   getValidAccessToken,
   hasYoutubeScope,
@@ -13,12 +24,6 @@ import {
   getValidSpotifyAccessToken,
   hasSpotifyScope,
 } from "./spotify";
-import {
-  buildLastfmAuthUrl,
-  fetchRecentTracks as fetchLastfmRecentTracks,
-  getLastfmAuthToken,
-  getLastfmSession,
-} from "./lastfm";
 import {
   buildLastfmAuthUrl,
   fetchRecentTracks as fetchLastfmRecentTracks,
@@ -167,9 +172,7 @@ export const appRouter = router({
       const [item] = await db
         .select()
         .from(history)
-        .where(
-          and(eq(history.id, input.id), eq(history.userId, userId)) as SQL,
-        )
+        .where(and(eq(history.id, input.id), eq(history.userId, userId)) as SQL)
         .limit(1);
       return item ?? null;
     }),
@@ -219,6 +222,81 @@ export const appRouter = router({
 
     return types.map((t) => t.type).filter(Boolean) as string[];
   }),
+
+  searchHistory: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().min(1),
+        limit: z.number().min(1).max(100).default(50),
+        cursor: z
+          .object({
+            id: z.string(),
+            timelineTime: z.string().datetime(),
+          })
+          .optional(),
+        type: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { query, limit, cursor, type } = input;
+      const userId = ctx.session.user.id;
+
+      const conditions: SQL[] = [eq(history.userId, userId)];
+
+      if (type) {
+        conditions.push(eq(history.type, type));
+      }
+
+      if (cursor) {
+        conditions.push(
+          lt(history.id, cursor.id),
+          lt(history.timelineTime, cursor.timelineTime),
+        );
+      }
+
+      const items = await db
+        .select({
+          id: history.id,
+          createdAt: history.createdAt,
+          timelineTime: history.timelineTime,
+          type: history.type,
+          contentId: history.contentId,
+          content: history.content,
+          searchContent: history.searchContent,
+          userId: history.userId,
+          rank: sql<number>`ts_rank(${history.searchVector}, websearch_to_tsquery('english', ${query}))`,
+        })
+        .from(history)
+        .where(
+          and(
+            ...conditions,
+            sql`${history.searchVector} @@ websearch_to_tsquery('english', ${query})`,
+          ),
+        )
+        .orderBy(
+          desc(
+            sql`ts_rank(${history.searchVector}, websearch_to_tsquery('english', ${query}))`,
+          ),
+          desc(history.timelineTime),
+          desc(history.id),
+        )
+        .limit(limit + 1);
+
+      let nextCursor: { id: string; timelineTime: string } | undefined;
+      if (items.length > limit) {
+        const nextItem = items[limit - 1];
+        if (nextItem) {
+          const timelineTime = new Date(nextItem.timelineTime).toISOString();
+          nextCursor = {
+            id: nextItem.id,
+            timelineTime,
+          };
+          items.pop();
+        }
+      }
+
+      return { items, nextCursor };
+    }),
 
   getHistoryByDateRange: protectedProcedure
     .input(
@@ -321,7 +399,11 @@ export const appRouter = router({
             eq(history.userId, userId),
             gte(
               history.timelineTime,
-              new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
+              new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+              ).toISOString(),
             ),
             lt(
               history.timelineTime,
@@ -512,12 +594,7 @@ export const appRouter = router({
     const [googleAccount] = await db
       .select()
       .from(account)
-      .where(
-        and(
-          eq(account.userId, userId),
-          eq(account.providerId, "google"),
-        ),
-      );
+      .where(and(eq(account.userId, userId), eq(account.providerId, "google")));
     const connected =
       !!googleAccount &&
       hasYoutubeScope(googleAccount.scope) &&
@@ -533,18 +610,15 @@ export const appRouter = router({
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     if (!clientId || !clientSecret) {
-      throw new Error("YouTube sync is not configured (missing Google credentials)");
+      throw new Error(
+        "YouTube sync is not configured (missing Google credentials)",
+      );
     }
 
     const [googleAccount] = await db
       .select()
       .from(account)
-      .where(
-        and(
-          eq(account.userId, userId),
-          eq(account.providerId, "google"),
-        ),
-      );
+      .where(and(eq(account.userId, userId), eq(account.providerId, "google")));
 
     if (!googleAccount || !hasYoutubeScope(googleAccount.scope)) {
       return { synced: 0, error: "not_connected" as const };
@@ -603,12 +677,7 @@ export const appRouter = router({
     const userId = ctx.session.user.id;
     await db
       .delete(account)
-      .where(
-        and(
-          eq(account.userId, userId),
-          eq(account.providerId, "google"),
-        ),
-      );
+      .where(and(eq(account.userId, userId), eq(account.providerId, "google")));
     return { success: true };
   }),
 
@@ -618,10 +687,7 @@ export const appRouter = router({
       .select()
       .from(account)
       .where(
-        and(
-          eq(account.userId, userId),
-          eq(account.providerId, "spotify"),
-        ),
+        and(eq(account.userId, userId), eq(account.providerId, "spotify")),
       );
     const connected =
       !!spotifyAccount &&
@@ -647,10 +713,7 @@ export const appRouter = router({
       .select()
       .from(account)
       .where(
-        and(
-          eq(account.userId, userId),
-          eq(account.providerId, "spotify"),
-        ),
+        and(eq(account.userId, userId), eq(account.providerId, "spotify")),
       );
 
     if (!spotifyAccount || !hasSpotifyScope(spotifyAccount.scope)) {
@@ -713,10 +776,7 @@ export const appRouter = router({
     await db
       .delete(account)
       .where(
-        and(
-          eq(account.userId, userId),
-          eq(account.providerId, "spotify"),
-        ),
+        and(eq(account.userId, userId), eq(account.providerId, "spotify")),
       );
     return { success: true };
   }),

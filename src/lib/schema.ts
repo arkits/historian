@@ -6,8 +6,19 @@ import {
   uuid,
   jsonb,
   uniqueIndex,
+  index,
+  customType,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql, type SQL } from "drizzle-orm";
+
+const tsvector = customType<{
+  data: string;
+  driverData: string;
+}>({
+  dataType() {
+    return "tsvector";
+  },
+});
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -95,6 +106,10 @@ export const history = pgTable(
     contentId: text("contentId").notNull(),
     content: jsonb("content").notNull(),
     searchContent: text("searchContent"),
+    searchVector: tsvector("searchVector").generatedAlwaysAs(
+      (): SQL =>
+        sql`to_tsvector('english', coalesce("searchContent", '') || ' ' || coalesce("content"->>'title', '') || ' ' || coalesce("content"->>'url', '') || ' ' || coalesce("content"->>'description', ''))`,
+    ),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -107,6 +122,9 @@ export const history = pgTable(
         table.type,
         table.timelineTime,
       ),
+    },
+    {
+      searchIdx: index("history_search_idx").using("gin", table.searchVector),
     },
   ],
 );

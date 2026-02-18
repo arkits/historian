@@ -507,10 +507,19 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   );
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [combineSimilar, setCombineSimilar] = useState(true);
   const [expandedStacks, setExpandedStacks] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pageSize = 50;
+
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const isInitialMount = useRef(true);
 
@@ -563,11 +572,35 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !dateRange?.from,
+      enabled: !dateRange?.from && !debouncedSearchQuery,
+    },
+  );
+
+  const {
+    data: searchData,
+    fetchNextPage: fetchNextSearchPage,
+    hasNextPage: hasNextSearchPage,
+    isFetchingNextPage: isFetchingNextSearchPage,
+    isLoading: isSearchLoading,
+    isError: isSearchError,
+  } = trpc.searchHistory.useInfiniteQuery(
+    {
+      query: debouncedSearchQuery,
+      limit: pageSize,
+      type: selectedType === "all" ? undefined : selectedType,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !!debouncedSearchQuery,
     },
   );
 
   const allItems = useMemo(() => {
+    // Use search results when there's a search query
+    if (debouncedSearchQuery && searchData) {
+      return searchData.pages.flatMap((page) => page.items) as HistoryItem[];
+    }
+    // Otherwise use the regular queries
     if (dateRange?.from && !dateRange?.to && dateQuery.data) {
       return dateQuery.data.map((item) => ({
         ...item,
@@ -582,32 +615,9 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
     }
     if (!historyData) return [];
     return historyData.pages.flatMap((page) => page.items) as HistoryItem[];
-  }, [historyData, dateQuery.data, dateRangeQuery.data, dateRange]);
+  }, [historyData, dateQuery.data, dateRangeQuery.data, dateRange, searchData, debouncedSearchQuery]);
 
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return allItems;
-    const query = searchQuery.toLowerCase();
-    return allItems.filter((item) => {
-      const content = item.content;
-      const title = (
-        (content.title as string) ||
-        (content.name as string) ||
-        ""
-      ).toLowerCase();
-      const subtitle = (
-        (content.description as string) ||
-        (content.url as string) ||
-        ""
-      ).toLowerCase();
-      const searchContent = (item.searchContent || "").toLowerCase();
-      return (
-        title.includes(query) ||
-        subtitle.includes(query) ||
-        searchContent.includes(query) ||
-        item.type.toLowerCase().includes(query)
-      );
-    });
-  }, [allItems, searchQuery]);
+  const filteredItems = allItems;
 
   const groupedItems = useMemo(() => {
     if (combineSimilar) {
@@ -653,10 +663,16 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
   }, [filteredItems, combineSimilar]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+    if (debouncedSearchQuery) {
+      if (hasNextSearchPage && !isFetchingNextSearchPage) {
+        fetchNextSearchPage();
+      }
+    } else {
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, debouncedSearchQuery, hasNextSearchPage, isFetchingNextSearchPage, fetchNextSearchPage]);
 
   const handleClearSearch = useCallback(() => setSearchQuery(""), []);
 
@@ -684,6 +700,11 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
       !!dateRange?.to &&
       dateRange.to !== dateRange.from &&
       dateRangeQuery.isError);
+  const isSearch = !!debouncedSearchQuery;
+  const isLoadingState = isSearch ? isSearchLoading : (isLoading || isDateLoading);
+  const isErrorState = isSearch ? isSearchError : (isError || isErrorDate);
+  const hasNextPageState = isSearch ? hasNextSearchPage : hasNextPage;
+  const isFetchingNextPageState = isSearch ? isFetchingNextSearchPage : isFetchingNextPage;
 
   const handleDateSelect = (
     date: Date | { from: Date; to: Date } | undefined,
@@ -734,8 +755,8 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
           scrollElement.scrollTop -
           scrollElement.clientHeight <
           100 &&
-        hasNextPage &&
-        !isFetchingNextPage
+        hasNextPageState &&
+        !isFetchingNextPageState
       ) {
         handleLoadMore();
       }
@@ -745,9 +766,9 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
     return () => {
       scrollElement.removeEventListener("scroll", handleScroll);
     };
-  }, [hasNextPage, isFetchingNextPage, handleLoadMore]);
+  }, [hasNextPageState, isFetchingNextPageState, handleLoadMore]);
 
-  if (isError || isErrorDate) {
+  if (isErrorState) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="border-border/50 bg-card/80 backdrop-blur-xl max-w-md w-full mx-4">
@@ -885,7 +906,7 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
           <div className="flex-1 min-h-0 overflow-hidden history-scroll-container">
             <div ref={scrollContainerRef} className="h-full overflow-y-auto">
               <div className="max-w-7xl mx-auto px-6 py-4">
-                {isLoading || isDateLoading ? (
+                {isLoadingState ? (
                   <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
                       <TimelineSkeleton key={i} />
@@ -899,14 +920,14 @@ export function HistoryPage({ onSignOut }: HistoryPageProps) {
                           <Search className="w-8 h-8 text-primary" />
                         </div>
                         <h3 className="font-heading text-xl mb-2">
-                          {searchQuery
+                          {debouncedSearchQuery
                             ? "No Results Found"
                             : isDateFilter
                               ? "No History Found"
                               : "No History Yet"}
                         </h3>
                         <p className="text-muted-foreground mb-4">
-                          {searchQuery
+                          {debouncedSearchQuery
                             ? "Try adjusting your search terms"
                             : isDateFilter
                               ? "No history entries match your filters"

@@ -1,0 +1,2 @@
+ALTER TABLE "history" ADD COLUMN "searchVector" tsvector GENERATED ALWAYS AS (to_tsvector('english', coalesce("searchContent", '') || ' ' || coalesce("content"->>'title', '') || ' ' || coalesce("content"->>'url', '') || ' ' || coalesce("content"->>'description', ''))) STORED;
+CREATE INDEX "history_search_idx" ON "history" USING gin ("searchVector");

@@ -15,6 +15,13 @@
       "when": 1768803417912,
       "tag": "0001_nostalgic_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771458413762,
+      "tag": "0002_mushy_valkyrie",
+      "breakpoints": true
     }
   ]
 }
